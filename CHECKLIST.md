@@ -19,14 +19,16 @@
 - [x] General CRUD operations in database
 - [x] API endpoints for testing
 - [x] Users table
-- [ ] API endpoints for registration (and optionally account deletion?)
-- [ ] Projects table
-	- [ ] Also handle file uploading, either by hosting the files
- somewhere externally or by allowing direct upload
-	- [ ] Allow mapping multiple users to the same project
-- [ ] Require validation for project uploads
-- [ ] API endpoints for new project, delete project, edit project
-- [ ] Courses table
-- [ ] API endpoints for managing courses, only accessible by admin
-- [ ] Topics table (or just topics list ?)
-- [ ] Some method to manage, only accessible by admins, based on the data type we choose
+- [x] API endpoints for registration and account deletion
+- [x] Projects table
+	- [x] Handle file uploading
+	- [x] Allow mapping multiple users to the same project
+	- [x] Allow mapping projects to topics (n-to-n)
+- [x] Require validation for project uploads
+- [x] API endpoints for new project, delete project, edit project
+- [x] Courses table
+- [x] API endpoints for managing courses
+	- [ ] Only accessible by admin
+- [x] Topics table
+- [x] API endpoints for managing topics 
+	- [ ] Only accessible by admin

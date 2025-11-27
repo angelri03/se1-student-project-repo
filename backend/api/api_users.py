@@ -1,0 +1,135 @@
+"""
+User API endpoints
+Handles registration, login, and account management
+"""
+
+from flask import Blueprint, request, jsonify
+import database
+from .auth import create_token, token_required
+
+users_bp = Blueprint('users', __name__)
+
+@users_bp.route('/api/register', methods=['POST'])
+def register():
+    """
+    Register a new user
+    Expected JSON: {"username": "...", "password": "...", "email": "..."}
+    Returns: {"success": bool, "message": str, "token": str (if successful)}
+    """
+    data = request.get_json()
+    
+    # Validate required fields
+    required_fields = ['username', 'password', 'email']
+    if not all(field in data for field in required_fields):
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    
+    # Basic validation
+    if len(data['password']) < 8:
+        return jsonify({'success': False, 'message': 'Password must be at least 8 characters'}), 400
+    
+    if '@' not in data['email']:
+        return jsonify({'success': False, 'message': 'Invalid email address'}), 400
+    
+    # Create the user (password will be hashed automatically)
+    result = database.create_user(
+        username=data['username'],
+        password=data['password'],
+        email=data['email']
+    )
+    
+    if not result['success']:
+        return jsonify(result), 400
+    
+    # Generate JWT token for the new user
+    token = create_token(result['id'], data['username'])
+    
+    return jsonify({
+        'success': True,
+        'message': 'User registered successfully',
+        'token': token,
+        'user': {
+            'id': result['id'],
+            'username': data['username'],
+            'email': data['email']
+        }
+    }), 201
+
+@users_bp.route('/api/login', methods=['POST'])
+def login():
+    """
+    Login with username and password
+    Expected JSON: {"username": "...", "password": "..."}
+    Returns: {"success": bool, "token": str (if successful)}
+    """
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({'success': False, 'message': 'Username and password required'}), 400
+    
+    # Get user from database
+    user = database.get_user_by_username(data['username'])
+    
+    if not user:
+        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+    
+    # Verify password
+    if not database.verify_password(data['password'], user['password']):
+        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+    
+    # Generate JWT token
+    token = create_token(user['id'], user['username'])
+    
+    return jsonify({
+        'success': True,
+        'message': 'Login successful',
+        'token': token,
+        'user': {
+            'id': user['id'],
+            'username': user['username'],
+            'email': user['email']
+        }
+    }), 200
+
+@users_bp.route('/api/account', methods=['DELETE'])
+@token_required
+def delete_account(current_user_id, current_username):
+    """
+    Delete the authenticated user's account
+    Requires valid JWT token in Authorization header
+    Users can only delete their own account
+    """
+    # Delete the user's account
+    result = database.delete_user(current_user_id)
+    
+    if result['success']:
+        return jsonify({
+            'success': True,
+            'message': 'Account deleted successfully'
+        }), 200
+    else:
+        return jsonify(result), 500
+
+@users_bp.route('/api/me', methods=['GET'])
+@token_required
+def get_current_user(current_user_id, current_username):
+    """
+    Get information about the currently authenticated user
+    Requires valid JWT token in Authorization header
+    """
+    user = database.get_user_by_id(current_user_id)
+    
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    # Don't send the password hash
+    user_data = {
+        'id': user['id'],
+        'username': user['username'],
+        'email': user['email']
+    }
+    
+    return jsonify({
+        'success': True,
+        'user': user_data
+    }), 200
