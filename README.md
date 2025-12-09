@@ -20,3 +20,17 @@ pip install -r requirements.txt
 python main.py
 ```
 - Congratulations! It's now available at `http://localhost:5000`!
+
+### how to run the web application
+- Install packages
+```sh
+cd frontend
+npm install
+```
+
+- Run development server
+```sh
+npm run dev
+```
+
+- It's now available at `http://localhost:3000`
