@@ -1,5 +1,10 @@
 # se1-student-project-repo
 
+### structure
+- frontend: react-based user interface
+- backend: database and API server (python)
+- report: deliverable 1 documentation
+
 ### `backend` setup instructions
 - Install [conda](https://www.anaconda.com/docs/getting-started/miniconda/install)
 - Create and activate a conda environment
