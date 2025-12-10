@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import UploadProjectPage from './pages/UploadProjectPage'
 import ExploreProjectsPage from './pages/ExploreProjectsPage'
 import ViewProjectPage from './pages/ViewProjectPage'
+import LoginPage from './pages/LoginPage'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route path="/explore" element={<ExploreProjectsPage />} />
           <Route path="/upload" element={<UploadProjectPage />} />
           <Route path="/project/:id" element={<ViewProjectPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </div>
     </Router>

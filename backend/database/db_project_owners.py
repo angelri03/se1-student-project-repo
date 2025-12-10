@@ -128,12 +128,14 @@ def get_user_projects(user_id: int) -> Dict:
         for row in rows:
             project = dict(row)
             
-            # Get tags for each project
+            # Get tags for each project (join with topics table)
             cursor.execute('''
-                SELECT tag FROM project_tags WHERE project_id = ?
+                SELECT t.name FROM project_tags pt
+                JOIN topics t ON pt.topic_id = t.id
+                WHERE pt.project_id = ?
             ''', (project['id'],))
-            
-            project['tags'] = [tag_row['tag'] for tag_row in cursor.fetchall()]
+
+            project['tags'] = [tag_row['name'] for tag_row in cursor.fetchall()]
             
             # Get all owners for each project
             cursor.execute('''

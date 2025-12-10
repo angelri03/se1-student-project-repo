@@ -370,5 +370,67 @@ def remove_project_owner(project_id, user_id, current_user_id, current_username)
     
     # Remove the owner
     result = database.remove_owner_from_project(project_id, user_id)
-    
+
+    return jsonify(result), 200 if result['success'] else 400
+
+# ===== RATING ENDPOINTS =====
+
+@projects_bp.route('/api/projects/<int:project_id>/rating', methods=['GET'])
+def get_project_rating(project_id):
+    """
+    Get the average rating and total ratings for a project
+    Public endpoint
+    """
+    result = database.get_project_rating(project_id)
+    return jsonify(result), 200 if result['success'] else 500
+
+@projects_bp.route('/api/projects/<int:project_id>/rating', methods=['POST'])
+@token_required
+def rate_project(project_id, current_user_id, current_username):
+    """
+    Rate a project (1-5 stars)
+    Requires authentication
+    Expected JSON: {"rating": 1-5}
+    """
+    data = request.get_json()
+
+    if not data or 'rating' not in data:
+        return jsonify({'success': False, 'message': 'Rating is required'}), 400
+
+    try:
+        rating = int(data['rating'])
+    except (ValueError, TypeError):
+        return jsonify({'success': False, 'message': 'Rating must be a number'}), 400
+
+    if rating < 1 or rating > 5:
+        return jsonify({'success': False, 'message': 'Rating must be between 1 and 5'}), 400
+
+    # Check if project exists and is approved
+    project = database.get_project_by_id(project_id)
+    if not project:
+        return jsonify({'success': False, 'message': 'Project not found'}), 404
+
+    if not project['approved']:
+        return jsonify({'success': False, 'message': 'Cannot rate unapproved projects'}), 403
+
+    result = database.rate_project(project_id, current_user_id, rating)
+    return jsonify(result), 200 if result['success'] else 400
+
+@projects_bp.route('/api/projects/<int:project_id>/rating/me', methods=['GET'])
+@token_required
+def get_my_rating(project_id, current_user_id, current_username):
+    """
+    Get the current user's rating for a project
+    Returns the rating or null if not rated
+    """
+    rating = database.get_user_rating(project_id, current_user_id)
+    return jsonify({'success': True, 'rating': rating}), 200
+
+@projects_bp.route('/api/projects/<int:project_id>/rating', methods=['DELETE'])
+@token_required
+def delete_my_rating(project_id, current_user_id, current_username):
+    """
+    Delete the current user's rating for a project
+    """
+    result = database.delete_rating(project_id, current_user_id)
     return jsonify(result), 200 if result['success'] else 400

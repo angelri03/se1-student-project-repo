@@ -5,7 +5,7 @@ Handles database initialization and table creation
 
 import sqlite3
 
-DATABASE_NAME = 'users.db'
+DATABASE_NAME = 'se1.db'
 
 def init_db():
     """Initialize the database and create all tables if they don't exist"""
@@ -49,13 +49,15 @@ def init_db():
         )
     ''')
     
-    # Project tags table
+    # Project tags table (maps projects to topics)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS project_tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             project_id INTEGER NOT NULL,
-            tag TEXT NOT NULL,
-            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+            topic_id INTEGER NOT NULL,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE,
+            UNIQUE(project_id, topic_id)
         )
     ''')
     
@@ -102,11 +104,31 @@ def init_db():
             UNIQUE(course_id, topic_id)
         )
     ''')
-    
+
+    # Project ratings table (one rating per user per project)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS project_ratings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(project_id, user_id)
+        )
+    ''')
+
     # Create indexes for better query performance
     cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_tags_project 
+        CREATE INDEX IF NOT EXISTS idx_tags_project
         ON project_tags(project_id)
+    ''')
+
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_tags_topic
+        ON project_tags(topic_id)
     ''')
     
     cursor.execute('''
@@ -140,9 +162,19 @@ def init_db():
     ''')
     
     cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_course_topics_topic 
+        CREATE INDEX IF NOT EXISTS idx_course_topics_topic
         ON course_topics(topic_id)
     ''')
-    
+
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_ratings_project
+        ON project_ratings(project_id)
+    ''')
+
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_ratings_user
+        ON project_ratings(user_id)
+    ''')
+
     conn.commit()
     conn.close()

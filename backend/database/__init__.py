@@ -57,6 +57,13 @@ from .db_topics import (
     delete_topic,
     get_courses_by_topic
 )
+from .db_ratings import (
+    rate_project,
+    get_user_rating,
+    get_project_rating,
+    delete_rating,
+    get_all_ratings_for_project
+)
 
 __all__ = [
     # Core
@@ -114,5 +121,12 @@ __all__ = [
     'get_all_topics',
     'update_topic',
     'delete_topic',
-    'get_courses_by_topic'
+    'get_courses_by_topic',
+
+    # Ratings
+    'rate_project',
+    'get_user_rating',
+    'get_project_rating',
+    'delete_rating',
+    'get_all_ratings_for_project'
 ]

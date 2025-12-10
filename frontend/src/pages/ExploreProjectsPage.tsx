@@ -1,29 +1,95 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { dummyProjects } from '../data/dummyData'
+import axios from 'axios'
 
 interface Project {
   id: number
-  title: string
+  name: string
   description: string
-  course: string
-  topic: string[]
-  authors: string[]
-  uploadDate: string
-  fileName: string
+  course?: string
+  tags: string[]
+  owners: { id: number; username: string; email: string }[]
+  created_at: string
+  file_path: string
+}
+
+interface User {
+  id: number
+  username: string
+  email: string
 }
 
 function ExploreProjectsPage() {
   const navigate = useNavigate()
-  const [projects] = useState<Project[]>(dummyProjects)
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>(dummyProjects)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCourse, setSelectedCourse] = useState<string>('all')
   const [selectedTopic, setSelectedTopic] = useState<string>('all')
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setUser(null)
+        return
+      }
+
+      try {
+        const response = await axios.get('/api/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (response.data.success) {
+          setUser(response.data.user)
+        } else {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setUser(null)
+        }
+      } catch {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        setUser(null)
+      }
+    }
+
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get('/api/projects')
+        if (response.data.success) {
+          // Fetch course info for each project
+          const projectsWithCourses = await Promise.all(
+            response.data.data.map(async (project: Project) => {
+              try {
+                const courseResponse = await axios.get(`/api/projects/${project.id}/course`)
+                if (courseResponse.data.success) {
+                  return { ...project, course: courseResponse.data.course.name }
+                }
+              } catch {
+                // Project might not have a course assigned
+              }
+              return { ...project, course: 'Uncategorized' }
+            })
+          )
+          setProjects(projectsWithCourses)
+          setFilteredProjects(projectsWithCourses)
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuth()
+    fetchProjects()
+  }, [])
 
   // Extract courses and topics from existing projects
-  const courses = ['all', ...Array.from(new Set(projects.map(p => p.course)))]
-  const topics = ['all', ...Array.from(new Set(projects.flatMap(p => p.topic)))]
+  const courses = ['all', ...Array.from(new Set(projects.map(p => p.course).filter(Boolean)))]
+  const topics = ['all', ...Array.from(new Set(projects.flatMap(p => p.tags || [])))]
 
   // Filter projects based on search and filters
   const handleFilter = (search: string, course: string, topic: string) => {
@@ -32,9 +98,9 @@ function ExploreProjectsPage() {
     // Filter by search query
     if (search) {
       filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(search.toLowerCase()) ||
+        project.name.toLowerCase().includes(search.toLowerCase()) ||
         project.description.toLowerCase().includes(search.toLowerCase()) ||
-        project.authors.some(author => author.toLowerCase().includes(search.toLowerCase()))
+        project.owners.some(owner => owner.username.toLowerCase().includes(search.toLowerCase()))
       )
     }
 
@@ -45,7 +111,7 @@ function ExploreProjectsPage() {
 
     // Filter by topic
     if (topic !== 'all') {
-      filtered = filtered.filter(project => project.topic.includes(topic))
+      filtered = filtered.filter(project => (project.tags || []).includes(topic))
     }
 
     setFilteredProjects(filtered)
@@ -78,15 +144,42 @@ function ExploreProjectsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Top Navigation Bar */}
         <div className="flex justify-end gap-3 mb-8">
-          <button
-            onClick={() => navigate('/profile')}
-            className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            View Profile
-          </button>
+          {user ? (
+            <>
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {user.username}
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('token')
+                  localStorage.removeItem('user')
+                  setUser(null)
+                }}
+                className="p-3 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-red-400 transition duration-200"
+                title="Logout"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Login
+            </button>
+          )}
           <button
             onClick={() => navigate('/upload')}
             className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
@@ -176,7 +269,11 @@ function ExploreProjectsPage() {
         </div>
 
         {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-lg">Loading projects...</p>
+          </div>
+        ) : filteredProjects.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-400 text-lg">No projects found matching your criteria.</p>
             <button
@@ -196,7 +293,7 @@ function ExploreProjectsPage() {
                 <div className="p-6 flex flex-col flex-grow">
                   {/* Project Title */}
                   <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
-                    {project.title}
+                    {project.name}
                   </h3>
 
                   {/* Course and Topic Tags */}
@@ -204,17 +301,11 @@ function ExploreProjectsPage() {
                     <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
                       {project.course}
                     </span>
-                    {Array.isArray(project.topic) ? (
-                      project.topic.map((t, index) => (
-                        <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
-                        {project.topic}
+                    {(project.tags || []).map((tag, index) => (
+                      <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
+                        {tag}
                       </span>
-                    )}
+                    ))}
                   </div>
 
                   {/* Description */}
@@ -228,12 +319,12 @@ function ExploreProjectsPage() {
                   {/* Authors */}
                   <div className="mb-3">
                     <p className="text-xs text-gray-500 mb-1">Authors:</p>
-                    <p className="text-sm text-gray-300">{project.authors.join(', ')}</p>
+                    <p className="text-sm text-gray-300">{project.owners.map(o => o.username).join(', ')}</p>
                   </div>
 
                   {/* Upload Date */}
                   <p className="text-xs text-gray-500 mb-4">
-                    Uploaded: {new Date(project.uploadDate).toLocaleDateString('en-US', {
+                    Uploaded: {new Date(project.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'
@@ -242,7 +333,7 @@ function ExploreProjectsPage() {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => navigate(`/project/${project.id}`)}
                       className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition duration-200"
                     >
