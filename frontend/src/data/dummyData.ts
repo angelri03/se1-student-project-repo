@@ -65,7 +65,7 @@ export const dummyProjects = [
   }
 ]
 
-export const dummyUser = {
+export let dummyUser = {
   id: 1,
   name: "Angelica",
   email: "angelica@uni.lu",
@@ -75,4 +75,8 @@ export const dummyUser = {
   totalRatings: 83,
   averageRating: 4.44,
   projects: [1, 2, 3, 4]
+}
+
+export const updateDummyUser = (updatedUser: typeof dummyUser) => {
+  Object.assign(dummyUser, updatedUser)
 }
