@@ -3,6 +3,7 @@ import UploadProjectPage from './pages/UploadProjectPage'
 import ExploreProjectsPage from './pages/ExploreProjectsPage'
 import ViewProjectPage from './pages/ViewProjectPage'
 import LoginPage from './pages/LoginPage'
+import ProfilePage from './pages/ProfilePage'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/upload" element={<UploadProjectPage />} />
           <Route path="/project/:id" element={<ViewProjectPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </div>
     </Router>

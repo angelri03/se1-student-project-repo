@@ -3,6 +3,7 @@
 #### Frontend
 - [ ] Registration/Login page
 - [x] Upload project page
+	- [ ] Media Attachments
 - [x] Explore projects page
 	- [x] Include filtering by topics/classes/etc.
 - [ ] Manage project page (for own projects and for admins)
@@ -10,11 +11,11 @@
 	- [ ] Allow deleting project
 	- [ ] Allow the owner to invite and remove collaborators
 	- [ ] Allow uploading media attachments
-- [ ] View profile page
-	- [ ] Allow editing on own profile page
+- [x] View profile page
+	- [x] Allow editing on own profile page
 - [ ] Admins approve project before it becomes publicly visible
 - [ ] Course management page for admins
-- [ ] View Project Page
+- [x] View Project Page
 
 #### Backend
 - [x] General CRUD operations in database
@@ -45,5 +46,5 @@
 - [ ] Add Link to Project (for example if you are hosting it) -- OPTIONAL NOT REQUIRED
 - [ ] View Project Files
 - [ ] Fix Rating on Project
-- [ ] Media Attachments
 - [ ] Download button
+- [ ] Dynamically allocate projects based on name to profile
