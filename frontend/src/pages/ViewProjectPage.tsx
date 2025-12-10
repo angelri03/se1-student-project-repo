@@ -47,7 +47,7 @@ function ViewProjectPage() {
           <h1 className="text-3xl font-bold text-white mb-4">Project Not Found</h1>
           <button
             onClick={() => navigate('/explore')}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
           >
             Back to Explore
           </button>
@@ -78,7 +78,7 @@ function ViewProjectPage() {
           
           {/* Course Tag */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-indigo-900 text-indigo-200">
+            <span className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-purple-900 text-purple-200">
               {project.course}
             </span>
           </div>
@@ -86,7 +86,7 @@ function ViewProjectPage() {
           {/* Topic Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
             {topics.map((topic, index) => (
-              <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
+              <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
                 {topic}
               </span>
             ))}
@@ -148,7 +148,7 @@ function ViewProjectPage() {
                     key={star}
                     className={`w-6 h-6 ${
                       star <= Math.round(project.rating || 0)
-                        ? 'text-purple-400 fill-purple-400'
+                        ? 'text-fuchsia-400 fill-fuchsia-400'
                         : 'text-gray-600'
                     }`}
                     fill="none"
@@ -183,7 +183,7 @@ function ViewProjectPage() {
                   <svg
                     className={`w-10 h-10 ${
                       star <= (hoveredStar || userRating)
-                        ? 'text-purple-400 fill-purple-400'
+                        ? 'text-fuchsia-400 fill-fuchsia-400'
                         : 'text-gray-600'
                     } transition-colors`}
                     fill="none"

@@ -112,7 +112,7 @@ function UploadProjectPage() {
             {/* Project Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
-                Project Title <span className="text-purple-500">*</span>
+                Project Title <span className="text-fuchsia-500">*</span>
               </label>
               <input
                 type="text"
@@ -121,7 +121,7 @@ function UploadProjectPage() {
                 required
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Enter your project title"
               />
             </div>
@@ -129,7 +129,7 @@ function UploadProjectPage() {
             {/* Description */}
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
-                Description <span className="text-purple-500">*</span>
+                Description <span className="text-fuchsia-500">*</span>
               </label>
               <textarea
                 id="description"
@@ -138,7 +138,7 @@ function UploadProjectPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Describe your project..."
               />
             </div>
@@ -148,7 +148,7 @@ function UploadProjectPage() {
               {/* Course */}
               <div>
                 <label htmlFor="course" className="block text-sm font-medium text-gray-300 mb-2">
-                  Course <span className="text-purple-500">*</span>
+                  Course <span className="text-fuchsia-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -157,7 +157,7 @@ function UploadProjectPage() {
                   required
                   value={formData.course}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="e.g., Software Engineering 1"
                 />
               </div>
@@ -165,7 +165,7 @@ function UploadProjectPage() {
               {/* Topic */}
               <div>
                 <label htmlFor="topic" className="block text-sm font-medium text-gray-300 mb-2">
-                  Topic <span className="text-purple-500">*</span>
+                  Topic <span className="text-fuchsia-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -174,7 +174,7 @@ function UploadProjectPage() {
                   required
                   value={formData.topic}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="e.g., Web Development"
                 />
               </div>
@@ -183,9 +183,9 @@ function UploadProjectPage() {
             {/* File Upload */}
             <div>
               <label htmlFor="file" className="block text-sm font-medium text-gray-300 mb-2">
-                Project File <span className="text-purple-500">*</span>
+                Project File <span className="text-fuchsia-500">*</span>
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-indigo-500 transition duration-200">
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-purple-500 transition duration-200">
                 <div className="space-y-1 text-center">
                   <svg
                     className="mx-auto h-12 w-12 text-gray-400"
@@ -204,7 +204,7 @@ function UploadProjectPage() {
                   <div className="flex text-sm text-gray-400">
                     <label
                       htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md font-medium text-indigo-400 hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                      className="relative cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
                     >
                       <span>Upload a file</span>
                       <input
@@ -221,7 +221,7 @@ function UploadProjectPage() {
                   </div>
                   <p className="text-xs text-gray-500">ZIP, RAR, 7Z up to 500MB</p>
                   {fileName && (
-                    <p className="text-sm text-indigo-400 mt-2">
+                    <p className="text-sm text-purple-400 mt-2">
                       Selected: {fileName}
                     </p>
                   )}
@@ -232,7 +232,7 @@ function UploadProjectPage() {
             {/* Authors */}
             <div>
               <label htmlFor="authors" className="block text-sm font-medium text-gray-300 mb-2">
-                Authors <span className="text-purple-500">*</span>
+                Authors <span className="text-fuchsia-500">*</span>
               </label>
               <input
                 type="text"
@@ -241,7 +241,7 @@ function UploadProjectPage() {
                 required
                 value={formData.authors}
                 onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Angelica, Robert, etc... (comma-separated)"
               />
               <p className="mt-1 text-sm text-gray-500">Separate multiple authors with commas</p>
@@ -280,7 +280,7 @@ function UploadProjectPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Uploading...' : 'Upload Project'}
               </button>

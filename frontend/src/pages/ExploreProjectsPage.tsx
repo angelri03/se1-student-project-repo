@@ -89,7 +89,7 @@ function ExploreProjectsPage() {
           </button>
           <button
             onClick={() => navigate('/upload')}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 inline-flex items-center gap-2"
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -117,7 +117,7 @@ function ExploreProjectsPage() {
                 id="search"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Search by title, description, or author..."
               />
             </div>
@@ -131,7 +131,7 @@ function ExploreProjectsPage() {
                 id="course"
                 value={selectedCourse}
                 onChange={(e) => handleCourseChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 {courses.map(course => (
                   <option key={course} value={course}>
@@ -150,7 +150,7 @@ function ExploreProjectsPage() {
                 id="topic"
                 value={selectedTopic}
                 onChange={(e) => handleTopicChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 {topics.map(topic => (
                   <option key={topic} value={topic}>
@@ -181,7 +181,7 @@ function ExploreProjectsPage() {
             <p className="text-gray-400 text-lg">No projects found matching your criteria.</p>
             <button
               onClick={handleReset}
-              className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
+              className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
             >
               Clear Filters
             </button>
@@ -191,7 +191,7 @@ function ExploreProjectsPage() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 hover:border-indigo-500 transition duration-200 overflow-hidden flex flex-col"
+                className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 hover:border-purple-500 transition duration-200 overflow-hidden flex flex-col"
               >
                 <div className="p-6 flex flex-col flex-grow">
                   {/* Project Title */}
@@ -201,17 +201,17 @@ function ExploreProjectsPage() {
 
                   {/* Course and Topic Tags */}
                   <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-indigo-900 text-indigo-200">
+                    <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
                       {project.course}
                     </span>
                     {Array.isArray(project.topic) ? (
                       project.topic.map((t, index) => (
-                        <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
+                        <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
                           {t}
                         </span>
                       ))
                     ) : (
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
+                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
                         {project.topic}
                       </span>
                     )}
@@ -244,7 +244,7 @@ function ExploreProjectsPage() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => navigate(`/project/${project.id}`)}
-                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition duration-200"
+                      className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition duration-200"
                     >
                       View Details
                     </button>
