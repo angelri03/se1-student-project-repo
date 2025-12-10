@@ -64,3 +64,15 @@ export const dummyProjects = [
     totalRatings: 12
   }
 ]
+
+export const dummyUser = {
+  id: 1,
+  name: "Angelica",
+  email: "angelica@uni.lu",
+  bio: "Computer Science student at unilu",
+  joinDate: "2022-09-15",
+  projectCount: 4,
+  totalRatings: 83,
+  averageRating: 4.44,
+  projects: [1, 2, 3, 4]
+}

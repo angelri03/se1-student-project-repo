@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { dummyProjects } from '../data/dummyData'
 
 interface Project {
@@ -17,10 +17,12 @@ interface Project {
 
 function ViewProjectPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams<{ id: string }>()
   const [project, setProject] = useState<Project | null>(null)
   const [userRating, setUserRating] = useState<number>(0)
   const [hoveredStar, setHoveredStar] = useState<number>(0)
+  const fromProfile = location.state?.fromProfile || false
 
   useEffect(() => {
     // Find project by ID
@@ -63,13 +65,13 @@ function ViewProjectPage() {
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/explore')}
+          onClick={() => navigate(fromProfile ? '/profile' : '/explore')}
           className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Explore
+          {fromProfile ? 'Back to Profile' : 'Back to Explore'}
         </button>
 
         {/* Project Header Card */}
