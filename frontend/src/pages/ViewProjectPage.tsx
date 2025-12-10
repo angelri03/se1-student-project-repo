@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
 interface Project {
@@ -22,6 +22,7 @@ function ViewProjectPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams<{ id: string }>()
+  const fromProfile = location.state?.fromProfile || false
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [ratingData, setRatingData] = useState<RatingData>({ average: 0, count: 0 })
