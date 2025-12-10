@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
 interface ProjectFormData {
@@ -13,6 +13,8 @@ interface ProjectFormData {
 
 function UploadProjectPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const fromProfile = location.state?.fromProfile || false
   const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     description: '',
@@ -92,13 +94,13 @@ function UploadProjectPage() {
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/explore')}
+          onClick={() => navigate(fromProfile ? '/profile' : '/explore')}
           className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Explore
+          {fromProfile ? 'Back to Profile' : 'Back to Explore'}
         </button>
 
         {/* Header */}

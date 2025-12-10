@@ -54,7 +54,7 @@ function ProfilePage() {
             </svg>
             Back to Explore
           </button>
-          <h1 className="text-3xl font-bold text-white">Profile</h1>
+          <h1 className="text-3xl font-bold text-white absolute left-1/2 transform -translate-x-1/2">Profile</h1>
           <div className="flex gap-3">
             <button
               onClick={() => {
@@ -72,7 +72,7 @@ function ProfilePage() {
               {isEditing ? 'Cancel' : 'Edit Profile'}
             </button>
             <button
-              onClick={() => navigate('/upload')}
+              onClick={() => navigate('/upload', { state: { fromProfile: true } })}
               className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
