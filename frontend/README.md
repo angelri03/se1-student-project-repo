@@ -1,49 +1,62 @@
-# Student Project Frontend
+# Frontend Web Application
 
-Frontend for the student project repository.
+React-based user interface for the student project repository platform.
 
-## Setup
+## Quick Start
 
-1. Install dependencies:
-```bash
-npm install
-```
+### Prerequisites
+- Node.js 18+ and npm
 
-2. Run development server:
-```bash
-npm run dev
-```
+### Installation
 
-The application will be available at http://localhost:3000
+1. **Navigate to frontend directory**
+   ```sh
+   cd frontend
+   ```
+
+2. **Install dependencies**
+   ```sh
+   npm install
+   ```
+
+3. **Start development server**
+   ```sh
+   npm run dev
+   ```
+
+The application will be available at `http://localhost:3000`
 
 ## Features
 
-- Course Management page
-- Explore projects page
-- Manage project page
-- Registration Page
-- Upload Project Page
-- View profile page
+### Pages
+- **Home/Explore** - Browse and search projects
+- **Project Details** - View individual project information
+- **Upload Project** - Submit new projects (requires authentication)
+- **Login/Register** - User authentication
+- **Profile** - User profile management
 
-
-## Scripts
+## Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 
+## Development Notes
 
-## FOR TESTING
-if you want to add a project with the upload thingy,
-you have to approve it for it to show up on the explore page
-so, upload it, then run this command:
+### Testing the Upload Functionalities
+
+**Note:** Uploaded projects require manual approval before appearing on the explore page.
+
+To approve a project after uploading:
 ```sh
-python -c "from database import db_projects; db_projects.approve_project(n); 
+cd backend
+python -c "from database import db_projects; db_projects.approve_project(PROJECT_ID)"
 ```
 
-to delete the project:
+To delete a test project:
 ```sh
-python -c "from database import db_projects; result = db_projects.delete_project(n);"
+cd backend
+python -c "from database import db_projects; db_projects.delete_project(PROJECT_ID)"
 ```
 
-n is the number of the project
+Replace `PROJECT_ID` with the numeric ID of the project.

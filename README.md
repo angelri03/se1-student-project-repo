@@ -1,41 +1,39 @@
-# se1-student-project-repo
+# SE1 - Student Project Showcasing Repo
 
-### structure
-- frontend: react-based user interface
-- backend: database and API server (python)
-- report: deliverable 1 documentation
+A platform for students to showcase and explore academic projects.
 
-### `backend` setup instructions
-- Install [conda](https://www.anaconda.com/docs/getting-started/miniconda/install)
-- Create and activate a conda environment
-```sh
-conda create -n se1 python=3.11 pip
-conda activate se1
-```
-- Ensure you are in the backend folder
+> See [frontend](frontend) and [backend](backend) READMEs for detailed setup instructions.
+
+## Structure
+
+| Codebase             |       Description       |
+| :------------------- | :---------------------: |
+| [frontend](frontend) | Front End App \| Vite   |
+| [backend](backend)   | Back End App \| Python  |
+| [report](report)     | Documentation           |
+
+## Technologies
+
+**Frontend:** React, TypeScript, Vite, Tailwind CSS  
+**Backend:** Flask, SQLite, JWT, pytest
+
+
+## Setup Instructions
+
+### Backend Setup
+
+1. Navigate to the backend directory and start the server:
 ```sh
 cd backend
-```
-- Install dependencies
-```sh
-pip install -r requirements.txt
-```
-- Run the server
-```sh
 python main.py
 ```
-- Congratulations! It's now available at `http://localhost:5000`!
+2. The API will be available at `http://localhost:5000`
 
-### how to run the web application
-- Install packages
+### Frontend Setup
+
+1. Navigate to the frontend directory and start the development server:
 ```sh
 cd frontend
-npm install
-```
-
-- Run development server
-```sh
 npm run dev
 ```
-
-- It's now available at `http://localhost:3000`
+2. The web application will be available at `http://localhost:3000`
