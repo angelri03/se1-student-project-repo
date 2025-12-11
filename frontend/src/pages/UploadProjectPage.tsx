@@ -1,13 +1,19 @@
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
+
+interface User {
+  id: number
+  username: string
+  email: string
+}
 
 interface ProjectFormData {
   title: string
   description: string
   course: string
   topic: string
-  authors: string
+  authors: User[]
   file: File | null
   mediaFiles: FileList | null
 }
@@ -21,7 +27,7 @@ function UploadProjectPage() {
     description: '',
     course: '',
     topic: '',
-    authors: '',
+    authors: [],
     file: null,
     mediaFiles: null
   })
@@ -31,6 +37,45 @@ function UploadProjectPage() {
   const [fileName, setFileName] = useState<string>('')
   const [isDraggingFile, setIsDraggingFile] = useState(false)
   const [isDraggingMedia, setIsDraggingMedia] = useState(false)
+  const [allUsers, setAllUsers] = useState<User[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  // Fetch current user and all users on mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      try {
+        // Fetch current user
+        const meResponse = await axios.get('/api/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (meResponse.data.success) {
+          const user = meResponse.data.user
+          setCurrentUser(user)
+          // Pre-add current user as author
+          setFormData(prev => ({
+            ...prev,
+            authors: [{ id: user.id, username: user.username, email: user.email }]
+          }))
+        }
+
+        // Fetch all users
+        const usersResponse = await axios.get('/api/users', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (usersResponse.data.success) {
+          setAllUsers(usersResponse.data.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error)
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -120,6 +165,29 @@ function UploadProjectPage() {
     }
   }
 
+  const addAuthor = (user: User) => {
+    if (!formData.authors.find(a => a.id === user.id)) {
+      setFormData(prev => ({
+        ...prev,
+        authors: [...prev.authors, user]
+      }))
+    }
+    setIsDropdownOpen(false)
+  }
+
+  const removeAuthor = (userId: number) => {
+    // Don't allow removing the current user (uploader)
+    if (currentUser && userId === currentUser.id) return
+    setFormData(prev => ({
+      ...prev,
+      authors: prev.authors.filter(a => a.id !== userId)
+    }))
+  }
+
+  const availableUsers = allUsers.filter(
+    user => !formData.authors.find(a => a.id === user.id)
+  )
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -206,7 +274,23 @@ function UploadProjectPage() {
             console.error('Failed to assign course:', error)
           }
         }
-        
+
+        // Add co-authors (skip current user since they're automatically added as owner)
+        if (projectId && currentUser) {
+          const coAuthors = formData.authors.filter(a => a.id !== currentUser.id)
+          for (const author of coAuthors) {
+            try {
+              await axios.post(`/api/projects/${projectId}/owners`, {
+                username: author.username
+              }, {
+                headers: { Authorization: `Bearer ${token}` }
+              })
+            } catch (error) {
+              console.error(`Failed to add co-author ${author.username}:`, error)
+            }
+          }
+        }
+
         // Upload media attachments if any
         if (formData.mediaFiles && formData.mediaFiles.length > 0 && projectId) {
           console.log('Uploading media for project:', projectId)
@@ -239,7 +323,7 @@ function UploadProjectPage() {
         description: '',
         course: '',
         topic: '',
-        authors: '',
+        authors: currentUser ? [currentUser] : [],
         file: null,
         mediaFiles: null
       })
@@ -462,20 +546,76 @@ function UploadProjectPage() {
 
             {/* Authors */}
             <div>
-              <label htmlFor="authors" className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Authors <span className="text-fuchsia-500">*</span>
               </label>
-              <input
-                type="text"
-                id="authors"
-                name="authors"
-                required
-                value={formData.authors}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                placeholder="Angelica, Robert, etc... (comma-separated)"
-              />
-              <p className="mt-1 text-sm text-gray-500">Separate multiple authors with commas</p>
+
+              {/* Selected Authors */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.authors.map(author => (
+                  <span
+                    key={author.id}
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                      currentUser && author.id === currentUser.id
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-700 text-gray-200'
+                    }`}
+                  >
+                    {author.username}
+                    {currentUser && author.id === currentUser.id && (
+                      <span className="text-xs text-purple-200">(you)</span>
+                    )}
+                    {(!currentUser || author.id !== currentUser.id) && (
+                      <button
+                        type="button"
+                        onClick={() => removeAuthor(author.id)}
+                        className="ml-1 text-gray-400 hover:text-white transition"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              {/* Dropdown to add more authors */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 text-left hover:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
+                >
+                  <span>Add co-author...</span>
+                  <svg className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isDropdownOpen && availableUsers.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {availableUsers.map(user => (
+                      <button
+                        key={user.id}
+                        type="button"
+                        onClick={() => addAuthor(user)}
+                        className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition first:rounded-t-lg last:rounded-b-lg"
+                      >
+                        {user.username}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {isDropdownOpen && availableUsers.length === 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg p-4 text-gray-400 text-sm">
+                    No more users available
+                  </div>
+                )}
+              </div>
+
+              <p className="mt-2 text-sm text-gray-500">You are automatically added as an author. Add co-authors using the dropdown above.</p>
             </div>
 
             {/* Message Display */}
@@ -499,7 +639,7 @@ function UploadProjectPage() {
                     description: '',
                     course: '',
                     topic: '',
-                    authors: '',
+                    authors: currentUser ? [currentUser] : [],
                     file: null,
                     mediaFiles: null
                   })

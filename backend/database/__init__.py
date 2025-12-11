@@ -11,7 +11,8 @@ from .db_users import (
     get_user_by_username,
     get_user_by_id,
     update_user,
-    delete_user
+    delete_user,
+    get_all_users
 )
 from .db_projects import (
     create_project,
@@ -85,6 +86,7 @@ __all__ = [
     'get_user_by_id',
     'update_user',
     'delete_user',
+    'get_all_users',
     
     # Projects
     'create_project',

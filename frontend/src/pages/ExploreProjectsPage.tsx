@@ -180,7 +180,7 @@ function ExploreProjectsPage() {
               Login
             </button>
           )}
-          <button
+          {user && (<button
             onClick={() => navigate('/upload')}
             className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
           >
@@ -188,7 +188,8 @@ function ExploreProjectsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Upload Project
-          </button>
+          </button>)
+          }
         </div>
 
         {/* Header */}

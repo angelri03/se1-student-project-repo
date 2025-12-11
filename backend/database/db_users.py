@@ -148,16 +148,37 @@ def delete_user(user_id: int) -> Dict:
     try:
         conn = sqlite3.connect(DATABASE_NAME)
         cursor = conn.cursor()
-        
+
         cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
         conn.commit()
-        
+
         if cursor.rowcount == 0:
             conn.close()
             return {'success': False, 'message': 'User not found'}
-        
+
         conn.close()
         return {'success': True, 'message': 'User deleted successfully'}
-    
+
+    except Exception as e:
+        return {'success': False, 'message': f'Error: {str(e)}'}
+
+def get_all_users() -> Dict:
+    """
+    Get all users (without password hashes)
+    Returns: {'success': bool, 'data': List[Dict] or 'message': str}
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT id, username, email FROM users ORDER BY username ASC')
+        rows = cursor.fetchall()
+
+        conn.close()
+
+        users = [dict(row) for row in rows]
+        return {'success': True, 'data': users}
+
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}

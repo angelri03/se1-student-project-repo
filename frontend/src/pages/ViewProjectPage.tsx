@@ -2,13 +2,19 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
+interface User {
+  id: number
+  username: string
+  email: string
+}
+
 interface Project {
   id: number
   name: string
   description: string
   course?: string
   tags: string[]
-  owners: { id: number; username: string; email: string }[]
+  owners: User[]
   created_at: string
   file_path: string
 }
@@ -31,9 +37,23 @@ function ViewProjectPage() {
   const [ratingMessage, setRatingMessage] = useState<string>('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [media, setMedia] = useState<any[]>([])
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
   const [uploadingMedia, setUploadingMedia] = useState(false)
+
+  // Editing states
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [isEditingTags, setIsEditingTags] = useState(false)
+  const [editedTitle, setEditedTitle] = useState('')
+  const [editedDescription, setEditedDescription] = useState('')
+  const [editedTags, setEditedTags] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  // Collaborator management states
+  const [allUsers, setAllUsers] = useState<User[]>([])
+  const [isCollaboratorDropdownOpen, setIsCollaboratorDropdownOpen] = useState(false)
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -95,9 +115,43 @@ function ViewProjectPage() {
       }
     }
 
+    const checkOwnership = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      try {
+        // Get current user info
+        const meResponse = await axios.get('/api/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (meResponse.data.success) {
+          const userId = meResponse.data.user.id
+          setCurrentUserId(userId)
+          // Get project to check owners
+          const projectResponse = await axios.get(`/api/projects/${id}`)
+          if (projectResponse.data.success) {
+            const owners = projectResponse.data.project.owners || []
+            const userIsOwner = owners.some((owner: { id: number }) => owner.id === userId)
+            setIsOwner(userIsOwner)
+          }
+        }
+
+        // Fetch all users for collaborator dropdown
+        const usersResponse = await axios.get('/api/users', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (usersResponse.data.success) {
+          setAllUsers(usersResponse.data.data)
+        }
+      } catch (error) {
+        console.error('Failed to check ownership:', error)
+      }
+    }
+
     fetchProject()
     fetchRating()
     fetchUserRating()
+    checkOwnership()
     
     // Fetch media
     const fetchMedia = async () => {
@@ -213,6 +267,158 @@ function ViewProjectPage() {
     }
   }
 
+  // Edit handlers
+  const startEditingTitle = () => {
+    if (project) {
+      setEditedTitle(project.name)
+      setIsEditingTitle(true)
+    }
+  }
+
+  const startEditingDescription = () => {
+    if (project) {
+      setEditedDescription(project.description)
+      setIsEditingDescription(true)
+    }
+  }
+
+  const startEditingTags = () => {
+    if (project) {
+      setEditedTags(project.tags.join(', '))
+      setIsEditingTags(true)
+    }
+  }
+
+  const saveTitle = async () => {
+    if (!project || !editedTitle.trim()) return
+    setSaving(true)
+    const token = localStorage.getItem('token')
+
+    try {
+      const formData = new FormData()
+      formData.append('name', editedTitle.trim())
+
+      const response = await axios.put(`/api/projects/${project.id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setProject({ ...project, name: editedTitle.trim() })
+        setIsEditingTitle(false)
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to update title')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveDescription = async () => {
+    if (!project) return
+    setSaving(true)
+    const token = localStorage.getItem('token')
+
+    try {
+      const formData = new FormData()
+      formData.append('description', editedDescription)
+
+      const response = await axios.put(`/api/projects/${project.id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setProject({ ...project, description: editedDescription })
+        setIsEditingDescription(false)
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to update description')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveTags = async () => {
+    if (!project) return
+    setSaving(true)
+    const token = localStorage.getItem('token')
+
+    try {
+      const formData = new FormData()
+      formData.append('tags', editedTags)
+
+      const response = await axios.put(`/api/projects/${project.id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        const newTags = editedTags.split(',').map(t => t.trim()).filter(t => t)
+        setProject({ ...project, tags: newTags })
+        setIsEditingTags(false)
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to update tags')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Collaborator management
+  const addCollaborator = async (user: User) => {
+    if (!project) return
+    const token = localStorage.getItem('token')
+
+    try {
+      const response = await axios.post(`/api/projects/${project.id}/owners`, {
+        username: user.username
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setProject({
+          ...project,
+          owners: [...project.owners, user]
+        })
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to add collaborator')
+    }
+    setIsCollaboratorDropdownOpen(false)
+  }
+
+  const removeCollaborator = async (userId: number) => {
+    if (!project) return
+    if (project.owners.length <= 1) {
+      alert('Cannot remove the last owner')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+
+    try {
+      const response = await axios.delete(`/api/projects/${project.id}/owners/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setProject({
+          ...project,
+          owners: project.owners.filter(o => o.id !== userId)
+        })
+        // If current user removed themselves, they're no longer an owner
+        if (userId === currentUserId) {
+          setIsOwner(false)
+        }
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to remove collaborator')
+    }
+  }
+
+  const availableCollaborators = allUsers.filter(
+    user => !project?.owners.find(o => o.id === user.id)
+  )
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -257,7 +463,57 @@ function ViewProjectPage() {
 
         {/* Project Header Card */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
-          <h1 className="text-3xl font-bold text-white mb-3">{project.name}</h1>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-3">
+            {/* Editable Title */}
+            {isEditingTitle ? (
+              <div className="flex-1 flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-2xl font-bold focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  autoFocus
+                />
+                <button
+                  onClick={saveTitle}
+                  disabled={saving}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {saving ? '...' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setIsEditingTitle(false)}
+                  className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold text-white">{project.name}</h1>
+                {isOwner && (
+                  <button
+                    onClick={startEditingTitle}
+                    className="p-1 text-gray-400 hover:text-white transition"
+                    title="Edit title"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+            <a
+              href={`/api/projects/${project.id}/download`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200 shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download ZIP
+            </a>
+          </div>
 
           {/* Course Tag */}
           <div className="flex flex-wrap gap-2 mb-4">
@@ -266,18 +522,64 @@ function ViewProjectPage() {
             </span>
           </div>
 
-          {/* Topic Tags */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {topics.map((topic, index) => (
-              <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
-                {topic}
-              </span>
-            ))}
+          {/* Editable Topic Tags */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-sm font-medium text-gray-400">Topics</h3>
+              {isOwner && !isEditingTags && (
+                <button
+                  onClick={startEditingTags}
+                  className="p-1 text-gray-400 hover:text-white transition"
+                  title="Edit tags"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {isEditingTags ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editedTags}
+                  onChange={(e) => setEditedTags(e.target.value)}
+                  placeholder="tag1, tag2, tag3"
+                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  autoFocus
+                />
+                <button
+                  onClick={saveTags}
+                  disabled={saving}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50"
+                >
+                  {saving ? '...' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setIsEditingTags(false)}
+                  className="px-3 py-2 bg-gray-600 text-white rounded-lg text-sm hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {topics.length > 0 ? topics.map((topic, index) => (
+                  <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
+                    {topic}
+                  </span>
+                )) : (
+                  <span className="text-gray-500 text-sm">No tags</span>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Authors */}
+          {/* Authors/Collaborators */}
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Authors</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-sm font-medium text-gray-400">Authors</h3>
+            </div>
             <div className="flex flex-wrap gap-2">
               {project.owners.map((owner) => (
                 <span key={owner.id} className="inline-flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-lg text-gray-300">
@@ -285,8 +587,57 @@ function ViewProjectPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   {owner.username}
+                  {owner.id === currentUserId && (
+                    <span className="text-xs text-purple-400">(you)</span>
+                  )}
+                  {isOwner && project.owners.length > 1 && (
+                    <button
+                      onClick={() => removeCollaborator(owner.id)}
+                      className="ml-1 text-gray-400 hover:text-red-400 transition"
+                      title="Remove collaborator"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </span>
               ))}
+
+              {/* Add Collaborator Dropdown */}
+              {isOwner && (
+                <div className="relative">
+                  <button
+                    onClick={() => setIsCollaboratorDropdownOpen(!isCollaboratorDropdownOpen)}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add
+                  </button>
+
+                  {isCollaboratorDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-48 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {availableCollaborators.length > 0 ? (
+                        availableCollaborators.map(user => (
+                          <button
+                            key={user.id}
+                            onClick={() => addCollaborator(user)}
+                            className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            {user.username}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-gray-400 text-sm">
+                          No users available
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -311,10 +662,50 @@ function ViewProjectPage() {
 
         {/* Description Card */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
-          <h2 className="text-2xl font-bold text-white mb-4">Description</h2>
-          <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-            {project.description}
-          </p>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-2xl font-bold text-white">Description</h2>
+            {isOwner && !isEditingDescription && (
+              <button
+                onClick={startEditingDescription}
+                className="p-1 text-gray-400 hover:text-white transition"
+                title="Edit description"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {isEditingDescription ? (
+            <div className="space-y-3">
+              <textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                rows={6}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={saveDescription}
+                  disabled={saving}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setIsEditingDescription(false)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+              {project.description || 'No description provided.'}
+            </p>
+          )}
         </div>
 
         {/* Rating Section */}
@@ -495,7 +886,7 @@ function ViewProjectPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700">
+        <div className="bg-gray-800 rounded-lg shadow-xl mt-6 p-6 border border-gray-700">
           <h2 className="text-xl font-bold text-white mb-4">Actions</h2>
           <div className="flex flex-wrap gap-3">
             <button className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2">

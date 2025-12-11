@@ -3,14 +3,14 @@
 #### Frontend
 - [x] Registration/Login page
 - [x] Upload project page
-	- [ ] Media Attachments
+	- [x] Media Attachments
 - [x] Explore projects page
 	- [x] Include filtering by topics/classes/etc.
 - [ ] Manage project page (for own projects and for admins)
-	- [ ] Allow editing data
+	- [x] Allow editing data
 	- [ ] Allow deleting project
-	- [ ] Allow the owner to invite and remove collaborators
-	- [ ] Allow uploading media attachments
+	- [x] Allow the owner to invite and remove collaborators
+	- [x] Allow uploading media attachments
 - [x] View profile page
 	- [x] Allow editing on own profile page
 - [ ] Admins approve project before it becomes publicly visible

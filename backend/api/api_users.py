@@ -141,6 +141,24 @@ def get_current_user(current_user_id, current_username):
         'user': user_data
     }), 200
 
+@users_bp.route('/api/users', methods=['GET'])
+@token_required
+def get_all_users(current_user_id, current_username):
+    """
+    Get all users (for author selection dropdown)
+    Requires valid JWT token in Authorization header
+    Returns list of users with id, username, email (no passwords)
+    """
+    result = database.get_all_users()
+
+    if not result['success']:
+        return jsonify(result), 500
+
+    return jsonify({
+        'success': True,
+        'data': result['data']
+    }), 200
+
 @users_bp.route('/api/me', methods=['PUT'])
 @token_required
 def update_current_user(current_user_id, current_username):
