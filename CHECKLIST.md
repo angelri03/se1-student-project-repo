@@ -1,7 +1,7 @@
 ## Checklist
 
 #### Frontend
-- [ ] Registration/Login page
+- [x] Registration/Login page
 - [x] Upload project page
 	- [ ] Media Attachments
 - [x] Explore projects page
@@ -45,6 +45,6 @@
 	- [ ] Project Link
 - [ ] Add Link to Project (for example if you are hosting it) -- OPTIONAL NOT REQUIRED
 - [ ] View Project Files
-- [ ] Fix Rating on Project
+- [x] Fix Rating on Project
 - [ ] Download button
-- [ ] Dynamically allocate projects based on name to profile
+- [x] Dynamically allocate projects based on name to profile

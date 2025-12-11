@@ -65,6 +65,12 @@ from .db_ratings import (
     get_all_ratings_for_project,
     get_user_rating_stats
 )
+from .db_media import (
+    add_project_media,
+    get_project_media,
+    delete_project_media,
+    get_media_by_id
+)
 
 __all__ = [
     # Core
@@ -130,5 +136,11 @@ __all__ = [
     'get_project_rating',
     'delete_rating',
     'get_all_ratings_for_project',
-    'get_user_rating_stats'
+    'get_user_rating_stats',
+
+    # Media
+    'add_project_media',
+    'get_project_media',
+    'delete_project_media',
+    'get_media_by_id'
 ]

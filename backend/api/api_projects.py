@@ -14,15 +14,22 @@ projects_bp = Blueprint('projects', __name__)
 
 # Configuration
 UPLOAD_FOLDER = 'uploads/projects'
+MEDIA_FOLDER = 'uploads/media'
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB in bytes
 ALLOWED_EXTENSIONS = {'zip'}
+ALLOWED_MEDIA_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'pdf'}
 
-# Ensure upload directory exists
+# Ensure upload directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     """Check if file has allowed extension"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_media_file(filename):
+    """Check if media file has allowed extension"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_MEDIA_EXTENSIONS
 
 @projects_bp.route('/api/projects', methods=['POST'])
 @token_required
@@ -433,4 +440,137 @@ def delete_my_rating(project_id, current_user_id, current_username):
     Delete the current user's rating for a project
     """
     result = database.delete_rating(project_id, current_user_id)
+    return jsonify(result), 200 if result['success'] else 400
+
+@projects_bp.route('/api/projects/<int:project_id>/media', methods=['POST'])
+@token_required
+def upload_project_media(project_id, current_user_id, current_username):
+    """
+    Upload media attachments to a project
+    Only owners can upload media
+    Accepts: images (jpg, jpeg, png, gif), videos (mp4, mov, avi), pdf
+    """
+    # Check if project exists
+    project = database.get_project_by_id(project_id)
+    if not project:
+        return jsonify({'success': False, 'message': 'Project not found'}), 404
+    
+    # Check if user is an owner
+    is_owner = any(owner['id'] == current_user_id for owner in project['owners'])
+    if not is_owner:
+        return jsonify({'success': False, 'message': 'Only project owners can upload media'}), 403
+    
+    # Check if media files are in request
+    if 'media' not in request.files:
+        return jsonify({'success': False, 'message': 'No media files provided'}), 400
+    
+    files = request.files.getlist('media')
+    if not files or len(files) == 0:
+        return jsonify({'success': False, 'message': 'No media files selected'}), 400
+    
+    uploaded_media = []
+    
+    for file in files:
+        if file.filename == '':
+            continue
+            
+        if not allowed_media_file(file.filename):
+            return jsonify({'success': False, 'message': f'File type not allowed: {file.filename}'}), 400
+        
+        # Generate unique filename
+        filename = secure_filename(file.filename)
+        unique_filename = f"{secrets.token_hex(8)}_{filename}"
+        file_path = os.path.join(MEDIA_FOLDER, unique_filename)
+        
+        # Save file
+        file.save(file_path)
+        file_size = os.path.getsize(file_path)
+        file_type = filename.rsplit('.', 1)[1].lower()
+        
+        # Add to database
+        result = database.add_project_media(
+            project_id=project_id,
+            file_path=file_path,
+            file_name=filename,
+            file_type=file_type,
+            file_size=file_size
+        )
+        
+        if result['success']:
+            uploaded_media.append({
+                'id': result['id'],
+                'file_name': filename,
+                'file_type': file_type
+            })
+    
+    return jsonify({
+        'success': True,
+        'message': f'Uploaded {len(uploaded_media)} media file(s)',
+        'media': uploaded_media
+    }), 201
+
+@projects_bp.route('/api/projects/<int:project_id>/media', methods=['GET'])
+def get_project_media_list(project_id):
+    """
+    Get all media attachments for a project
+    Public endpoint for approved projects
+    """
+    project = database.get_project_by_id(project_id)
+    if not project or not project['approved']:
+        return jsonify({'success': False, 'message': 'Project not found'}), 404
+    
+    media = database.get_project_media(project_id)
+    return jsonify({'success': True, 'media': media}), 200
+
+@projects_bp.route('/api/media/<int:media_id>', methods=['GET'])
+def get_media_file(media_id):
+    """
+    Download/view a specific media file
+    Public endpoint
+    """
+    media = database.get_media_by_id(media_id)
+    
+    if not media:
+        return jsonify({'success': False, 'message': 'Media not found'}), 404
+    
+    file_path = media['file_path']
+    
+    if not os.path.exists(file_path):
+        return jsonify({'success': False, 'message': 'File not found'}), 404
+    
+    return send_file(file_path, as_attachment=False)
+
+@projects_bp.route('/api/media/<int:media_id>', methods=['DELETE'])
+@token_required
+def delete_media_file(media_id, current_user_id, current_username):
+    """
+    Delete a media attachment
+    Only project owners can delete media
+    """
+    media = database.get_media_by_id(media_id)
+    
+    if not media:
+        return jsonify({'success': False, 'message': 'Media not found'}), 404
+    
+    # Get project and check ownership
+    project = database.get_project_by_id(media['project_id'])
+    if not project:
+        return jsonify({'success': False, 'message': 'Project not found'}), 404
+    
+    is_owner = any(owner['id'] == current_user_id for owner in project['owners'])
+    if not is_owner:
+        return jsonify({'success': False, 'message': 'Only project owners can delete media'}), 403
+    
+    # Delete from database
+    result = database.delete_project_media(media_id)
+    
+    if result['success']:
+        # Delete file from disk
+        file_path = result['file_path']
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception:
+                pass
+    
     return jsonify(result), 200 if result['success'] else 400

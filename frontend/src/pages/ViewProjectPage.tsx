@@ -30,6 +30,10 @@ function ViewProjectPage() {
   const [hoveredStar, setHoveredStar] = useState<number>(0)
   const [ratingMessage, setRatingMessage] = useState<string>('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isOwner, setIsOwner] = useState(false)
+  const [media, setMedia] = useState<any[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
+  const [uploadingMedia, setUploadingMedia] = useState(false)
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -94,7 +98,88 @@ function ViewProjectPage() {
     fetchProject()
     fetchRating()
     fetchUserRating()
+    
+    // Fetch media
+    const fetchMedia = async () => {
+      try {
+        const response = await axios.get(`/api/projects/${id}/media`)
+        if (response.data.success) {
+          setMedia(response.data.media)
+        }
+      } catch (error) {
+        console.error('Failed to fetch media:', error)
+      }
+    }
+    fetchMedia()
   }, [id])
+
+  const handleMediaUpload = async () => {
+    if (!selectedFiles || selectedFiles.length === 0) {
+      alert('Please select files to upload')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('Please log in to upload media')
+      return
+    }
+
+    setUploadingMedia(true)
+
+    try {
+      const formData = new FormData()
+      Array.from(selectedFiles).forEach(file => {
+        formData.append('media', file)
+      })
+
+      const response = await axios.post(`/api/projects/${id}/media`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      if (response.data.success) {
+        alert(`Successfully uploaded ${response.data.media.length} file(s)`)
+        setSelectedFiles(null)
+        // Refresh media list
+        const mediaResponse = await axios.get(`/api/projects/${id}/media`)
+        if (mediaResponse.data.success) {
+          setMedia(mediaResponse.data.media)
+        }
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to upload media')
+    } finally {
+      setUploadingMedia(false)
+    }
+  }
+
+  const handleDeleteMedia = async (mediaId: number) => {
+    if (!confirm('Are you sure you want to delete this media?')) {
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('Please log in')
+      return
+    }
+
+    try {
+      const response = await axios.delete(`/api/media/${mediaId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setMedia(media.filter(m => m.id !== mediaId))
+        alert('Media deleted successfully')
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to delete media')
+    }
+  }
 
   const handleRating = async (rating: number) => {
     const token = localStorage.getItem('token')
@@ -322,6 +407,91 @@ function ViewProjectPage() {
               </p>
             )}
           </div>
+        </div>
+
+        {/* Media Attachments */}
+        <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700">
+          <h2 className="text-xl font-bold text-white mb-4">Media Attachments</h2>
+          
+          {/* Upload Section (only for owners) */}
+          {isOwner && (
+            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+              <h3 className="text-lg font-semibold text-white mb-3">Upload Media</h3>
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*,.pdf"
+                onChange={(e) => setSelectedFiles(e.target.files)}
+                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 mb-3"
+              />
+              <p className="text-xs text-gray-400 mb-3">
+                Accepts: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF
+              </p>
+              <button
+                onClick={handleMediaUpload}
+                disabled={uploadingMedia || !selectedFiles}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+              >
+                {uploadingMedia ? 'Uploading...' : 'Upload Media'}
+              </button>
+            </div>
+          )}
+
+          {/* Media Grid */}
+          {media.length === 0 ? (
+            <p className="text-gray-400 text-center py-8">No media attachments yet</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {media.map((item) => (
+                <div key={item.id} className="bg-gray-700 rounded-lg overflow-hidden border border-gray-600 hover:border-purple-500 transition duration-200">
+                  {/* Media Preview */}
+                  {item.file_type.match(/jpg|jpeg|png|gif/) ? (
+                    <img
+                      src={`/api/media/${item.id}`}
+                      alt={item.file_name}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : item.file_type.match(/mp4|mov|avi/) ? (
+                    <video controls className="w-full h-48 bg-black">
+                      <source src={`/api/media/${item.id}`} type={`video/${item.file_type}`} />
+                    </video>
+                  ) : (
+                    <div className="w-full h-48 bg-gray-600 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                  
+                  {/* Media Info */}
+                  <div className="p-3">
+                    <p className="text-sm text-white font-medium truncate mb-1">{item.file_name}</p>
+                    <p className="text-xs text-gray-400 mb-2">
+                      {(item.file_size / 1024).toFixed(0)} KB • {item.file_type.toUpperCase()}
+                    </p>
+                    <div className="flex gap-2">
+                      <a
+                        href={`/api/media/${item.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition duration-200 text-center"
+                      >
+                        View
+                      </a>
+                      {isOwner && (
+                        <button
+                          onClick={() => handleDeleteMedia(item.id)}
+                          className="flex-1 px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition duration-200"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
