@@ -590,7 +590,7 @@ function ViewProjectPage() {
                   {owner.id === currentUserId && (
                     <span className="text-xs text-purple-400">(you)</span>
                   )}
-                  {isOwner && project.owners.length > 1 && (
+                  {isOwner && project.owners.length > 1 && owner.id !== currentUserId && (
                     <button
                       onClick={() => removeCollaborator(owner.id)}
                       className="ml-1 text-gray-400 hover:text-red-400 transition"
@@ -749,7 +749,11 @@ function ViewProjectPage() {
           {/* User Rating Input */}
           <div className="border-t border-gray-700 pt-6">
             <h3 className="text-lg font-semibold text-white mb-3">Rate this project</h3>
-            {isLoggedIn ? (
+            {isOwner ? (
+              <p className="text-gray-400">
+                You cannot rate your own project.
+              </p>
+            ) : isLoggedIn ? (
               <>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
