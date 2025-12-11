@@ -62,7 +62,8 @@ from .db_ratings import (
     get_user_rating,
     get_project_rating,
     delete_rating,
-    get_all_ratings_for_project
+    get_all_ratings_for_project,
+    get_user_rating_stats
 )
 
 __all__ = [
@@ -128,5 +129,6 @@ __all__ = [
     'get_user_rating',
     'get_project_rating',
     'delete_rating',
-    'get_all_ratings_for_project'
+    'get_all_ratings_for_project',
+    'get_user_rating_stats'
 ]

@@ -122,14 +122,72 @@ def get_current_user(current_user_id, current_username):
     if not user:
         return jsonify({'success': False, 'message': 'User not found'}), 404
     
+    # Get rating statistics
+    rating_stats = database.get_user_rating_stats(current_user_id)
+    
     # Don't send the password hash
     user_data = {
         'id': user['id'],
         'username': user['username'],
-        'email': user['email']
+        'email': user['email'],
+        'bio': user.get('bio'),
+        'created_at': user.get('created_at'),
+        'total_ratings': rating_stats.get('total_ratings', 0),
+        'average_rating': rating_stats.get('average_rating', 0)
     }
     
     return jsonify({
         'success': True,
+        'user': user_data
+    }), 200
+
+@users_bp.route('/api/me', methods=['PUT'])
+@token_required
+def update_current_user(current_user_id, current_username):
+    """
+    Update the currently authenticated user's profile
+    Requires valid JWT token in Authorization header
+    Expected JSON: {"username": "...", "email": "..."}
+    """
+    data = request.get_json()
+    user = database.get_user_by_id(current_user_id)
+    
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    # Validate email if provided
+    if 'email' in data and '@' not in data['email']:
+        return jsonify({'success': False, 'message': 'Invalid email address'}), 400
+    
+    # Check if username is already taken (if changing username)
+    if 'username' in data and data['username'] != current_username:
+        existing_user = database.get_user_by_username(data['username'])
+        if existing_user:
+            return jsonify({'success': False, 'message': 'Username already taken'}), 400
+    
+    # Update user (username, email, and bio can be updated)
+    result = database.update_user(
+        user_id=current_user_id,
+        username=data.get('username', current_username),
+        email=data.get('email', user['email']),
+        bio=data.get('bio', user.get('bio'))
+    )
+    
+    if not result['success']:
+        return jsonify(result), 400
+    
+    # Return updated user data
+    updated_user = database.get_user_by_id(current_user_id)
+    user_data = {
+        'id': updated_user['id'],
+        'username': updated_user['username'],
+        'email': updated_user['email'],
+        'bio': updated_user.get('bio'),
+        'created_at': updated_user.get('created_at')
+    }
+    
+    return jsonify({
+        'success': True,
+        'message': 'Profile updated successfully',
         'user': user_data
     }), 200

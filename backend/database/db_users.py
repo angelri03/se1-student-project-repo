@@ -89,7 +89,7 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
     except Exception:
         return None
 
-def update_user(user_id: int, username: str = None, password: str = None, email: str = None) -> Dict:
+def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None) -> Dict:
     """
     Update user information
     Only updates fields that are provided (not None)
@@ -114,6 +114,10 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
         if email is not None:
             update_fields.append('email = ?')
             values.append(email)
+        
+        if bio is not None:
+            update_fields.append('bio = ?')
+            values.append(bio)
         
         if not update_fields:
             return {'success': False, 'message': 'No fields to update'}

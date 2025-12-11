@@ -165,3 +165,36 @@ def get_all_ratings_for_project(project_id: int) -> Dict:
 
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
+
+
+def get_user_rating_stats(user_id: int) -> Dict:
+    """
+    Get rating statistics for all projects owned by a user.
+    Returns: {'success': bool, 'total_ratings': int, 'average_rating': float}
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+
+        # Get all ratings for projects owned by this user
+        cursor.execute('''
+            SELECT AVG(pr.rating) as average, COUNT(*) as count
+            FROM project_ratings pr
+            JOIN project_owners po ON pr.project_id = po.project_id
+            WHERE po.user_id = ?
+        ''', (user_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        average = row[0] if row[0] is not None else 0
+        count = row[1] if row[1] is not None else 0
+
+        return {
+            'success': True,
+            'total_ratings': count,
+            'average_rating': round(average, 1) if average else 0
+        }
+
+    except Exception as e:
+        return {'success': False, 'message': f'Error: {str(e)}'}
