@@ -50,7 +50,8 @@ def register():
         'user': {
             'id': result['id'],
             'username': data['username'],
-            'email': data['email']
+            'email': data['email'],
+            'admin': 0
         }
     }), 201
 
@@ -87,7 +88,8 @@ def login():
         'user': {
             'id': user['id'],
             'username': user['username'],
-            'email': user['email']
+            'email': user['email'],
+            'admin': user.get('admin', 0)
         }
     }), 200
 
@@ -131,6 +133,7 @@ def get_current_user(current_user_id, current_username):
         'username': user['username'],
         'email': user['email'],
         'bio': user.get('bio'),
+        'admin': user.get('admin', 0),
         'created_at': user.get('created_at'),
         'total_ratings': rating_stats.get('total_ratings', 0),
         'average_rating': rating_stats.get('average_rating', 0)
@@ -201,6 +204,7 @@ def update_current_user(current_user_id, current_username):
         'username': updated_user['username'],
         'email': updated_user['email'],
         'bio': updated_user.get('bio'),
+        'admin': updated_user.get('admin', 0),
         'created_at': updated_user.get('created_at')
     }
     

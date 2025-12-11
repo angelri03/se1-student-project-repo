@@ -34,6 +34,14 @@ def migrate_database():
             print("  ✓ Created_at column added successfully!")
         else:
             print("  ✓ Created_at column already exists.")
+
+        if 'admin' not in columns:
+            print("  Adding admin column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN admin INTEGER DEFAULT 0')
+            conn.commit()
+            print("  ✓ Admin column added successfully!")
+        else:
+            print("  ✓ Admin column already exists.")
         
         # Migration 2: Create project_media table
         print("\nChecking project_media table...")

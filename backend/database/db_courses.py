@@ -34,72 +34,44 @@ def create_course(name: str, description: str = None) -> Dict:
 
 def get_course_by_id(course_id: int) -> Optional[Dict]:
     """
-    Get a course by ID with its topics
-    Returns: Dict with course data including topics, or None if not found
+    Get a course by ID
+    Returns: Dict with course data or None if not found
     """
     try:
         conn = sqlite3.connect(DATABASE_NAME)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        
+
         cursor.execute('SELECT * FROM courses WHERE id = ?', (course_id,))
         row = cursor.fetchone()
-        
-        if not row:
-            conn.close()
-            return None
-        
-        course = dict(row)
-        
-        # Get topics for this course
-        cursor.execute('''
-            SELECT t.*
-            FROM topics t
-            JOIN course_topics ct ON t.id = ct.topic_id
-            WHERE ct.course_id = ?
-            ORDER BY t.name
-        ''', (course_id,))
-        
-        course['topics'] = [dict(topic_row) for topic_row in cursor.fetchall()]
-        
+
         conn.close()
-        return course
-    
+
+        if row:
+            return dict(row)
+        return None
+
     except Exception:
         return None
 
 def get_all_courses() -> Dict:
     """
-    Get all courses with their topics
+    Get all courses
     Returns: {'success': bool, 'data': List[Dict] or 'message': str}
     """
     try:
         conn = sqlite3.connect(DATABASE_NAME)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        
+
         cursor.execute('SELECT * FROM courses ORDER BY name')
         rows = cursor.fetchall()
-        courses = []
-        
-        for row in rows:
-            course = dict(row)
-            
-            # Get topics for each course
-            cursor.execute('''
-                SELECT t.*
-                FROM topics t
-                JOIN course_topics ct ON t.id = ct.topic_id
-                WHERE ct.course_id = ?
-                ORDER BY t.name
-            ''', (course['id'],))
-            
-            course['topics'] = [dict(topic_row) for topic_row in cursor.fetchall()]
-            courses.append(course)
-        
+
         conn.close()
+
+        courses = [dict(row) for row in rows]
         return {'success': True, 'data': courses}
-    
+
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
@@ -299,52 +271,3 @@ def get_project_course(project_id: int) -> Optional[Dict]:
     except Exception:
         return None
 
-def add_topic_to_course(course_id: int, topic_id: int) -> Dict:
-    """
-    Add a topic to a course
-    Returns: {'success': bool, 'message': str}
-    """
-    try:
-        conn = sqlite3.connect(DATABASE_NAME)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            INSERT INTO course_topics (course_id, topic_id)
-            VALUES (?, ?)
-        ''', (course_id, topic_id))
-        
-        conn.commit()
-        conn.close()
-        
-        return {'success': True, 'message': 'Topic added to course successfully'}
-    
-    except sqlite3.IntegrityError:
-        return {'success': False, 'message': 'Topic is already assigned to this course'}
-    except Exception as e:
-        return {'success': False, 'message': f'Error: {str(e)}'}
-
-def remove_topic_from_course(course_id: int, topic_id: int) -> Dict:
-    """
-    Remove a topic from a course
-    Returns: {'success': bool, 'message': str}
-    """
-    try:
-        conn = sqlite3.connect(DATABASE_NAME)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            DELETE FROM course_topics 
-            WHERE course_id = ? AND topic_id = ?
-        ''', (course_id, topic_id))
-        
-        conn.commit()
-        
-        if cursor.rowcount == 0:
-            conn.close()
-            return {'success': False, 'message': 'Topic not found in this course'}
-        
-        conn.close()
-        return {'success': True, 'message': 'Topic removed from course successfully'}
-    
-    except Exception as e:
-        return {'success': False, 'message': f'Error: {str(e)}'}

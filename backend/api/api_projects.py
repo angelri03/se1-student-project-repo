@@ -193,10 +193,10 @@ def update_project(project_id, current_user_id, current_username):
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
     
-    # Check if user is an owner
-    if not database.is_project_owner(project_id, current_user_id):
+    # Check if user is an owner or admin
+    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'You do not have permission to update this project'}), 403
-    
+
     # Get form data
     name = request.form.get('name')
     description = request.form.get('description')
@@ -270,11 +270,11 @@ def delete_project(project_id, current_user_id, current_username):
     
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
-    
-    # Check if user is an owner
-    if not database.is_project_owner(project_id, current_user_id):
+
+    # Check if user is an owner or admin
+    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'You do not have permission to delete this project'}), 403
-    
+
     # Delete file
     file_path = project['file_path']
     if os.path.exists(file_path):
@@ -328,10 +328,10 @@ def get_project_owners_endpoint(project_id, current_user_id, current_username):
     Get all owners of a project
     Any owner can view the owner list
     """
-    # Check if user is an owner
-    if not database.is_project_owner(project_id, current_user_id):
+    # Check if user is an owner or admin
+    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'You do not have permission to view owners'}), 403
-    
+
     result = database.get_project_owners(project_id)
     return jsonify(result), 200 if result['success'] else 500
 
@@ -343,10 +343,10 @@ def add_project_owner(project_id, current_user_id, current_username):
     Any existing owner can add new owners
     Expected JSON: {"username": "..."}
     """
-    # Check if current user is an owner
-    if not database.is_project_owner(project_id, current_user_id):
+    # Check if current user is an owner or admin
+    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'You do not have permission to add owners'}), 403
-    
+
     data = request.get_json()
     
     if not data or 'username' not in data:
@@ -371,10 +371,10 @@ def remove_project_owner(project_id, user_id, current_user_id, current_username)
     Any owner can remove other owners (or themselves)
     Cannot remove the last owner
     """
-    # Check if current user is an owner
-    if not database.is_project_owner(project_id, current_user_id):
+    # Check if current user is an owner or admin
+    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'You do not have permission to remove owners'}), 403
-    
+
     # Remove the owner
     result = database.remove_owner_from_project(project_id, user_id)
 
@@ -455,11 +455,11 @@ def upload_project_media(project_id, current_user_id, current_username):
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
     
-    # Check if user is an owner
+    # Check if user is an owner or admin
     is_owner = any(owner['id'] == current_user_id for owner in project['owners'])
-    if not is_owner:
+    if not is_owner and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'Only project owners can upload media'}), 403
-    
+
     # Check if media files are in request
     if 'media' not in request.files:
         return jsonify({'success': False, 'message': 'No media files provided'}), 400
@@ -556,11 +556,11 @@ def delete_media_file(media_id, current_user_id, current_username):
     project = database.get_project_by_id(media['project_id'])
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
-    
+
     is_owner = any(owner['id'] == current_user_id for owner in project['owners'])
-    if not is_owner:
+    if not is_owner and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'Only project owners can delete media'}), 403
-    
+
     # Delete from database
     result = database.delete_project_media(media_id)
     

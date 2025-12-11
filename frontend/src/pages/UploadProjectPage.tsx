@@ -8,11 +8,23 @@ interface User {
   email: string
 }
 
+interface Course {
+  id: number
+  name: string
+  description?: string
+}
+
+interface Topic {
+  id: number
+  name: string
+  description?: string
+}
+
 interface ProjectFormData {
   title: string
   description: string
-  course: string
-  topic: string
+  courseId: number | null
+  selectedTopics: string[]
   authors: User[]
   file: File | null
   mediaFiles: FileList | null
@@ -25,8 +37,8 @@ function UploadProjectPage() {
   const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     description: '',
-    course: '',
-    topic: '',
+    courseId: null,
+    selectedTopics: [],
     authors: [],
     file: null,
     mediaFiles: null
@@ -41,9 +53,16 @@ function UploadProjectPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  // Fetch current user and all users on mount
+  // Course and topic states
+  const [courses, setCourses] = useState<Course[]>([])
+  const [topics, setTopics] = useState<Topic[]>([])
+  const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false)
+  const [newTopicName, setNewTopicName] = useState('')
+  const [addingTopic, setAddingTopic] = useState(false)
+
+  // Fetch current user, all users, courses, and topics on mount
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       const token = localStorage.getItem('token')
       if (!token) return
 
@@ -69,12 +88,24 @@ function UploadProjectPage() {
         if (usersResponse.data.success) {
           setAllUsers(usersResponse.data.data)
         }
+
+        // Fetch courses
+        const coursesResponse = await axios.get('/api/courses')
+        if (coursesResponse.data.success) {
+          setCourses(coursesResponse.data.data)
+        }
+
+        // Fetch topics
+        const topicsResponse = await axios.get('/api/topics')
+        if (topicsResponse.data.success) {
+          setTopics(topicsResponse.data.data)
+        }
       } catch (error) {
-        console.error('Failed to fetch users:', error)
+        console.error('Failed to fetch data:', error)
       }
     }
 
-    fetchUsers()
+    fetchData()
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -188,6 +219,71 @@ function UploadProjectPage() {
     user => !formData.authors.find(a => a.id === user.id)
   )
 
+  // Topic management functions
+  const toggleTopic = (topicName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedTopics: prev.selectedTopics.includes(topicName)
+        ? prev.selectedTopics.filter(t => t !== topicName)
+        : [...prev.selectedTopics, topicName]
+    }))
+  }
+
+  const removeTopic = (topicName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedTopics: prev.selectedTopics.filter(t => t !== topicName)
+    }))
+  }
+
+  const addNewTopic = async () => {
+    if (!newTopicName.trim()) return
+
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    setAddingTopic(true)
+    try {
+      const response = await axios.post('/api/topics', {
+        name: newTopicName.trim()
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        // Refresh topics list
+        const topicsResponse = await axios.get('/api/topics')
+        if (topicsResponse.data.success) {
+          setTopics(topicsResponse.data.data)
+        }
+        // Add to selected topics
+        setFormData(prev => ({
+          ...prev,
+          selectedTopics: [...prev.selectedTopics, newTopicName.trim()]
+        }))
+        setNewTopicName('')
+      }
+    } catch (error: any) {
+      console.error('Failed to add topic:', error)
+      // If topic already exists, just add it to selection
+      if (error.response?.data?.message?.includes('already exists')) {
+        setFormData(prev => ({
+          ...prev,
+          selectedTopics: prev.selectedTopics.includes(newTopicName.trim())
+            ? prev.selectedTopics
+            : [...prev.selectedTopics, newTopicName.trim()]
+        }))
+        setNewTopicName('')
+      }
+    } finally {
+      setAddingTopic(false)
+    }
+  }
+
+  const availableTopics = topics.filter(
+    topic => !formData.selectedTopics.includes(topic.name)
+  )
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -198,78 +294,49 @@ function UploadProjectPage() {
       console.log('Form data being sent:', {
         name: formData.title,
         description: formData.description,
-        tags: formData.topic,
+        tags: formData.selectedTopics.join(', '),
         file: formData.file?.name
       })
-      
+
       const formDataToSend = new FormData()
       formDataToSend.append('name', formData.title)  // Backend expects 'name'
       formDataToSend.append('description', formData.description)
-      formDataToSend.append('tags', formData.topic)  // Send topic as tags
+      formDataToSend.append('tags', formData.selectedTopics.join(', '))  // Send topics as comma-separated tags
       if (formData.file) {
         formDataToSend.append('file', formData.file)
       }
-      
+
       // Debug: log FormData contents
       console.log('FormData entries:')
-      for (let pair of formDataToSend.entries()) {
+      for (const pair of formDataToSend.entries()) {
         console.log(pair[0], pair[1])
       }
-      
+
       const token = localStorage.getItem('token')
-      
+
       const response = await axios.post('/api/projects', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
         }
       })
-      
+
       console.log('Upload response:', response.data)
-      
+
       // If project created successfully, assign course and handle authors
       if (response.data.success) {
         const projectId = response.data.project?.id || response.data.id
         console.log('Project ID:', projectId)
         console.log('Has media files:', formData.mediaFiles?.length)
-        
-        // Assign course if provided
-        if (formData.course && projectId) {
+
+        // Assign course if selected
+        if (formData.courseId && projectId) {
           try {
-            // First, get or create the course
-            const coursesResponse = await axios.get('/api/courses')
-            let courseId = null
-            
-            if (coursesResponse.data.success) {
-              const existingCourse = coursesResponse.data.data.find(
-                (c: any) => c.name.toLowerCase() === formData.course.toLowerCase()
-              )
-              
-              if (existingCourse) {
-                courseId = existingCourse.id
-              } else {
-                // Create new course
-                const createCourseResponse = await axios.post('/api/courses', {
-                  name: formData.course,
-                  description: ''
-                }, {
-                  headers: { Authorization: `Bearer ${token}` }
-                })
-                
-                if (createCourseResponse.data.success) {
-                  courseId = createCourseResponse.data.id
-                }
-              }
-              
-              // Assign project to course
-              if (courseId) {
-                await axios.post(`/api/projects/${projectId}/course`, {
-                  course_id: courseId
-                }, {
-                  headers: { Authorization: `Bearer ${token}` }
-                })
-              }
-            }
+            await axios.post(`/api/projects/${projectId}/course`, {
+              course_id: formData.courseId
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            })
           } catch (error) {
             console.error('Failed to assign course:', error)
           }
@@ -321,17 +388,17 @@ function UploadProjectPage() {
       setFormData({
         title: '',
         description: '',
-        course: '',
-        topic: '',
+        courseId: null,
+        selectedTopics: [],
         authors: currentUser ? [currentUser] : [],
         file: null,
         mediaFiles: null
       })
       setFileName('')
     } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to upload project. Please try again.' 
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Failed to upload project. Please try again.'
       })
     } finally {
       setLoading(false)
@@ -394,41 +461,124 @@ function UploadProjectPage() {
               />
             </div>
 
-            {/* Course and Topic Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Course */}
-              <div>
-                <label htmlFor="course" className="block text-sm font-medium text-gray-300 mb-2">
-                  Course <span className="text-fuchsia-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="course"
-                  name="course"
-                  required
-                  value={formData.course}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                  placeholder="e.g., Software Engineering 1"
-                />
+            {/* Course Dropdown */}
+            <div>
+              <label htmlFor="course" className="block text-sm font-medium text-gray-300 mb-2">
+                Course <span className="text-fuchsia-500">*</span>
+              </label>
+              <select
+                id="course"
+                name="course"
+                required
+                value={formData.courseId || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, courseId: e.target.value ? parseInt(e.target.value) : null }))}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              >
+                <option value="">Select a course...</option>
+                {courses.map(course => (
+                  <option key={course.id} value={course.id}>{course.name}</option>
+                ))}
+              </select>
+              {courses.length === 0 && (
+                <p className="mt-1 text-xs text-gray-500">No courses available. Contact an admin to add courses.</p>
+              )}
+            </div>
+
+            {/* Topics Multi-Select */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Topics <span className="text-fuchsia-500">*</span>
+              </label>
+
+              {/* Selected Topics */}
+              {formData.selectedTopics.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {formData.selectedTopics.map(topic => (
+                    <span
+                      key={topic}
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-fuchsia-900 text-fuchsia-200"
+                    >
+                      {topic}
+                      <button
+                        type="button"
+                        onClick={() => removeTopic(topic)}
+                        className="ml-1 text-fuchsia-300 hover:text-white transition"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Topic Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsTopicDropdownOpen(!isTopicDropdownOpen)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 text-left hover:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
+                >
+                  <span>Select topics...</span>
+                  <svg className={`w-5 h-5 transition-transform ${isTopicDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isTopicDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {/* Add new topic input */}
+                    <div className="p-2 border-b border-gray-600">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newTopicName}
+                          onChange={(e) => setNewTopicName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              addNewTopic()
+                            }
+                          }}
+                          placeholder="Add new topic..."
+                          className="flex-1 px-3 py-1 bg-gray-600 border border-gray-500 rounded text-white text-sm placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                        />
+                        <button
+                          type="button"
+                          onClick={addNewTopic}
+                          disabled={addingTopic || !newTopicName.trim()}
+                          className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {addingTopic ? '...' : 'Add'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Existing topics */}
+                    {availableTopics.length > 0 ? (
+                      availableTopics.map(topic => (
+                        <button
+                          key={topic.id}
+                          type="button"
+                          onClick={() => toggleTopic(topic.name)}
+                          className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition"
+                        >
+                          {topic.name}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-gray-400 text-sm">
+                        {topics.length === 0 ? 'No topics available. Add one above.' : 'All topics selected'}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Topic */}
-              <div>
-                <label htmlFor="topic" className="block text-sm font-medium text-gray-300 mb-2">
-                  Topic <span className="text-fuchsia-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="topic"
-                  name="topic"
-                  required
-                  value={formData.topic}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                  placeholder="e.g., Web Development"
-                />
-              </div>
+              {formData.selectedTopics.length === 0 && (
+                <p className="mt-1 text-xs text-gray-500">Select at least one topic for your project.</p>
+              )}
             </div>
 
             {/* File Upload */}
@@ -637,8 +787,8 @@ function UploadProjectPage() {
                   setFormData({
                     title: '',
                     description: '',
-                    course: '',
-                    topic: '',
+                    courseId: null,
+                    selectedTopics: [],
                     authors: currentUser ? [currentUser] : [],
                     file: null,
                     mediaFiles: null

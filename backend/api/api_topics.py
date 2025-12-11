@@ -85,11 +85,3 @@ def delete_topic(topic_id, current_user_id, current_username):
     status_code = 200 if result['success'] else 404
     return jsonify(result), status_code
 
-@topics_bp.route('/api/topics/<int:topic_id>/courses', methods=['GET'])
-def get_topic_courses(topic_id):
-    """
-    Get all courses that have this topic
-    Public endpoint
-    """
-    result = database.get_courses_by_topic(topic_id)
-    return jsonify(result), 200 if result['success'] else 500

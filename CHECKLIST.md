@@ -6,11 +6,12 @@
 	- [x] Media Attachments
 - [x] Explore projects page
 	- [x] Include filtering by topics/classes/etc.
-- [ ] Manage project page (for own projects and for admins)
+- [x] Manage project page for own projects
 	- [x] Allow editing data
-	- [ ] Allow deleting project
+	- [x] Allow deleting project
 	- [x] Allow the owner to invite and remove collaborators
 	- [x] Allow uploading media attachments
+  - [x] Allow all above operations also for admins
 - [x] View profile page
 	- [x] Allow editing on own profile page
 - [ ] Admins approve project before it becomes publicly visible
@@ -21,6 +22,7 @@
 - [x] General CRUD operations in database
 - [x] API endpoints for testing
 - [x] Users table
+  - [x] Users can be admins
 - [x] API endpoints for registration and account deletion
 - [x] Projects table
 	- [x] Handle file uploading
@@ -46,5 +48,5 @@
 - [ ] Add Link to Project (for example if you are hosting it) -- OPTIONAL NOT REQUIRED
 - [ ] View Project Files
 - [x] Fix Rating on Project
-- [ ] Download button
+- [x] Download button
 - [x] Dynamically allocate projects based on name to profile

@@ -20,6 +20,7 @@ def init_db():
             password TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             bio TEXT,
+            admin INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -95,18 +96,7 @@ def init_db():
         )
     ''')
     
-    # Course-Topics mapping (many-to-many)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS course_topics (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_id INTEGER NOT NULL,
-            topic_id INTEGER NOT NULL,
-            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-            FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE,
-            UNIQUE(course_id, topic_id)
-        )
-    ''')
-
+    
     # Project ratings table (one rating per user per project)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS project_ratings (
@@ -158,16 +148,7 @@ def init_db():
         ON project_course(course_id)
     ''')
     
-    cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_course_topics_course 
-        ON course_topics(course_id)
-    ''')
     
-    cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_course_topics_topic
-        ON course_topics(topic_id)
-    ''')
-
     cursor.execute('''
         CREATE INDEX IF NOT EXISTS idx_ratings_project
         ON project_ratings(project_id)

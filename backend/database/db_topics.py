@@ -138,29 +138,3 @@ def delete_topic(topic_id: int) -> Dict:
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
-def get_courses_by_topic(topic_id: int) -> Dict:
-    """
-    Get all courses that have this topic
-    Returns: {'success': bool, 'data': List[Dict] or 'message': str}
-    """
-    try:
-        conn = sqlite3.connect(DATABASE_NAME)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            SELECT c.*
-            FROM courses c
-            JOIN course_topics ct ON c.id = ct.course_id
-            WHERE ct.topic_id = ?
-            ORDER BY c.name
-        ''', (topic_id,))
-        
-        rows = cursor.fetchall()
-        courses = [dict(row) for row in rows]
-        
-        conn.close()
-        return {'success': True, 'data': courses}
-    
-    except Exception as e:
-        return {'success': False, 'message': f'Error: {str(e)}'}

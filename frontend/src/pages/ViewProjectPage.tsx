@@ -24,6 +24,12 @@ interface RatingData {
   count: number
 }
 
+interface Topic {
+  id: number
+  name: string
+  description?: string
+}
+
 function ViewProjectPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -48,8 +54,15 @@ function ViewProjectPage() {
   const [isEditingTags, setIsEditingTags] = useState(false)
   const [editedTitle, setEditedTitle] = useState('')
   const [editedDescription, setEditedDescription] = useState('')
-  const [editedTags, setEditedTags] = useState('')
+  const [editedTags, setEditedTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  // Topics state for dropdown
+  const [allTopics, setAllTopics] = useState<Topic[]>([])
+  const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false)
+  const [newTopicName, setNewTopicName] = useState('')
+  const [addingTopic, setAddingTopic] = useState(false)
 
   // Collaborator management states
   const [allUsers, setAllUsers] = useState<User[]>([])
@@ -126,13 +139,15 @@ function ViewProjectPage() {
         })
         if (meResponse.data.success) {
           const userId = meResponse.data.user.id
+          const userIsAdmin = meResponse.data.user.admin === 1
           setCurrentUserId(userId)
           // Get project to check owners
           const projectResponse = await axios.get(`/api/projects/${id}`)
           if (projectResponse.data.success) {
             const owners = projectResponse.data.project.owners || []
             const userIsOwner = owners.some((owner: { id: number }) => owner.id === userId)
-            setIsOwner(userIsOwner)
+            // User can act as owner if they are an actual owner OR an admin
+            setIsOwner(userIsOwner || userIsAdmin)
           }
         }
 
@@ -142,6 +157,12 @@ function ViewProjectPage() {
         })
         if (usersResponse.data.success) {
           setAllUsers(usersResponse.data.data)
+        }
+
+        // Fetch all topics for tag editing dropdown
+        const topicsResponse = await axios.get('/api/topics')
+        if (topicsResponse.data.success) {
+          setAllTopics(topicsResponse.data.data)
         }
       } catch (error) {
         console.error('Failed to check ownership:', error)
@@ -284,7 +305,7 @@ function ViewProjectPage() {
 
   const startEditingTags = () => {
     if (project) {
-      setEditedTags(project.tags.join(', '))
+      setEditedTags([...project.tags])
       setIsEditingTags(true)
     }
   }
@@ -344,16 +365,16 @@ function ViewProjectPage() {
 
     try {
       const formData = new FormData()
-      formData.append('tags', editedTags)
+      formData.append('tags', editedTags.join(', '))
 
       const response = await axios.put(`/api/projects/${project.id}`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
       if (response.data.success) {
-        const newTags = editedTags.split(',').map(t => t.trim()).filter(t => t)
-        setProject({ ...project, tags: newTags })
+        setProject({ ...project, tags: [...editedTags] })
         setIsEditingTags(false)
+        setIsTopicDropdownOpen(false)
       }
     } catch (error: any) {
       alert(error.response?.data?.message || 'Failed to update tags')
@@ -361,6 +382,61 @@ function ViewProjectPage() {
       setSaving(false)
     }
   }
+
+  // Topic editing functions
+  const toggleEditedTopic = (topicName: string) => {
+    setEditedTags(prev =>
+      prev.includes(topicName)
+        ? prev.filter(t => t !== topicName)
+        : [...prev, topicName]
+    )
+  }
+
+  const removeEditedTopic = (topicName: string) => {
+    setEditedTags(prev => prev.filter(t => t !== topicName))
+  }
+
+  const addNewTopicWhileEditing = async () => {
+    if (!newTopicName.trim()) return
+
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    setAddingTopic(true)
+    try {
+      const response = await axios.post('/api/topics', {
+        name: newTopicName.trim()
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        // Refresh topics list
+        const topicsResponse = await axios.get('/api/topics')
+        if (topicsResponse.data.success) {
+          setAllTopics(topicsResponse.data.data)
+        }
+        // Add to edited tags
+        setEditedTags(prev => [...prev, newTopicName.trim()])
+        setNewTopicName('')
+      }
+    } catch (error: any) {
+      console.error('Failed to add topic:', error)
+      // If topic already exists, just add it to selection
+      if (error.response?.data?.message?.includes('already exists')) {
+        if (!editedTags.includes(newTopicName.trim())) {
+          setEditedTags(prev => [...prev, newTopicName.trim()])
+        }
+        setNewTopicName('')
+      }
+    } finally {
+      setAddingTopic(false)
+    }
+  }
+
+  const availableTopicsForEditing = allTopics.filter(
+    topic => !editedTags.includes(topic.name)
+  )
 
   // Collaborator management
   const addCollaborator = async (user: User) => {
@@ -418,6 +494,35 @@ function ViewProjectPage() {
   const availableCollaborators = allUsers.filter(
     user => !project?.owners.find(o => o.id === user.id)
   )
+
+  const handleDeleteProject = async () => {
+    if (!project) return
+    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('Please log in')
+      return
+    }
+
+    setDeleting(true)
+    try {
+      const response = await axios.delete(`/api/projects/${project.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        alert('Project deleted successfully')
+        navigate(fromProfile ? '/profile' : '/explore')
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to delete project')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -539,28 +644,112 @@ function ViewProjectPage() {
               )}
             </div>
             {isEditingTags ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={editedTags}
-                  onChange={(e) => setEditedTags(e.target.value)}
-                  placeholder="tag1, tag2, tag3"
-                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  autoFocus
-                />
-                <button
-                  onClick={saveTags}
-                  disabled={saving}
-                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50"
-                >
-                  {saving ? '...' : 'Save'}
-                </button>
-                <button
-                  onClick={() => setIsEditingTags(false)}
-                  className="px-3 py-2 bg-gray-600 text-white rounded-lg text-sm hover:bg-gray-500"
-                >
-                  Cancel
-                </button>
+              <div className="space-y-3">
+                {/* Selected tags */}
+                {editedTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {editedTags.map(tag => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-fuchsia-900 text-fuchsia-200"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeEditedTopic(tag)}
+                          className="ml-1 text-fuchsia-300 hover:text-white transition"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Topic dropdown */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsTopicDropdownOpen(!isTopicDropdownOpen)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 text-left text-sm hover:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
+                  >
+                    <span>Select topics...</span>
+                    <svg className={`w-4 h-4 transition-transform ${isTopicDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isTopicDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {/* Add new topic input */}
+                      <div className="p-2 border-b border-gray-600">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newTopicName}
+                            onChange={(e) => setNewTopicName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
+                                addNewTopicWhileEditing()
+                              }
+                            }}
+                            placeholder="Add new topic..."
+                            className="flex-1 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-white text-sm placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                          />
+                          <button
+                            type="button"
+                            onClick={addNewTopicWhileEditing}
+                            disabled={addingTopic || !newTopicName.trim()}
+                            className="px-2 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {addingTopic ? '...' : 'Add'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Existing topics */}
+                      {availableTopicsForEditing.length > 0 ? (
+                        availableTopicsForEditing.map(topic => (
+                          <button
+                            key={topic.id}
+                            type="button"
+                            onClick={() => toggleEditedTopic(topic.name)}
+                            className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition text-sm"
+                          >
+                            {topic.name}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-gray-400 text-sm">
+                          {allTopics.length === 0 ? 'No topics available. Add one above.' : 'All topics selected'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Save/Cancel buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveTags}
+                    disabled={saving}
+                    className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {saving ? '...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingTags(false)
+                      setIsTopicDropdownOpen(false)
+                    }}
+                    className="px-3 py-2 bg-gray-600 text-white rounded-lg text-sm hover:bg-gray-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -905,6 +1094,18 @@ function ViewProjectPage() {
               </svg>
               Bookmark
             </button>
+            {isOwner && (
+              <button
+                onClick={handleDeleteProject}
+                disabled={deleting}
+                className="px-6 py-3 bg-red-600 rounded-lg text-white font-medium hover:bg-red-700 transition duration-200 inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                {deleting ? 'Deleting...' : 'Delete Project'}
+              </button>
+            )}
           </div>
         </div>
       </div>

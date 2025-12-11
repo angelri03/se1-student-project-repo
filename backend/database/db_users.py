@@ -162,6 +162,28 @@ def delete_user(user_id: int) -> Dict:
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
+def is_admin(user_id: int) -> bool:
+    """
+    Check if a user is an admin
+    Returns: True if user is admin, False otherwise
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT admin FROM users WHERE id = ?', (user_id,))
+        row = cursor.fetchone()
+
+        conn.close()
+
+        if row:
+            return row['admin'] == 1
+        return False
+
+    except Exception:
+        return False
+
 def get_all_users() -> Dict:
     """
     Get all users (without password hashes)
@@ -172,7 +194,7 @@ def get_all_users() -> Dict:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        cursor.execute('SELECT id, username, email FROM users ORDER BY username ASC')
+        cursor.execute('SELECT id, username, email, admin FROM users ORDER BY username ASC')
         rows = cursor.fetchall()
 
         conn.close()

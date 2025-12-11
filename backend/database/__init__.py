@@ -12,7 +12,8 @@ from .db_users import (
     get_user_by_id,
     update_user,
     delete_user,
-    get_all_users
+    get_all_users,
+    is_admin
 )
 from .db_projects import (
     create_project,
@@ -46,17 +47,14 @@ from .db_courses import (
     assign_project_to_course,
     unassign_project_from_course,
     get_projects_by_course,
-    get_project_course,
-    add_topic_to_course,
-    remove_topic_from_course
+    get_project_course
 )
 from .db_topics import (
     create_topic,
     get_topic_by_id,
     get_all_topics,
     update_topic,
-    delete_topic,
-    get_courses_by_topic
+    delete_topic
 )
 from .db_ratings import (
     rate_project,
@@ -87,6 +85,7 @@ __all__ = [
     'update_user',
     'delete_user',
     'get_all_users',
+    'is_admin',
     
     # Projects
     'create_project',
@@ -121,8 +120,6 @@ __all__ = [
     'unassign_project_from_course',
     'get_projects_by_course',
     'get_project_course',
-    'add_topic_to_course',
-    'remove_topic_from_course',
     
     # Topics
     'create_topic',
@@ -130,7 +127,6 @@ __all__ = [
     'get_all_topics',
     'update_topic',
     'delete_topic',
-    'get_courses_by_topic',
 
     # Ratings
     'rate_project',
