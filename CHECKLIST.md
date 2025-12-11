@@ -14,7 +14,7 @@
   - [x] Allow all above operations also for admins
 - [x] View profile page
 	- [x] Allow editing on own profile page
-- [ ] Admins approve project before it becomes publicly visible
+- [x] Admins approve project before it becomes publicly visible
 - [ ] Course management page for admins
 - [x] View Project Page
 
@@ -35,7 +35,7 @@
 	- [ ] Only accessible by admin
 - [x] Topics table
 - [x] API endpoints for managing topics 
-	- [ ] Only accessible by admin
+	- [ ] Only admin can delete topics
 - [ ] Unit Testing with PyTest
 - [x] Dummy Data
 

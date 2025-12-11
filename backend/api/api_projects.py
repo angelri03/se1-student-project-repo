@@ -131,21 +131,63 @@ def get_projects():
     result = database.get_all_approved_projects()
     return jsonify(result), 200 if result['success'] else 500
 
+@projects_bp.route('/api/projects/all', methods=['GET'])
+@token_required
+def get_all_projects(current_user_id, current_username):
+    """
+    Get all projects (including unapproved)
+    Admin only endpoint
+    """
+    # Check if user is admin
+    if not database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+
+    result = database.get_all_projects()
+    return jsonify(result), 200 if result['success'] else 500
+
+@projects_bp.route('/api/projects/<int:project_id>/approve', methods=['POST'])
+@token_required
+def approve_project_endpoint(project_id, current_user_id, current_username):
+    """
+    Approve a project
+    Admin only endpoint
+    """
+    # Check if user is admin
+    if not database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+
+    result = database.approve_project(project_id)
+    return jsonify(result), 200 if result['success'] else 400
+
 @projects_bp.route('/api/projects/<int:project_id>', methods=['GET'])
 def get_project(project_id):
     """
     Get a specific project by ID
-    Public endpoint for approved projects
+    Public endpoint for approved projects, admins can view unapproved
     """
     project = database.get_project_by_id(project_id)
-    
+
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
-    
-    # Only show approved projects to public
-    if not project['approved']:
+
+    # Check if user is admin (optional token)
+    is_admin = False
+    if 'Authorization' in request.headers:
+        auth_header = request.headers['Authorization']
+        try:
+            from .auth import decode_token
+            token = auth_header.split(' ')[1]
+            result = decode_token(token)
+            if result['success']:
+                user_id = result['payload']['user_id']
+                is_admin = database.is_admin(user_id)
+        except (IndexError, KeyError):
+            pass
+
+    # Only show approved projects to public, admins can see all
+    if not project['approved'] and not is_admin:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
-    
+
     return jsonify({
         'success': True,
         'project': project

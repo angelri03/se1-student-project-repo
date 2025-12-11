@@ -11,12 +11,14 @@ interface Project {
   owners: { id: number; username: string; email: string }[]
   created_at: string
   file_path: string
+  approved?: number
 }
 
 interface User {
   id: number
   username: string
   email: string
+  admin?: number
 }
 
 function ExploreProjectsPage() {
@@ -30,34 +32,40 @@ function ExploreProjectsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndFetchProjects = async () => {
       const token = localStorage.getItem('token')
-      if (!token) {
-        setUser(null)
-        return
-      }
+      let currentUser: User | null = null
 
-      try {
-        const response = await axios.get('/api/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        if (response.data.success) {
-          setUser(response.data.user)
-        } else {
+      // Check authentication
+      if (token) {
+        try {
+          const response = await axios.get('/api/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          if (response.data.success) {
+            currentUser = response.data.user
+            setUser(currentUser)
+          } else {
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            setUser(null)
+          }
+        } catch {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
           setUser(null)
         }
-      } catch {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+      } else {
         setUser(null)
       }
-    }
 
-    const fetchProjects = async () => {
+      // Fetch projects - use admin endpoint if user is admin
       try {
-        const response = await axios.get('/api/projects')
+        const isAdmin = currentUser?.admin === 1
+        const endpoint = isAdmin ? '/api/projects/all' : '/api/projects'
+        const headers = isAdmin ? { Authorization: `Bearer ${token}` } : {}
+
+        const response = await axios.get(endpoint, { headers })
         if (response.data.success) {
           // Fetch course info for each project
           const projectsWithCourses = await Promise.all(
@@ -83,8 +91,7 @@ function ExploreProjectsPage() {
       }
     }
 
-    checkAuth()
-    fetchProjects()
+    checkAuthAndFetchProjects()
   }, [])
 
   // Extract courses and topics from existing projects
@@ -137,6 +144,26 @@ function ExploreProjectsPage() {
     setSelectedCourse('all')
     setSelectedTopic('all')
     setFilteredProjects(projects)
+  }
+
+  const handleApprove = async (projectId: number) => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    try {
+      const response = await axios.post(`/api/projects/${projectId}/approve`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.data.success) {
+        // Update the project in both lists
+        const updateProjects = (prevProjects: Project[]) =>
+          prevProjects.map(p => p.id === projectId ? { ...p, approved: 1 } : p)
+        setProjects(updateProjects)
+        setFilteredProjects(updateProjects)
+      }
+    } catch (error) {
+      console.error('Failed to approve project:', error)
+    }
   }
 
   return (
@@ -293,8 +320,13 @@ function ExploreProjectsPage() {
               >
                 <div className="p-6 flex flex-col flex-grow">
                   {/* Project Title */}
-                  <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
-                    {project.name}
+                  <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 flex items-center gap-2">
+                    <span className="line-clamp-2">{project.name}</span>
+                    {project.approved === 0 && (
+                      <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Pending approval">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    )}
                   </h3>
 
                   {/* Course and Topic Tags */}
@@ -333,13 +365,24 @@ function ExploreProjectsPage() {
                   </p>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
                     <button
                       onClick={() => navigate(`/project/${project.id}`)}
                       className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition duration-200"
                     >
                       View Details
                     </button>
+                    {user?.admin === 1 && project.approved === 0 && (
+                      <button
+                        onClick={() => handleApprove(project.id)}
+                        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Approve
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -71,7 +71,10 @@ function ViewProjectPage() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await axios.get(`/api/projects/${id}`)
+        // Include token if available (allows admins to view unapproved projects)
+        const token = localStorage.getItem('token')
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        const response = await axios.get(`/api/projects/${id}`, { headers })
         if (response.data.success) {
           let projectData = response.data.project
 
@@ -141,8 +144,10 @@ function ViewProjectPage() {
           const userId = meResponse.data.user.id
           const userIsAdmin = meResponse.data.user.admin === 1
           setCurrentUserId(userId)
-          // Get project to check owners
-          const projectResponse = await axios.get(`/api/projects/${id}`)
+          // Get project to check owners (include token for admin access to unapproved projects)
+          const projectResponse = await axios.get(`/api/projects/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
           if (projectResponse.data.success) {
             const owners = projectResponse.data.project.owners || []
             const userIsOwner = owners.some((owner: { id: number }) => owner.id === userId)
