@@ -14,7 +14,7 @@ def migrate_database():
         
         print("Starting database migration...\n")
         
-        # Migration 1: Add bio column to users table
+        # Add bio column to users table
         print("Checking users table...")
         cursor.execute("PRAGMA table_info(users)")
         columns = [column[1] for column in cursor.fetchall()]
@@ -23,27 +23,59 @@ def migrate_database():
             print("  Adding bio column...")
             cursor.execute('ALTER TABLE users ADD COLUMN bio TEXT')
             conn.commit()
-            print("  ✓ Bio column added successfully!")
+            print("Bio column added successfully!")
         else:
-            print("  ✓ Bio column already exists.")
+            print("Bio column already exists.")
         
         if 'created_at' not in columns:
             print("  Adding created_at column...")
             cursor.execute('ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
             conn.commit()
-            print("  ✓ Created_at column added successfully!")
+            print("Created_at column added successfully!")
         else:
-            print("  ✓ Created_at column already exists.")
+            print("Created_at column already exists.")
 
         if 'admin' not in columns:
             print("  Adding admin column...")
             cursor.execute('ALTER TABLE users ADD COLUMN admin INTEGER DEFAULT 0')
             conn.commit()
-            print("  ✓ Admin column added successfully!")
+            print("Admin column added successfully!")
         else:
-            print("  ✓ Admin column already exists.")
+            print("Admin column already exists.")
         
-        # Migration 2: Create project_media table
+        if 'is_student' not in columns:
+            print("  Adding is_student column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN is_student INTEGER DEFAULT 1')
+            conn.commit()
+            print("Is_student column added successfully!")
+        else:
+            print("Is_student column already exists.")
+        
+        if 'semester' not in columns:
+            print("  Adding semester column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN semester TEXT')
+            conn.commit()
+            print("Semester column added successfully!")
+        else:
+            print("Semester column already exists.")
+        
+        if 'study_programme' not in columns:
+            print("  Adding study_programme column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN study_programme TEXT')
+            conn.commit()
+            print("Study_programme column added successfully!")
+        else:
+            print("Study_programme column already exists.")
+        
+        if 'organization' not in columns:
+            print("  Adding organization column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN organization TEXT')
+            conn.commit()
+            print("Organization column added successfully!")
+        else:
+            print("Organization column already exists.")
+        
+        # Create project_media table
         print("\nChecking project_media table...")
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='project_media'")
         if cursor.fetchone() is None:
@@ -68,9 +100,9 @@ def migrate_database():
             ''')
             
             conn.commit()
-            print("  ✓ Project media table created successfully!")
+            print("Project media table created successfully!")
         else:
-            print("  ✓ Project media table already exists.")
+            print("Project media table already exists.")
         
         conn.close()
         print("\nMigration completed successfully!")

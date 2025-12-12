@@ -18,7 +18,8 @@ def verify_password(password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-def create_user(username: str, password: str, email: str) -> Dict:
+def create_user(username: str, password: str, email: str, is_student: int = 1, 
+                semester: str = None, study_programme: str = None, organization: str = None) -> Dict:
     """
     Create a new user with hashed password
     Returns: {'success': bool, 'message': str, 'id': int (if successful)}
@@ -30,9 +31,9 @@ def create_user(username: str, password: str, email: str) -> Dict:
         hashed_password = hash_password(password)
         
         cursor.execute('''
-            INSERT INTO users (username, password, email)
-            VALUES (?, ?, ?)
-        ''', (username, hashed_password, email))
+            INSERT INTO users (username, password, email, is_student, semester, study_programme, organization)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (username, hashed_password, email, is_student, semester, study_programme, organization))
         
         conn.commit()
         user_id = cursor.lastrowid
@@ -89,7 +90,8 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
     except Exception:
         return None
 
-def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None) -> Dict:
+def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None,
+                is_student: int = None, semester: str = None, study_programme: str = None, organization: str = None) -> Dict:
     """
     Update user information
     Only updates fields that are provided (not None)
@@ -118,6 +120,22 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
         if bio is not None:
             update_fields.append('bio = ?')
             values.append(bio)
+        
+        if is_student is not None:
+            update_fields.append('is_student = ?')
+            values.append(is_student)
+        
+        if semester is not None:
+            update_fields.append('semester = ?')
+            values.append(semester)
+        
+        if study_programme is not None:
+            update_fields.append('study_programme = ?')
+            values.append(study_programme)
+        
+        if organization is not None:
+            update_fields.append('organization = ?')
+            values.append(organization)
         
         if not update_fields:
             return {'success': False, 'message': 'No fields to update'}

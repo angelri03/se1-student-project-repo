@@ -13,7 +13,8 @@ users_bp = Blueprint('users', __name__)
 def register():
     """
     Register a new user
-    Expected JSON: {"username": "...", "password": "...", "email": "..."}
+    Expected JSON: {"username": "...", "password": "...", "email": "...", "is_student": 1/0, 
+                    "semester": "...", "study_programme": "...", "organization": "..."}
     Returns: {"success": bool, "message": str, "token": str (if successful)}
     """
     data = request.get_json()
@@ -30,11 +31,26 @@ def register():
     if '@' not in data['email']:
         return jsonify({'success': False, 'message': 'Invalid email address'}), 400
     
+    # Get user type and related fields
+    is_student = data.get('is_student', 1)  # Default to student
+    semester = data.get('semester')
+    study_programme = data.get('study_programme')
+    organization = data.get('organization')
+    
+    # Validate: if not a student, semester and study_programme should not be set
+    if not is_student:
+        semester = None
+        study_programme = None
+    
     # Create the user (password will be hashed automatically)
     result = database.create_user(
         username=data['username'],
         password=data['password'],
-        email=data['email']
+        email=data['email'],
+        is_student=is_student,
+        semester=semester,
+        study_programme=study_programme,
+        organization=organization
     )
     
     if not result['success']:
@@ -51,7 +67,11 @@ def register():
             'id': result['id'],
             'username': data['username'],
             'email': data['email'],
-            'admin': 0
+            'admin': 0,
+            'is_student': is_student,
+            'semester': semester,
+            'study_programme': study_programme,
+            'organization': organization
         }
     }), 201
 
@@ -89,7 +109,11 @@ def login():
             'id': user['id'],
             'username': user['username'],
             'email': user['email'],
-            'admin': user.get('admin', 0)
+            'admin': user.get('admin', 0),
+            'is_student': user.get('is_student', 1),
+            'semester': user.get('semester'),
+            'study_programme': user.get('study_programme'),
+            'organization': user.get('organization')
         }
     }), 200
 
@@ -134,6 +158,10 @@ def get_current_user(current_user_id, current_username):
         'email': user['email'],
         'bio': user.get('bio'),
         'admin': user.get('admin', 0),
+        'is_student': user.get('is_student', 1),
+        'semester': user.get('semester'),
+        'study_programme': user.get('study_programme'),
+        'organization': user.get('organization'),
         'created_at': user.get('created_at'),
         'total_ratings': rating_stats.get('total_ratings', 0),
         'average_rating': rating_stats.get('average_rating', 0)
@@ -186,12 +214,27 @@ def update_current_user(current_user_id, current_username):
         if existing_user:
             return jsonify({'success': False, 'message': 'Username already taken'}), 400
     
-    # Update user (username, email, and bio can be updated)
+    # Get user type and related fields
+    is_student = data.get('is_student', user.get('is_student', 1))
+    semester = data.get('semester', user.get('semester'))
+    study_programme = data.get('study_programme', user.get('study_programme'))
+    organization = data.get('organization', user.get('organization'))
+    
+    # Validate: if not a student, semester and study_programme should not be set
+    if not is_student:
+        semester = None
+        study_programme = None
+    
+    # Update user (username, email, bio, and user type fields can be updated)
     result = database.update_user(
         user_id=current_user_id,
         username=data.get('username', current_username),
         email=data.get('email', user['email']),
-        bio=data.get('bio', user.get('bio'))
+        bio=data.get('bio', user.get('bio')),
+        is_student=is_student,
+        semester=semester,
+        study_programme=study_programme,
+        organization=organization
     )
     
     if not result['success']:

@@ -21,6 +21,10 @@ def init_db():
             email TEXT NOT NULL UNIQUE,
             bio TEXT,
             admin INTEGER DEFAULT 0,
+            is_student INTEGER DEFAULT 1,
+            semester INTEGER,
+            study_programme TEXT,
+            organization TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')

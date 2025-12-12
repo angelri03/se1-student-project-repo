@@ -10,6 +10,10 @@ interface User {
   created_at?: string
   total_ratings?: number
   average_rating?: number
+  is_student?: number
+  semester?: string
+  study_programme?: string
+  organization?: string
 }
 
 function ProfilePage() {
@@ -178,7 +182,7 @@ function ProfilePage() {
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
-                  <div className="mb-6">
+                  <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-400 mb-2">Bio</label>
                     <textarea
                       value={editedUser?.bio || ''}
@@ -186,6 +190,63 @@ function ProfilePage() {
                       rows={4}
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                       placeholder="Tell us about yourself..."
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">User Type</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={editedUser?.is_student === 1}
+                          onChange={() => setEditedUser(prev => prev ? {...prev, is_student: 1} : null)}
+                          className="mr-2"
+                        />
+                        <span className="text-gray-300">Student</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={editedUser?.is_student === 0}
+                          onChange={() => setEditedUser(prev => prev ? {...prev, is_student: 0, semester: undefined, study_programme: undefined} : null)}
+                          className="mr-2"
+                        />
+                        <span className="text-gray-300">Non-Student</span>
+                      </label>
+                    </div>
+                  </div>
+                  {editedUser?.is_student === 1 && (
+                    <>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-400 mb-2">Semester</label>
+                        <input
+                          type="text"
+                          value={editedUser?.semester || ''}
+                          onChange={(e) => setEditedUser(prev => prev ? {...prev, semester: e.target.value} : null)}
+                          className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="e.g., 1, 2, 3..."
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-400 mb-2">Study Programme</label>
+                        <input
+                          type="text"
+                          value={editedUser?.study_programme || ''}
+                          onChange={(e) => setEditedUser(prev => prev ? {...prev, study_programme: e.target.value} : null)}
+                          className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="e.g., Computer Science"
+                        />
+                      </div>
+                    </>
+                  )}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Organization</label>
+                    <input
+                      type="text"
+                      value={editedUser?.organization || ''}
+                      onChange={(e) => setEditedUser(prev => prev ? {...prev, organization: e.target.value} : null)}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="e.g., University Name"
                     />
                   </div>
                   <button
@@ -196,7 +257,11 @@ function ProfilePage() {
                           await axios.put('/api/me', {
                             username: editedUser.username,
                             email: editedUser.email,
-                            bio: editedUser.bio
+                            bio: editedUser.bio,
+                            is_student: editedUser.is_student,
+                            semester: editedUser.semester,
+                            study_programme: editedUser.study_programme,
+                            organization: editedUser.organization
                           }, {
                             headers: { Authorization: `Bearer ${token}` }
                           })
@@ -218,6 +283,26 @@ function ProfilePage() {
                   <h2 className="text-3xl font-bold text-white mb-2">{user.username}</h2>
                   <p className="text-gray-400 mb-4">{user.email}</p>
                   
+                  {/* User Type Tags */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {user.is_student === 1 ? (
+                      <>
+                        <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">Student</span>
+                        {user.semester && (
+                          <span className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full">Semester {user.semester}</span>
+                        )}
+                        {user.study_programme && (
+                          <span className="px-3 py-1 bg-violet-600 text-white text-sm rounded-full">{user.study_programme}</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">Non-Student</span>
+                    )}
+                    {user.organization && (
+                      <span className={`px-3 py-1 ${user.is_student === 1 ? 'bg-purple-600' : 'bg-indigo-600'} text-white text-sm rounded-full`}>{user.organization}</span>
+                    )}
+                  </div>
+                  
                   {/* Bio */}
                   {user.bio && (
                     <p className="text-gray-300 leading-relaxed mb-6 whitespace-pre-line">{user.bio}</p>
@@ -234,7 +319,7 @@ function ProfilePage() {
                       <p className="text-2xl font-bold text-white">{user.total_ratings || 0}</p>
                     </div>
                     <div className="bg-gray-700 rounded-lg p-4">
-                      <p className="text-gray-400 text-sm mb-1">Avg Rating</p>
+                      <p className="text-gray-400 text-sm mb-1">Avg. Rating</p>
                       <p className="text-2xl font-bold text-purple-400">{user.average_rating ? user.average_rating.toFixed(1) : '0.0'}</p>
                     </div>
                     <div className="bg-gray-700 rounded-lg p-4">

@@ -14,8 +14,8 @@
   - [x] Allow all above operations also for admins
 - [x] View profile page
 	- [x] Allow editing on own profile page
-	- [ ] Semester/Programme Tag
-	- [ ] Organization Tag
+	- [x] Semester/Programme Tag
+	- [x] Organization Tag
 		- [ ] View Organization (rather optional)
 - [x] Admins approve project before it becomes publicly visible
 - [ ] Course management page for admins

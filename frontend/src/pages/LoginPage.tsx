@@ -19,7 +19,11 @@ function LoginPage() {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    is_student: 1,
+    semester: '',
+    study_programme: '',
+    organization: ''
   })
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +84,11 @@ function LoginPage() {
       const response = await axios.post('/api/register', {
         username: registerData.username,
         email: registerData.email,
-        password: registerData.password
+        password: registerData.password,
+        is_student: registerData.is_student,
+        semester: registerData.is_student === 1 ? registerData.semester : undefined,
+        study_programme: registerData.is_student === 1 ? registerData.study_programme : undefined,
+        organization: registerData.organization
       })
 
       if (response.data.success) {
@@ -232,6 +240,83 @@ function LoginPage() {
                   onChange={handleRegisterChange}
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  User Type
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="is_student"
+                      checked={registerData.is_student === 1}
+                      onChange={() => setRegisterData(prev => ({ ...prev, is_student: 1 }))}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Student</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="is_student"
+                      checked={registerData.is_student === 0}
+                      onChange={() => setRegisterData(prev => ({ ...prev, is_student: 0, semester: '', study_programme: '' }))}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Non-Student</span>
+                  </label>
+                </div>
+              </div>
+
+              {registerData.is_student === 1 && (
+                <>
+                  <div>
+                    <label htmlFor="register-semester" className="block text-sm font-medium text-gray-300 mb-2">
+                      Semester (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      id="register-semester"
+                      name="semester"
+                      value={registerData.semester}
+                      onChange={handleRegisterChange}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                      placeholder="e.g., Fall 2025"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="register-study-programme" className="block text-sm font-medium text-gray-300 mb-2">
+                      Study Programme (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      id="register-study-programme"
+                      name="study_programme"
+                      value={registerData.study_programme}
+                      onChange={handleRegisterChange}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                      placeholder="e.g., Computer Science"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label htmlFor="register-organization" className="block text-sm font-medium text-gray-300 mb-2">
+                  Organization (Optional)
+                </label>
+                <input
+                  type="text"
+                  id="register-organization"
+                  name="organization"
+                  value={registerData.organization}
+                  onChange={handleRegisterChange}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  placeholder="e.g., University Name"
                 />
               </div>
 
