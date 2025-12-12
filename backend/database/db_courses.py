@@ -7,7 +7,7 @@ import sqlite3
 from typing import Dict, List, Optional
 from .db_core import DATABASE_NAME
 
-def create_course(name: str, description: str = None) -> Dict:
+def create_course(code: str, name: str, semester: str = None, term: str = None, description: str = None) -> Dict:
     """
     Create a new course
     Returns: {'success': bool, 'message': str, 'id': int (if successful)}
@@ -17,9 +17,9 @@ def create_course(name: str, description: str = None) -> Dict:
         cursor = conn.cursor()
         
         cursor.execute('''
-            INSERT INTO courses (name, description)
-            VALUES (?, ?)
-        ''', (name, description))
+            INSERT INTO courses (code, name, semester, term, description)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (code, name, semester, term, description))
         
         conn.commit()
         course_id = cursor.lastrowid
@@ -28,7 +28,7 @@ def create_course(name: str, description: str = None) -> Dict:
         return {'success': True, 'message': 'Course created successfully', 'id': course_id}
     
     except sqlite3.IntegrityError:
-        return {'success': False, 'message': 'Course name already exists'}
+        return {'success': False, 'message': 'Course code already exists'}
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
@@ -75,7 +75,7 @@ def get_all_courses() -> Dict:
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
-def update_course(course_id: int, name: str = None, description: str = None) -> Dict:
+def update_course(course_id: int, code: str = None, name: str = None, semester: str = None, term: str = None, description: str = None) -> Dict:
     """
     Update course information
     Only updates fields that are provided (not None)
@@ -88,9 +88,21 @@ def update_course(course_id: int, name: str = None, description: str = None) -> 
         update_fields = []
         values = []
         
+        if code is not None:
+            update_fields.append('code = ?')
+            values.append(code)
+        
         if name is not None:
             update_fields.append('name = ?')
             values.append(name)
+        
+        if semester is not None:
+            update_fields.append('semester = ?')
+            values.append(semester)
+        
+        if term is not None:
+            update_fields.append('term = ?')
+            values.append(term)
         
         if description is not None:
             update_fields.append('description = ?')

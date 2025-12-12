@@ -5,7 +5,7 @@ Handles course CRUD operations and project-course assignments
 
 from flask import Blueprint, request, jsonify
 import database
-from .auth import token_required
+from .auth import token_required, admin_required
 
 courses_bp = Blueprint('courses', __name__)
 
@@ -13,19 +13,22 @@ courses_bp = Blueprint('courses', __name__)
 # For now using @token_required as placeholder until admin system is implemented
 
 @courses_bp.route('/api/courses', methods=['POST'])
-@token_required
+@admin_required
 def create_course(current_user_id, current_username):
     """
-    Create a new course (ADMIN ONLY - currently accepts any authenticated user)
-    Expected JSON: {"name": "...", "description": "..." (optional)}
+    Create a new course (ADMIN ONLY)
+    Expected JSON: {"code": "...", "name": "...", "semester": "..." (optional), "term": "..." (optional), "description": "..." (optional)}
     """
     data = request.get_json()
     
-    if not data or 'name' not in data:
-        return jsonify({'success': False, 'message': 'Course name is required'}), 400
+    if not data or 'code' not in data or 'name' not in data:
+        return jsonify({'success': False, 'message': 'Course code and name are required'}), 400
     
     result = database.create_course(
+        code=data['code'],
         name=data['name'],
+        semester=data.get('semester'),
+        term=data.get('term'),
         description=data.get('description')
     )
     
@@ -55,11 +58,11 @@ def get_course(course_id):
     return jsonify({'success': True, 'course': course}), 200
 
 @courses_bp.route('/api/courses/<int:course_id>', methods=['PUT'])
-@token_required
+@admin_required
 def update_course(course_id, current_user_id, current_username):
     """
-    Update a course (ADMIN ONLY - currently accepts any authenticated user)
-    Expected JSON: {"name": "..." (optional), "description": "..." (optional)}
+    Update a course (ADMIN ONLY)
+    Expected JSON: {"code": "..." (optional), "name": "..." (optional), "semester": "..." (optional), "term": "..." (optional), "description": "..." (optional)}
     """
     data = request.get_json()
     
@@ -68,7 +71,10 @@ def update_course(course_id, current_user_id, current_username):
     
     result = database.update_course(
         course_id=course_id,
+        code=data.get('code'),
         name=data.get('name'),
+        semester=data.get('semester'),
+        term=data.get('term'),
         description=data.get('description')
     )
     
@@ -76,10 +82,10 @@ def update_course(course_id, current_user_id, current_username):
     return jsonify(result), status_code
 
 @courses_bp.route('/api/courses/<int:course_id>', methods=['DELETE'])
-@token_required
+@admin_required
 def delete_course(course_id, current_user_id, current_username):
     """
-    Delete a course (ADMIN ONLY - currently accepts any authenticated user)
+    Delete a course (ADMIN ONLY)
     """
     result = database.delete_course(course_id)
     status_code = 200 if result['success'] else 404

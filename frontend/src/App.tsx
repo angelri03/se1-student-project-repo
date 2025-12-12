@@ -4,6 +4,7 @@ import ExploreProjectsPage from './pages/ExploreProjectsPage'
 import ViewProjectPage from './pages/ViewProjectPage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
+import CourseManagementPage from './pages/CourseManagementPage'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/project/:id" element={<ViewProjectPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin/courses" element={<CourseManagementPage />} />
         </Routes>
       </div>
     </Router>

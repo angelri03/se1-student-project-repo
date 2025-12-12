@@ -103,6 +103,36 @@ def migrate_database():
             print("Project media table created successfully!")
         else:
             print("Project media table already exists.")
+
+
+        # Update courses table
+        print("\nChecking courses table...")
+        cursor.execute("PRAGMA table_info(courses)")
+        course_columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'code' not in course_columns:
+            print("  Adding code column...")
+            cursor.execute('ALTER TABLE courses ADD COLUMN code TEXT')
+            conn.commit()
+            print("Code column added successfully!")
+        else:
+            print("Code column already exists.")
+        
+        if 'semester' not in course_columns:
+            print("  Adding semester column...")
+            cursor.execute('ALTER TABLE courses ADD COLUMN semester TEXT')
+            conn.commit()
+            print("Semester column added successfully!")
+        else:
+            print("Semester column already exists.")
+        
+        if 'term' not in course_columns:
+            print("  Adding term column...")
+            cursor.execute('ALTER TABLE courses ADD COLUMN term TEXT')
+            conn.commit()
+            print("Term column added successfully!")
+        else:
+            print("Term column already exists.")
         
         conn.close()
         print("\nMigration completed successfully!")

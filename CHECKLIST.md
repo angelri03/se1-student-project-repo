@@ -18,8 +18,8 @@
 	- [x] Organization Tag
 		- [ ] View Organization (rather optional)
 - [x] Admins approve project before it becomes publicly visible
-- [ ] Course management page for admins
-	- [ ] Course Info (including code, name, semester)
+- [x] Course management page for admins
+	- [x] Course Info (including code, name, semester)
 - [x] View Project Page
 - [ ] View pending projects for admin ?
 

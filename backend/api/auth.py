@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from flask import request, jsonify
 from config import SECRET_KEY, JWT_EXPIRATION
+import database
 
 def create_token(user_id: int, username: str) -> str:
     """Create a JWT token for a user"""
@@ -55,6 +56,50 @@ def token_required(f):
         
         if not result['success']:
             return jsonify({'success': False, 'message': result['message']}), 401
+        
+        # Add user info to kwargs so the route function can access it
+        kwargs['current_user_id'] = result['payload']['user_id']
+        kwargs['current_username'] = result['payload']['username']
+        
+        return f(*args, **kwargs)
+    
+    return decorated
+
+def admin_required(f):
+    """
+    Decorator to protect routes that require admin privileges
+    Adds 'current_user_id' and 'current_username' to the route function
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        
+        # Check if token is in the Authorization header
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            try:
+                # Expected format: "Bearer <token>"
+                token = auth_header.split(' ')[1]
+            except IndexError:
+                return jsonify({'success': False, 'message': 'Invalid token format'}), 401
+        
+        if not token:
+            return jsonify({'success': False, 'message': 'Authentication token is missing'}), 401
+        
+        # Decode and verify the token
+        result = decode_token(token)
+        
+        if not result['success']:
+            return jsonify({'success': False, 'message': result['message']}), 401
+        
+        # Check if user is admin
+        user = database.get_user_by_id(result['payload']['user_id'])
+        
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 401
+        
+        if not user.get('admin', 0):
+            return jsonify({'success': False, 'message': 'Admin privileges required'}), 403
         
         # Add user info to kwargs so the route function can access it
         kwargs['current_user_id'] = result['payload']['user_id']

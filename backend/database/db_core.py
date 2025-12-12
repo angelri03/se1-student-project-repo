@@ -72,7 +72,10 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS courses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
+            code TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
+            semester INTEGER,
+            term TEXT,
             description TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
