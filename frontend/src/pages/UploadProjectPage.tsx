@@ -157,15 +157,18 @@ function UploadProjectPage() {
     const files = e.dataTransfer.files
     if (files && files.length > 0) {
       const file = files[0]
-      // Check if it's a zip file
-      if (file.name.endsWith('.zip') || file.name.endsWith('.rar') || 
-          file.name.endsWith('.7z') || file.name.endsWith('.tar') || 
-          file.name.endsWith('.gz')) {
+      // Check if it's a valid archive file (case-insensitive)
+      const fileName = file.name.toLowerCase()
+      if (fileName.endsWith('.zip') || fileName.endsWith('.rar') || 
+          fileName.endsWith('.7z') || fileName.endsWith('.tar') || 
+          fileName.endsWith('.gz')) {
         setFormData(prev => ({
           ...prev,
           file: file
         }))
         setFileName(file.name)
+      } else {
+        setMessage({ type: 'error', text: 'Please upload a valid archive file (ZIP, RAR, 7Z, TAR, or GZ)' })
       }
     }
   }
@@ -288,6 +291,13 @@ function UploadProjectPage() {
     e.preventDefault()
     setLoading(true)
     setMessage(null)
+
+    // Manual validation (to support drag and drop)
+    if (!formData.file) {
+      setMessage({ type: 'error', text: 'Please upload a project file' })
+      setLoading(false)
+      return
+    }
 
     try {
       // Debug: log form data
@@ -622,7 +632,6 @@ function UploadProjectPage() {
                         name="file-upload"
                         type="file"
                         className="sr-only"
-                        required
                         onChange={handleFileChange}
                         accept=".zip,.rar,.7z,.tar,.gz"
                       />
