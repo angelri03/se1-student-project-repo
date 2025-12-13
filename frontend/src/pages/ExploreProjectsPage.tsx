@@ -29,6 +29,7 @@ function ExploreProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCourse, setSelectedCourse] = useState<string>('all')
   const [selectedTopic, setSelectedTopic] = useState<string>('all')
+  const [selectedApprovalStatus, setSelectedApprovalStatus] = useState<string>('all')
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAdminMenu, setShowAdminMenu] = useState(false)
@@ -114,7 +115,7 @@ function ExploreProjectsPage() {
   const topics = ['all', ...Array.from(new Set(projects.flatMap(p => p.tags || [])))]
 
   // Filter projects based on search and filters
-  const handleFilter = (search: string, course: string, topic: string) => {
+  const handleFilter = (search: string, course: string, topic: string, approvalStatus: string) => {
     let filtered = projects
 
     // Filter by search query
@@ -136,28 +137,42 @@ function ExploreProjectsPage() {
       filtered = filtered.filter(project => (project.tags || []).includes(topic))
     }
 
+    // Filter by approval status (admin only)
+    if (approvalStatus === 'approved') {
+      filtered = filtered.filter(project => project.approved === 1)
+    } else if (approvalStatus === 'pending') {
+      filtered = filtered.filter(project => project.approved === 0)
+    }
+
+    // 'all' shows everything
     setFilteredProjects(filtered)
   }
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value)
-    handleFilter(value, selectedCourse, selectedTopic)
+    handleFilter(value, selectedCourse, selectedTopic, selectedApprovalStatus)
   }
 
   const handleCourseChange = (value: string) => {
     setSelectedCourse(value)
-    handleFilter(searchQuery, value, selectedTopic)
+    handleFilter(searchQuery, value, selectedTopic, selectedApprovalStatus)
   }
 
   const handleTopicChange = (value: string) => {
     setSelectedTopic(value)
-    handleFilter(searchQuery, selectedCourse, value)
+    handleFilter(searchQuery, selectedCourse, value, selectedApprovalStatus)
+  }
+
+  const handleApprovalStatusChange = (value: string) => {
+    setSelectedApprovalStatus(value)
+    handleFilter(searchQuery, selectedCourse, selectedTopic, value)
   }
 
   const handleReset = () => {
     setSearchQuery('')
     setSelectedCourse('all')
     setSelectedTopic('all')
+    setSelectedApprovalStatus('all')
     setFilteredProjects(projects)
   }
 
@@ -298,7 +313,7 @@ function ExploreProjectsPage() {
 
         {/* Filters Section */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 mb-8 border border-gray-700">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${user?.admin === 1 ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
             {/* Search Bar */}
             <div className="md:col-span-2">
               <label htmlFor="search" className="block text-sm font-medium text-gray-300 mb-2">
@@ -351,6 +366,25 @@ function ExploreProjectsPage() {
                 ))}
               </select>
             </div>
+
+            {/* Approval Status Filter (Admin Only) */}
+            {user?.admin === 1 && (
+              <div>
+                <label htmlFor="approval" className="block text-sm font-medium text-gray-300 mb-2">
+                  Status
+                </label>
+                <select
+                  id="approval"
+                  value={selectedApprovalStatus}
+                  onChange={(e) => handleApprovalStatusChange(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                >
+                  <option value="all">All Projects</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending Approval</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Filter Actions */}

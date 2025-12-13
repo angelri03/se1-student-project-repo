@@ -21,7 +21,7 @@
 - [x] Course management page for admins
 	- [x] Course Info (including code, name, semester)
 - [x] View Project Page
-- [ ] View pending projects for admin ?
+- [x] View pending projects for admin ?
 
 #### Backend
 - [x] General CRUD operations in database
@@ -65,7 +65,7 @@
 	- [ ] Add Light Mode
 	- [ ] Add Logo
 	- [ ] Add Header? (maybe)
-- Profile Details
+- [ ] Profile Details
 	- [ ] Add Github Link for Profle
 	- [ ] Add Profile Picture
 - [ ] Little About section on the website?
