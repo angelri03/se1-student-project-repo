@@ -5,6 +5,7 @@ import ViewProjectPage from './pages/ViewProjectPage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import CourseManagementPage from './pages/CourseManagementPage'
+import TopicManagementPage from './pages/TopicManagementPage'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin/courses" element={<CourseManagementPage />} />
+          <Route path="/admin/topics" element={<TopicManagementPage />} />
         </Routes>
       </div>
     </Router>

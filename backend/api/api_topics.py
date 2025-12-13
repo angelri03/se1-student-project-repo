@@ -5,7 +5,7 @@ Handles topic CRUD operations
 
 from flask import Blueprint, request, jsonify
 import database
-from .auth import token_required
+from .auth import token_required, admin_required
 
 topics_bp = Blueprint('topics', __name__)
 
@@ -76,10 +76,10 @@ def update_topic(topic_id, current_user_id, current_username):
     return jsonify(result), status_code
 
 @topics_bp.route('/api/topics/<int:topic_id>', methods=['DELETE'])
-@token_required
+@admin_required
 def delete_topic(topic_id, current_user_id, current_username):
     """
-    Delete a topic (ADMIN ONLY - currently accepts any authenticated user)
+    Delete a topic (ADMIN ONLY)
     """
     result = database.delete_topic(topic_id)
     status_code = 200 if result['success'] else 404
