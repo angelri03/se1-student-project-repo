@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import ProjectCard from '../components/ProjectCard'
 
 interface User {
   id: number
@@ -352,62 +353,12 @@ function ProfilePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userProjects.map((project) => (
-                <div
+                <ProjectCard
                   key={project.id}
-                  className="bg-gray-700 rounded-lg shadow-lg border border-gray-600 hover:border-purple-500 transition duration-200 overflow-hidden flex flex-col"
-                >
-                  <div className="p-6 flex flex-col flex-grow">
-                    {/* Project Title */}
-                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
-                      {project.name}
-                    </h3>
-
-                    {/* Course and Topic Tags */}
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
-                        {project.course}
-                      </span>
-                      {(project.tags || []).map((tag: string, index: number) => (
-                        <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-3">
-                      {project.description || 'No description provided'}
-                    </p>
-
-                    {/* Spacer to push content to bottom */}
-                    <div className="flex-grow"></div>
-
-                    {/* Authors */}
-                    <div className="mb-3">
-                      <p className="text-xs text-gray-500 mb-1">Authors:</p>
-                      <p className="text-sm text-gray-300">{project.owners.map((o: any) => o.username).join(', ')}</p>
-                    </div>
-
-                    {/* Upload Date */}
-                    <p className="text-xs text-gray-500 mb-4">
-                      Uploaded: {new Date(project.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/project/${project.id}`, { state: { fromProfile: true } })}
-                        className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition duration-200"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  project={project}
+                  variant="profile"
+                  fromProfile={true}
+                />
               ))}
             </div>
           )}
