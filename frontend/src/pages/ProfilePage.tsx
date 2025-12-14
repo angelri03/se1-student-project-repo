@@ -15,6 +15,7 @@ interface User {
   semester?: string
   study_programme?: string
   organization?: string
+  admin?: number
 }
 
 function ProfilePage() {
@@ -136,15 +137,17 @@ function ProfilePage() {
               </svg>
               {isEditing ? 'Cancel' : 'Edit Profile'}
             </button>
-            <button
-              onClick={() => navigate('/upload', { state: { fromProfile: true } })}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Upload Project
-            </button>
+            {user.is_student === 1 && (
+              <button
+                onClick={() => navigate('/upload', { state: { fromProfile: true } })}
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Upload Project
+              </button>
+            )}
           </div>
         </div>
 
@@ -286,6 +289,9 @@ function ProfilePage() {
                   
                   {/* User Type Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
+                    {user.admin === 1 && (
+                      <span className="px-3 py-1 bg-red-600 text-white text-sm rounded-full">Admin</span>
+                    )}
                     {user.is_student === 1 ? (
                       <>
                         <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">Student</span>
@@ -310,59 +316,70 @@ function ProfilePage() {
                   )}
 
                   {/* Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-700 rounded-lg p-4">
-                      <p className="text-gray-400 text-sm mb-1">Projects</p>
-                      <p className="text-2xl font-bold text-white">{userProjects.length}</p>
+                  {user.is_student === 1 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <p className="text-gray-400 text-sm mb-1">Projects</p>
+                        <p className="text-2xl font-bold text-white">{userProjects.length}</p>
+                      </div>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <p className="text-gray-400 text-sm mb-1">Total Ratings</p>
+                        <p className="text-2xl font-bold text-white">{user.total_ratings || 0}</p>
+                      </div>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <p className="text-gray-400 text-sm mb-1">Avg. Rating</p>
+                        <p className="text-2xl font-bold text-purple-400">{user.average_rating ? user.average_rating.toFixed(1) : '0.0'}</p>
+                      </div>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <p className="text-gray-400 text-sm mb-1">Member Since</p>
+                        <p className="text-lg font-semibold text-white">
+                          {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'N/A'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-gray-700 rounded-lg p-4">
-                      <p className="text-gray-400 text-sm mb-1">Total Ratings</p>
-                      <p className="text-2xl font-bold text-white">{user.total_ratings || 0}</p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-4">
-                      <p className="text-gray-400 text-sm mb-1">Avg. Rating</p>
-                      <p className="text-2xl font-bold text-purple-400">{user.average_rating ? user.average_rating.toFixed(1) : '0.0'}</p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-4">
+                  ) : (
+                    <div className="bg-gray-700 rounded-lg p-4 inline-block">
                       <p className="text-gray-400 text-sm mb-1">Member Since</p>
                       <p className="text-lg font-semibold text-white">
                         {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'N/A'}
                       </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Projects Section */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
-          <h2 className="text-2xl font-bold text-white mb-6">My Projects</h2>
-          
-          {userProjects.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg mb-4">No projects yet</p>
-              <button
-                onClick={() => navigate('/upload')}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
-              >
-                Upload Your First Project
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  variant="profile"
-                  fromProfile={true}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Projects Section - Only for Students */}
+        {user && user.is_student === 1 && (
+          <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
+            <h2 className="text-2xl font-bold text-white mb-6">My Projects</h2>
+            
+            {userProjects.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-lg mb-4">No projects yet</p>
+                <button
+                  onClick={() => navigate('/upload')}
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
+                >
+                  Upload Your First Project
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    variant="profile"
+                    fromProfile={true}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
