@@ -196,29 +196,6 @@ function ProfilePage() {
                       placeholder="Tell us about yourself..."
                     />
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-400 mb-2">User Type</label>
-                    <div className="flex gap-4">
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          checked={editedUser?.is_student === 1}
-                          onChange={() => setEditedUser(prev => prev ? {...prev, is_student: 1} : null)}
-                          className="mr-2"
-                        />
-                        <span className="text-gray-300">Student</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          checked={editedUser?.is_student === 0}
-                          onChange={() => setEditedUser(prev => prev ? {...prev, is_student: 0, semester: undefined, study_programme: undefined} : null)}
-                          className="mr-2"
-                        />
-                        <span className="text-gray-300">Non-Student</span>
-                      </label>
-                    </div>
-                  </div>
                   {editedUser?.is_student === 1 && (
                     <>
                       <div className="mb-4">
