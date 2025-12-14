@@ -557,6 +557,12 @@ function ViewProjectPage() {
 
   const topics = project.tags || []
 
+  // Helper function to get topic description
+  const getTopicDescription = (topicName: string): string => {
+    const topic = allTopics.find(t => t.name === topicName)
+    return topic?.description || topicName
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -759,8 +765,11 @@ function ViewProjectPage() {
             ) : (
               <div className="flex flex-wrap gap-2">
                 {topics.length > 0 ? topics.map((topic, index) => (
-                  <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
+                  <span key={index} className="relative inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200 group">
                     {topic}
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap max-w-xs">
+                      {getTopicDescription(topic)}
+                    </span>
                   </span>
                 )) : (
                   <span className="text-gray-500 text-sm">No tags</span>
