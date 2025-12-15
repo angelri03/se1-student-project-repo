@@ -75,6 +75,14 @@ def migrate_database():
         else:
             print("Organization column already exists.")
         
+        if 'profile_picture' not in columns:
+            print("  Adding profile_picture column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN profile_picture TEXT')
+            conn.commit()
+            print("Profile_picture column added successfully!")
+        else:
+            print("Profile_picture column already exists.")
+        
         # Create project_media table
         print("\nChecking project_media table...")
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='project_media'")

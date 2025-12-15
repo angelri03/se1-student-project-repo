@@ -163,6 +163,7 @@ def get_current_user(current_user_id, current_username):
         'study_programme': user.get('study_programme'),
         'organization': user.get('organization'),
         'created_at': user.get('created_at'),
+        'profile_picture': user.get('profile_picture'),
         'total_ratings': rating_stats.get('total_ratings', 0),
         'average_rating': rating_stats.get('average_rating', 0)
     }
@@ -255,4 +256,108 @@ def update_current_user(current_user_id, current_username):
         'success': True,
         'message': 'Profile updated successfully',
         'user': user_data
+    }), 200
+
+@users_bp.route('/api/me/profile-picture', methods=['POST'])
+@token_required
+def upload_profile_picture(current_user_id, current_username):
+    """
+    Upload or update profile picture for the current user
+    Requires valid JWT token in Authorization header
+    Expected: multipart/form-data with 'profile_picture' file
+    """
+    import os
+    from werkzeug.utils import secure_filename
+    
+    print(f"Upload profile picture request from user {current_user_id}")
+    print(f"Request files: {request.files}")
+    
+    if 'profile_picture' not in request.files:
+        return jsonify({'success': False, 'message': 'No file provided'}), 400
+    
+    file = request.files['profile_picture']
+    
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No file selected'}), 400
+    
+    # Validate file type
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    
+    if file_ext not in allowed_extensions:
+        return jsonify({'success': False, 'message': 'Invalid file type. Allowed: png, jpg, jpeg, gif, webp'}), 400
+    
+    # Create uploads directory if it doesn't exist
+    uploads_dir = os.path.join('uploads', 'profile_pictures')
+    os.makedirs(uploads_dir, exist_ok=True)
+    
+    # Generate unique filename
+    filename = f"user_{current_user_id}.{file_ext}"
+    file_path = os.path.join(uploads_dir, filename)
+    
+    # Delete old profile picture if it exists
+    user = database.get_user_by_id(current_user_id)
+    if user and user.get('profile_picture'):
+        old_file_path = user.get('profile_picture')
+        if os.path.exists(old_file_path):
+            try:
+                os.remove(old_file_path)
+            except Exception:
+                pass  # Ignore errors when deleting old file
+    
+    # Save the file
+    try:
+        file.save(file_path)
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to save file: {str(e)}'}), 500
+    
+    # Convert path to use forward slashes for URLs (works on both Windows and Unix)
+    web_path = file_path.replace('\\', '/')
+    
+    # Update database
+    result = database.update_user(user_id=current_user_id, profile_picture=web_path)
+    
+    if not result['success']:
+        # Clean up uploaded file if database update fails
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        return jsonify(result), 500
+    
+    return jsonify({
+        'success': True,
+        'message': 'Profile picture uploaded successfully',
+        'profile_picture': web_path
+    }), 200
+
+@users_bp.route('/api/me/profile-picture', methods=['DELETE'])
+@token_required
+def delete_profile_picture(current_user_id, current_username):
+    """
+    Delete profile picture for the current user
+    Requires valid JWT token in Authorization header
+    """
+    import os
+    
+    user = database.get_user_by_id(current_user_id)
+    
+    if not user or not user.get('profile_picture'):
+        return jsonify({'success': False, 'message': 'No profile picture to delete'}), 404
+    
+    # Delete the file
+    file_path = user.get('profile_picture')
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'Failed to delete file: {str(e)}'}), 500
+    
+    # Update database
+    result = database.update_user(user_id=current_user_id, profile_picture=None)
+    
+    if not result['success']:
+        return jsonify(result), 500
+    
+    return jsonify({
+        'success': True,
+        'message': 'Profile picture deleted successfully'
     }), 200

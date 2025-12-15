@@ -3,10 +3,11 @@ Main application entry point
 Aggregates all blueprints and runs the Flask server
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 import database
 from api import users_bp, projects_bp, courses_bp, topics_bp, bookmarks_bp
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -29,6 +30,12 @@ app.register_blueprint(bookmarks_bp)
 def health_check():
     """Simple health check endpoint"""
     return jsonify({'status': 'ok', 'message': 'Server is running'}), 200
+
+# Serve uploaded files
+@app.route('/uploads/<path:filename>')
+def serve_upload(filename):
+    """Serve uploaded files"""
+    return send_from_directory('uploads', filename)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

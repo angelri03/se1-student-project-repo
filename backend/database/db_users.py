@@ -90,12 +90,17 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
     except Exception:
         return None
 
+# Sentinel value for update_user to distinguish between None and not provided
+_UNSET = object()
+
 def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None,
-                is_student: int = None, semester: str = None, study_programme: str = None, organization: str = None) -> Dict:
+                is_student: int = None, semester: str = None, study_programme: str = None, organization: str = None,
+                profile_picture = _UNSET) -> Dict:
     """
     Update user information
     Only updates fields that are provided (not None)
     Password will be hashed automatically if provided
+    For profile_picture: pass a string path to set, None to remove, or omit to leave unchanged
     Returns: {'success': bool, 'message': str}
     """
     try:
@@ -136,6 +141,11 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
         if organization is not None:
             update_fields.append('organization = ?')
             values.append(organization)
+        
+        # Allow explicitly setting profile_picture to None to remove it
+        if profile_picture is not _UNSET:
+            update_fields.append('profile_picture = ?')
+            values.append(profile_picture)
         
         if not update_fields:
             return {'success': False, 'message': 'No fields to update'}
