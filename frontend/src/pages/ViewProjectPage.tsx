@@ -44,6 +44,7 @@ function ViewProjectPage() {
   const [ratingMessage, setRatingMessage] = useState<string>('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [media, setMedia] = useState<any[]>([])
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
@@ -147,6 +148,7 @@ function ViewProjectPage() {
           const userId = meResponse.data.user.id
           const userIsAdmin = meResponse.data.user.admin === 1
           setCurrentUserId(userId)
+          setIsAdmin(userIsAdmin)
           // Get project to check owners (include token for admin access to unapproved projects)
           const projectResponse = await axios.get(`/api/projects/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -1005,7 +1007,7 @@ function ViewProjectPage() {
             <h3 className="text-lg font-semibold text-white mb-3">Rate this project</h3>
             {isOwner ? (
               <p className="text-gray-400">
-                You cannot rate your own project.
+                {isAdmin ? "Admins cannot rate projects." : "You cannot rate your own project."}
               </p>
             ) : isLoggedIn ? (
               <>
