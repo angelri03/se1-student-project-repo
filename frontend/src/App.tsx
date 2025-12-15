@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import CourseManagementPage from './pages/CourseManagementPage'
 import TopicManagementPage from './pages/TopicManagementPage'
+import BookmarksPage from './pages/BookmarksPage'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/project/:id" element={<ViewProjectPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/bookmarks" element={<BookmarksPage />} />
           <Route path="/admin/courses" element={<CourseManagementPage />} />
           <Route path="/admin/topics" element={<TopicManagementPage />} />
         </Routes>

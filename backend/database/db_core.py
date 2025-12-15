@@ -118,6 +118,19 @@ def init_db():
             UNIQUE(project_id, user_id)
         )
     ''')
+    
+    # Bookmarks table (users can bookmark projects)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            project_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            UNIQUE(user_id, project_id)
+        )
+    ''')
 
     # Create indexes for better query performance
     cursor.execute('''
@@ -164,6 +177,16 @@ def init_db():
     cursor.execute('''
         CREATE INDEX IF NOT EXISTS idx_ratings_user
         ON project_ratings(user_id)
+    ''')
+    
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_bookmarks_user
+        ON bookmarks(user_id)
+    ''')
+    
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_bookmarks_project
+        ON bookmarks(project_id)
     ''')
 
     conn.commit()

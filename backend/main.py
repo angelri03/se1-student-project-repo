@@ -6,7 +6,7 @@ Aggregates all blueprints and runs the Flask server
 from flask import Flask, jsonify
 from flask_cors import CORS
 import database
-from api import users_bp, projects_bp, courses_bp, topics_bp
+from api import users_bp, projects_bp, courses_bp, topics_bp, bookmarks_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -22,6 +22,7 @@ app.register_blueprint(users_bp)
 app.register_blueprint(projects_bp)
 app.register_blueprint(courses_bp)
 app.register_blueprint(topics_bp)
+app.register_blueprint(bookmarks_bp)
 
 # Health check endpoint
 @app.route('/api/health', methods=['GET'])

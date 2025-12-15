@@ -204,10 +204,23 @@ function ExploreProjectsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Top Navigation Bar */}
         <div className="flex justify-between items-center gap-3 mb-8">
-          {user?.admin === 1 && (
-            <AdminMenu showAdminMenu={showAdminMenu} setShowAdminMenu={setShowAdminMenu} />
-          )}
-          {!user?.admin && <div />}
+          <div className="flex items-center gap-3">
+            {user?.admin === 1 && (
+              <AdminMenu showAdminMenu={showAdminMenu} setShowAdminMenu={setShowAdminMenu} />
+            )}
+            {user && (
+              <button
+                onClick={() => navigate('/bookmarks')}
+                className="px-4 py-2 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 transition duration-200 flex items-center gap-2"
+                title="View bookmarks"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                My Bookmarks
+              </button>
+            )}
+          </div>
           <UserMenu 
             user={user} 
             onLogout={() => {

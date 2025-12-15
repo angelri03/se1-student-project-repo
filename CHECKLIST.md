@@ -16,7 +16,6 @@
 	- [x] Allow editing on own profile page
 	- [x] Semester/Programme Tag
 	- [x] Organization Tag
-		- [ ] View Organization (rather optional)
 - [x] Admins approve project before it becomes publicly visible
 - [x] Course management page for admins
 	- [x] Course Info (including code, name, semester)
@@ -37,10 +36,10 @@
 - [x] API endpoints for new project, delete project, edit project
 - [x] Courses table
 - [x] API endpoints for managing courses
-	- [ ] Only accessible by admin
+	- [x] Only accessible by admin
 - [x] Topics table
 - [x] API endpoints for managing topics 
-	- [ ] Only admin can delete topics
+	- [x] Only admin can delete topics
 - [ ] Unit Testing with PyTest
 	- [ ] UT DB User/Projects/Courses
 	- [ ] UT Authentication
@@ -48,9 +47,9 @@
 - [x] Dummy Data
 
 #### Optional Things (for future use)
-- [ ] Bookmark Page
-	- [ ] Bookmark Project Function
- 	- [ ] Add to Database
+- [x] Bookmark Page
+	- [x] Bookmark Project Function
+ 	- [x] Add to Database
 - [ ] Project Details
 	- [ ] Share Function
 		- [ ] Project Link
@@ -70,5 +69,5 @@
 	- [ ] Add Profile Picture
 - [ ] Little About section on the website?
 - [ ] Potentially hosting the website
-
+- [ ] View Organization (rather optional)
 

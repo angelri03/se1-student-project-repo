@@ -70,6 +70,13 @@ from .db_media import (
     delete_project_media,
     get_media_by_id
 )
+from .db_bookmarks import (
+    add_bookmark,
+    remove_bookmark,
+    get_user_bookmarks,
+    is_bookmarked,
+    get_bookmark_count
+)
 
 __all__ = [
     # Core
@@ -140,5 +147,12 @@ __all__ = [
     'add_project_media',
     'get_project_media',
     'delete_project_media',
-    'get_media_by_id'
+    'get_media_by_id',
+    
+    # Bookmarks
+    'add_bookmark',
+    'remove_bookmark',
+    'get_user_bookmarks',
+    'is_bookmarked',
+    'get_bookmark_count'
 ]

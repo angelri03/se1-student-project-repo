@@ -35,6 +35,7 @@ function ViewProjectPage() {
   const location = useLocation()
   const { id } = useParams<{ id: string }>()
   const fromProfile = location.state?.fromProfile || false
+  const fromBookmarks = location.state?.fromBookmarks || false
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [ratingData, setRatingData] = useState<RatingData>({ average: 0, count: 0 })
@@ -47,6 +48,8 @@ function ViewProjectPage() {
   const [media, setMedia] = useState<any[]>([])
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
   const [uploadingMedia, setUploadingMedia] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isLoadingBookmark, setIsLoadingBookmark] = useState(false)
 
   // Editing states
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -191,6 +194,24 @@ function ViewProjectPage() {
       }
     }
     fetchMedia()
+
+    // Check bookmark status
+    const checkBookmark = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      try {
+        const response = await axios.get(`/api/bookmarks/check/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (response.data.success) {
+          setIsBookmarked(response.data.is_bookmarked)
+        }
+      } catch (error) {
+        console.error('Error checking bookmark status:', error)
+      }
+    }
+    checkBookmark()
   }, [id])
 
   const handleMediaUpload = async () => {
@@ -290,6 +311,36 @@ function ViewProjectPage() {
       }
     } catch (error: any) {
       setRatingMessage(error.response?.data?.message || 'Failed to submit rating')
+    }
+  }
+
+  const handleBookmarkToggle = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
+    setIsLoadingBookmark(true)
+    try {
+      if (isBookmarked) {
+        // Remove bookmark
+        await axios.delete(`/api/bookmarks/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setIsBookmarked(false)
+      } else {
+        // Add bookmark
+        await axios.post('/api/bookmarks', 
+          { project_id: parseInt(id || '0') },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        setIsBookmarked(true)
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error)
+    } finally {
+      setIsLoadingBookmark(false)
     }
   }
 
@@ -568,13 +619,13 @@ function ViewProjectPage() {
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate(fromProfile ? '/profile' : '/explore')}
+          onClick={() => navigate(fromBookmarks ? '/bookmarks' : fromProfile ? '/profile' : '/explore')}
           className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {fromProfile ? 'Back to Profile' : 'Back to Explore'}
+          {fromBookmarks ? 'Back to Bookmarks' : fromProfile ? 'Back to Profile' : 'Back to Explore'}
         </button>
 
         {/* Project Header Card */}
@@ -1102,12 +1153,33 @@ function ViewProjectPage() {
               </svg>
               Share
             </button>
-            <button className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              Bookmark
-            </button>
+            {isLoggedIn && (
+              <button
+                onClick={handleBookmarkToggle}
+                disabled={isLoadingBookmark}
+                className={`px-6 py-3 border rounded-lg font-medium transition duration-200 inline-flex items-center gap-2 disabled:opacity-50 ${
+                  isBookmarked 
+                    ? 'bg-fuchsia-700 text-white border-fuchsia-700 hover:bg-fuchsia-800' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                {isBookmarked ? (
+                  <>
+                    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    Bookmarked
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    Bookmark
+                  </>
+                )}
+              </button>
+            )}
             {isOwner && (
               <button
                 onClick={handleDeleteProject}
