@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CoursePopup from '../components/CoursePopup'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
@@ -13,6 +14,13 @@ interface Project {
   name: string
   description: string
   course?: string
+  course_info?: {
+    name: string;
+    code?: string;
+    description?: string;
+    instructor?: string;
+    semester?: string;
+  }
   tags: string[]
   owners: User[]
   created_at: string
@@ -37,6 +45,7 @@ function ViewProjectPage() {
   const fromProfile = location.state?.fromProfile || false
   const fromBookmarks = location.state?.fromBookmarks || false
   const [project, setProject] = useState<Project | null>(null)
+  const [showCoursePopup, setShowCoursePopup] = useState(false)
   const [loading, setLoading] = useState(true)
   const [ratingData, setRatingData] = useState<RatingData>({ average: 0, count: 0 })
   const [userRating, setUserRating] = useState<number>(0)
@@ -86,7 +95,11 @@ function ViewProjectPage() {
           try {
             const courseResponse = await axios.get(`/api/projects/${id}/course`)
             if (courseResponse.data.success) {
-              projectData = { ...projectData, course: courseResponse.data.course.name }
+              projectData = {
+                ...projectData,
+                course: courseResponse.data.course.name,
+                course_info: courseResponse.data.course
+              }
             }
           } catch {
             projectData = { ...projectData, course: 'Uncategorized' }
@@ -686,10 +699,18 @@ function ViewProjectPage() {
 
           {/* Course Tag */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-purple-900 text-purple-200">
+            <button
+              type="button"
+              className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-purple-900 text-purple-200 hover:bg-purple-800 hover:text-white transition"
+              onClick={() => setShowCoursePopup(true)}
+              title="View course info"
+            >
               {project.course}
-            </span>
+            </button>
           </div>
+          {showCoursePopup && project.course_info && (
+            <CoursePopup course={project.course_info} onClose={() => setShowCoursePopup(false)} />
+          )}
 
           {/* Editable Topic Tags */}
           <div className="mb-4">

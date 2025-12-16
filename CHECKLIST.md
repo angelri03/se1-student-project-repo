@@ -16,10 +16,15 @@
 	- [x] Allow editing on own profile page
 	- [x] Semester/Programme Tag
 	- [x] Organization Tag
+		- [ ] distinguish between uni and organization ?
+		- [ ] Uni Affiliation (if university)
+		- [ ] View Organization (rather optional)
 - [x] Admins approve project before it becomes publicly visible
 - [x] Course management page for admins
 	- [x] Course Info (including code, name, semester)
 - [x] View Project Page
+	- [ ] Study programme and semester
+	- [x] Course popup
 - [x] View pending projects for admin ?
 
 #### Backend
@@ -49,7 +54,7 @@
 #### Optional Things (for future use)
 - [x] Bookmark Page
 	- [x] Bookmark Project Function
- 	- [x] Add to Database
+	- [x] Add to Database
 - [ ] Project Details
 	- [ ] Share Function
 		- [ ] Project Link
@@ -60,14 +65,15 @@
 - [x] Download button
 - [x] Dynamically allocate projects based on name to profile
 - [ ] Visual Changes
+	- [ ] Redo the Design of the Profile and Project View
 	- [ ] Custom Color Schemes (green)
 	- [ ] Add Light Mode
 	- [ ] Add Logo
 	- [ ] Add Header? (maybe)
+	- [ ] Add Footer
 - [ ] Profile Details
 	- [ ] Add Github Link for Profle
 	- [ ] Add Profile Picture
 - [ ] Little About section on the website?
 - [ ] Potentially hosting the website
-- [ ] View Organization (rather optional)
-
+- [ ] Clean up code and reformat it
