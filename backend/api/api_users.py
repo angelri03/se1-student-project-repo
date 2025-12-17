@@ -361,3 +361,35 @@ def delete_profile_picture(current_user_id, current_username):
         'success': True,
         'message': 'Profile picture deleted successfully'
     }), 200
+
+
+@users_bp.route('/api/users/profile/<username>', methods=['GET'])
+def get_user_profile(username):
+    """
+    Get public user profile by username
+    Public endpoint
+    """
+    user = database.get_user_by_username(username)
+
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+
+    rating_stats = database.get_user_rating_stats(user['id'])
+
+    # return public profile info (so exclude email and password)
+    public_user = {
+        'id': user['id'],
+        'username': user['username'],
+        'bio': user.get('bio'),
+        'created_at': user.get('created_at'),
+        'is_student': user.get('is_student', 1),
+        'semester': user.get('semester'),
+        'study_programme': user.get('study_programme'),
+        'organization': user.get('organization'),
+        'admin': user.get('admin', 0),
+        'profile_picture': user.get('profile_picture'),
+        'total_ratings': rating_stats.get('total_ratings', 0) if rating_stats else 0,
+        'average_rating': rating_stats.get('average_rating', 0) if rating_stats else 0
+    }
+
+    return jsonify({'success': True, 'user': public_user}), 200

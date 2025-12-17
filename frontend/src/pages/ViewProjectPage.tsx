@@ -44,6 +44,7 @@ function ViewProjectPage() {
   const { id } = useParams<{ id: string }>()
   const fromProfile = location.state?.fromProfile || false
   const fromBookmarks = location.state?.fromBookmarks || false
+  const profileUsername = location.state?.profileUsername || null
   const [project, setProject] = useState<Project | null>(null)
   const [showCoursePopup, setShowCoursePopup] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -80,6 +81,22 @@ function ViewProjectPage() {
   // Collaborator management states
   const [allUsers, setAllUsers] = useState<User[]>([])
   const [isCollaboratorDropdownOpen, setIsCollaboratorDropdownOpen] = useState(false)
+
+  const handleBackNavigation = () => {
+    if (fromBookmarks) {
+      navigate('/bookmarks')
+    } else if (fromProfile && profileUsername) {
+      navigate(`/profile/${profileUsername}`)
+    } else {
+      navigate('/explore')
+    }
+  }
+
+  const getBackButtonText = () => {
+    if (fromBookmarks) return 'Back to Bookmarks'
+    if (fromProfile) return 'Back to Profile'
+    return 'Back to Explore'
+  }
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -196,7 +213,7 @@ function ViewProjectPage() {
     fetchRating()
     fetchUserRating()
     checkOwnership()
-    
+
     // Fetch media
     const fetchMedia = async () => {
       try {
@@ -346,7 +363,7 @@ function ViewProjectPage() {
         setIsBookmarked(false)
       } else {
         // Add bookmark
-        await axios.post('/api/bookmarks', 
+        await axios.post('/api/bookmarks',
           { project_id: parseInt(id || '0') },
           { headers: { Authorization: `Bearer ${token}` } }
         )
@@ -586,7 +603,7 @@ function ViewProjectPage() {
 
       if (response.data.success) {
         alert('Project deleted successfully')
-        navigate(fromProfile ? '/profile' : '/explore')
+        handleBackNavigation()
       }
     } catch (error: any) {
       alert(error.response?.data?.message || 'Failed to delete project')
@@ -634,13 +651,13 @@ function ViewProjectPage() {
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate(fromBookmarks ? '/bookmarks' : fromProfile ? '/profile' : '/explore')}
+          onClick={handleBackNavigation}
           className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {fromBookmarks ? 'Back to Bookmarks' : fromProfile ? 'Back to Profile' : 'Back to Explore'}
+          {getBackButtonText()}
         </button>
 
         {/* Project Header Card */}
@@ -1084,7 +1101,7 @@ function ViewProjectPage() {
         {/* Media Attachments */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700">
           <h2 className="text-xl font-bold text-white mb-4">Media Attachments</h2>
-          
+
           {/* Upload Section (only for owners) */}
           {isOwner && (
             <div className="mb-6 p-4 bg-gray-700 rounded-lg">
@@ -1134,7 +1151,7 @@ function ViewProjectPage() {
                       </svg>
                     </div>
                   )}
-                  
+
                   {/* Media Info */}
                   <div className="p-3">
                     <p className="text-sm text-white font-medium truncate mb-1">{item.file_name}</p>

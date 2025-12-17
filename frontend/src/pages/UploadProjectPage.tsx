@@ -34,6 +34,7 @@ function UploadProjectPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const fromProfile = location.state?.fromProfile || false
+  const profileUsername = location.state?.profileUsername || null
   const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     description: '',
@@ -59,6 +60,14 @@ function UploadProjectPage() {
   const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false)
   const [newTopicName, setNewTopicName] = useState('')
   const [addingTopic, setAddingTopic] = useState(false)
+
+  const handleBackNavigation = () => {
+    if (fromProfile && profileUsername) {
+      navigate(`/profile/${profileUsername}`)
+    } else {
+      navigate('/explore')
+    }
+  }
 
   // Fetch current user, all users, courses, and topics on mount
   useEffect(() => {
@@ -159,8 +168,8 @@ function UploadProjectPage() {
       const file = files[0]
       // Check if it's a valid archive file (case-insensitive)
       const fileName = file.name.toLowerCase()
-      if (fileName.endsWith('.zip') || fileName.endsWith('.rar') || 
-          fileName.endsWith('.7z') || fileName.endsWith('.tar') || 
+      if (fileName.endsWith('.zip') || fileName.endsWith('.rar') ||
+          fileName.endsWith('.7z') || fileName.endsWith('.tar') ||
           fileName.endsWith('.gz')) {
         setFormData(prev => ({
           ...prev,
@@ -375,7 +384,7 @@ function UploadProjectPage() {
           Array.from(formData.mediaFiles).forEach(file => {
             mediaFormData.append('media', file)
           })
-          
+
           try {
             const mediaResponse = await axios.post(`/api/projects/${projectId}/media`, mediaFormData, {
               headers: {
@@ -394,7 +403,7 @@ function UploadProjectPage() {
           setMessage({ type: 'success', text: 'Project uploaded successfully!' })
         }
       }
-      
+
       setFormData({
         title: '',
         description: '',
@@ -420,7 +429,7 @@ function UploadProjectPage() {
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate(fromProfile ? '/profile' : '/explore')}
+          onClick={handleBackNavigation}
           className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -596,7 +605,7 @@ function UploadProjectPage() {
               <label htmlFor="file" className="block text-sm font-medium text-gray-300 mb-2">
                 Project File <span className="text-fuchsia-500">*</span>
               </label>
-              <div 
+              <div
                 className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition duration-200 ${
                   isDraggingFile 
                     ? 'border-purple-500 bg-purple-900/20' 
@@ -653,7 +662,7 @@ function UploadProjectPage() {
               <label htmlFor="media-upload" className="block text-sm font-medium text-gray-300 mb-2">
                 Media Attachments <span className="text-gray-500">(optional)</span>
               </label>
-              <div 
+              <div
                 className={`mt-1 px-6 py-4 border-2 border-dashed rounded-lg transition duration-200 ${
                   isDraggingMedia 
                     ? 'border-purple-500 bg-purple-900/20' 

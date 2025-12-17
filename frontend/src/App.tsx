@@ -18,7 +18,7 @@ function App() {
           <Route path="/upload" element={<UploadProjectPage />} />
           <Route path="/project/:id" element={<ViewProjectPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:username" element={<ProfilePage />} />
           <Route path="/bookmarks" element={<BookmarksPage />} />
           <Route path="/admin/courses" element={<CourseManagementPage />} />
           <Route path="/admin/topics" element={<TopicManagementPage />} />

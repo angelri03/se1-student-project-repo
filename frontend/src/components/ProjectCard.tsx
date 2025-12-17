@@ -20,11 +20,22 @@ interface ProjectCardProps {
   variant?: 'default' | 'profile'
   fromProfile?: boolean
   fromBookmarks?: boolean
+  profileUsername?: string
   showBookmarkButton?: boolean
   onBookmarkChange?: () => void
 }
 
-function ProjectCard({ project, showApproveButton = false, onApprove, variant = 'default', fromProfile = false, fromBookmarks = false, showBookmarkButton = true, onBookmarkChange }: ProjectCardProps) {
+function ProjectCard({
+  project,
+  showApproveButton = false,
+  onApprove,
+  variant = 'default',
+  fromProfile = false,
+  fromBookmarks = false,
+  profileUsername,
+  showBookmarkButton = true,
+  onBookmarkChange
+}: ProjectCardProps) {
   const navigate = useNavigate()
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoadingBookmark, setIsLoadingBookmark] = useState(false)
@@ -55,7 +66,7 @@ function ProjectCard({ project, showApproveButton = false, onApprove, variant = 
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    
+
     const token = localStorage.getItem('token')
     if (!token) {
       navigate('/login')
@@ -72,13 +83,13 @@ function ProjectCard({ project, showApproveButton = false, onApprove, variant = 
         setIsBookmarked(false)
       } else {
         // Add bookmark
-        await axios.post('/api/bookmarks', 
+        await axios.post('/api/bookmarks',
           { project_id: project.id },
           { headers: { Authorization: `Bearer ${token}` } }
         )
         setIsBookmarked(true)
       }
-      
+
       // Notify parent component if callback provided
       if (onBookmarkChange) {
         onBookmarkChange()
@@ -89,6 +100,41 @@ function ProjectCard({ project, showApproveButton = false, onApprove, variant = 
       setIsLoadingBookmark(false)
     }
   }
+
+  const handleViewDetails = () => {
+    const state: { fromProfile?: boolean; fromBookmarks?: boolean; profileUsername?: string } = {}
+
+    if (fromProfile) {
+      state.fromProfile = true
+      if (profileUsername) {
+        state.profileUsername = profileUsername
+      }
+    }
+    if (fromBookmarks) {
+      state.fromBookmarks = true
+    }
+
+    navigate(`/project/${project.id}`, Object.keys(state).length > 0 ? { state } : undefined)
+  }
+
+const handleAuthorClick = (e: React.MouseEvent, username: string) => {
+  e.stopPropagation()
+
+  // navigation state based on current context
+  const state: { fromBookmarks?: boolean; fromProfile?: boolean; profileUsername?: string } = {}
+
+  if (fromBookmarks) {
+    state.fromBookmarks = true
+  }
+  if (fromProfile) {
+    state.fromProfile = true
+    if (profileUsername) {
+      state.profileUsername = profileUsername
+    }
+  }
+
+  navigate(`/profile/${username}`, Object.keys(state).length > 0 ? { state } : undefined)
+}
 
   return (
     <div
@@ -149,7 +195,21 @@ function ProjectCard({ project, showApproveButton = false, onApprove, variant = 
         {/* Authors */}
         <div className="mb-3">
           <p className="text-xs text-gray-500 mb-1">Authors:</p>
-          <p className="text-sm text-gray-300">{project.owners.map(o => o.username).join(', ')}</p>
+          <div className="flex flex-wrap gap-1">
+            {project.owners.map((owner, index) => (
+              <span key={owner.id}>
+                <button
+                  onClick={(e) => handleAuthorClick(e, owner.username)}
+                  className="text-sm text-purple-400 hover:text-purple-300 hover:underline transition"
+                >
+                  {owner.username}
+                </button>
+                {index < project.owners.length - 1 && (
+                  <span className="text-gray-500">, </span>
+                )}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Upload Date */}
@@ -164,7 +224,7 @@ function ProjectCard({ project, showApproveButton = false, onApprove, variant = 
         {/* Action Buttons */}
         <div className="flex flex-col gap-2">
           <button
-            onClick={() => navigate(`/project/${project.id}`, (fromProfile || fromBookmarks) ? { state: { fromProfile, fromBookmarks } } : undefined)}
+            onClick={handleViewDetails}
             className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition duration-200"
           >
             View Details

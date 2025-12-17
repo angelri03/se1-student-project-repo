@@ -21,7 +21,7 @@ function UserMenu({ user, onLogout }: UserMenuProps) {
       {user ? (
         <>
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate(`/profile/${user.username}`)}
             className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

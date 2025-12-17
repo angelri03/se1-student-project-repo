@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import ProjectCard from '../components/ProjectCard'
 
@@ -19,31 +19,75 @@ interface User {
   profile_picture?: string
 }
 
+interface CurrentUser {
+  id: number
+  username: string
+  admin?: number
+}
+
 function ProfilePage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { username } = useParams<{ username: string }>()
+
+  const fromBookmarks = location.state?.fromBookmarks || false
+  const fromProfile = location.state?.fromProfile || false
+  const previousProfileUsername = location.state?.profileUsername || null
+
   const [user, setUser] = useState<User | null>(null)
-  const [userProjects, setUserProjects] = useState<any[]>([])  
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
+  const [userProjects, setUserProjects] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editedUser, setEditedUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
   const [uploadingPicture, setUploadingPicture] = useState(false)
   const [hoveredAvatar, setHoveredAvatar] = useState(false)
   const [profilePicVersion, setProfilePicVersion] = useState(Date.now())
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const isOwnProfile = currentUser && user && currentUser.id === user.id
+
+  const handleBackNavigation = () => {
+    if (fromBookmarks) {
+      navigate('/bookmarks')
+    } else if (fromProfile && previousProfileUsername) {
+      navigate(`/profile/${previousProfileUsername}`)
+    } else {
+      navigate('/explore')
+    }
+  }
+
+  const getBackButtonText = () => {
+    if (fromBookmarks) return 'Back to Bookmarks'
+    if (fromProfile) return 'Back to Profile'
+    return 'Back to Explore'
+  }
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        navigate('/login')
-        return
-      }
+    const fetchData = async () => {
+      setLoading(true)
+      setNotFound(false)
 
       try {
-        // Fetch current user info
-        const userResponse = await axios.get('/api/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        // get current logged-in user (if any)
+        const token = localStorage.getItem('token')
+        if (token) {
+          try {
+            const meResponse = await axios.get('/api/me', {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+            if (meResponse.data.success) {
+              setCurrentUser(meResponse.data.user)
+            }
+          } catch {
+            // user not logged in or token invalid -> okay for viewing profiles
+            localStorage.removeItem('token')
+          }
+        }
+
+        // fetch profile by username
+        const userResponse = await axios.get(`/api/users/profile/${username}`)
 
         if (userResponse.data.success) {
           const userData = userResponse.data.user
@@ -55,10 +99,10 @@ function ProfilePage() {
           if (projectsResponse.data.success) {
             // Filter projects where user is an owner
             const allProjects = projectsResponse.data.data
-            const ownedProjects = allProjects.filter((project: any) => 
+            const ownedProjects = allProjects.filter((project: any) =>
               project.owners.some((owner: any) => owner.id === userData.id)
             )
-            
+
             // Fetch course info for each project
             const projectsWithCourses = await Promise.all(
               ownedProjects.map(async (project: any) => {
@@ -73,24 +117,28 @@ function ProfilePage() {
                 return { ...project, course: 'Uncategorized' }
               })
             )
-            
+
             setUserProjects(projectsWithCourses)
           }
+        } else {
+          setNotFound(true)
         }
       } catch (error: any) {
         console.error('Failed to fetch user data:', error)
-        console.error('Error response:', error.response?.data)
-        console.error('Error status:', error.response?.status)
-        alert(`Error loading profile: ${error.response?.data?.message || error.message}`)
-        navigate('/login')
+        if (error.response?.status === 404) {
+          setNotFound(true)
+        } else {
+          console.error('Error response:', error.response?.data)
+        }
       } finally {
-        setLoading(false
-        )
+        setLoading(false)
       }
     }
 
-    fetchUserData()
-  }, [])
+    if (username) {
+      fetchData()
+    }
+  }, [username])
 
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -125,9 +173,7 @@ function ProfilePage() {
 
       if (response.data.success) {
         // Refresh user data
-        const userResponse = await axios.get('/api/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        const userResponse = await axios.get(`/api/users/profile/${username}`)
         if (userResponse.data.success) {
           setUser(userResponse.data.user)
           setEditedUser(userResponse.data.user)
@@ -155,9 +201,7 @@ function ProfilePage() {
 
       if (response.data.success) {
         // Refresh user data
-        const userResponse = await axios.get('/api/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        const userResponse = await axios.get(`/api/users/profile/${username}`)
         if (userResponse.data.success) {
           setUser(userResponse.data.user)
           setEditedUser(userResponse.data.user)
@@ -172,6 +216,35 @@ function ProfilePage() {
     }
   }
 
+  const handleSaveChanges = async () => {
+    if (editedUser) {
+      try {
+        const token = localStorage.getItem('token')
+        await axios.put('/api/me', {
+          username: editedUser.username,
+          email: editedUser.email,
+          bio: editedUser.bio,
+          is_student: editedUser.is_student,
+          semester: editedUser.semester,
+          study_programme: editedUser.study_programme,
+          organization: editedUser.organization
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        // if username changed, navigate to new profile URL
+        if (editedUser.username !== username) {
+          navigate(`/profile/${editedUser.username}`, { replace: true })
+        } else {
+          setUser(editedUser)
+        }
+        setIsEditing(false)
+      } catch (error) {
+        console.error('Failed to update profile:', error)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -182,11 +255,18 @@ function ProfilePage() {
     )
   }
 
-  if (!user) {
+  if (notFound || !user) {
     return (
       <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Loading...</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">User Not Found</h1>
+          <p className="text-gray-400 mb-6">The user "{username}" does not exist.</p>
+          <button
+            onClick={handleBackNavigation}
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
+          >
+            {getBackButtonText()}
+          </button>
         </div>
       </div>
     )
@@ -198,40 +278,54 @@ function ProfilePage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <button
-            onClick={() => navigate('/explore')}
+            onClick={handleBackNavigation}
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Explore
+            {getBackButtonText()}
           </button>
-          <h1 className="text-3xl font-bold text-white absolute left-1/2 transform -translate-x-1/2">Profile</h1>
+          <h1 className="text-3xl font-bold text-white absolute left-1/2 transform -translate-x-1/2">
+            {isOwnProfile ? 'My Profile' : `${user.username}'s Profile`}
+          </h1>
           <div className="flex gap-3">
-            <button
-              onClick={() => {
-                if (isEditing) {
-                  // Cancel editing - restore original user data
-                  setEditedUser(user)
-                }
-                setIsEditing(!isEditing)
-              }}
-              className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </button>
-            {user.is_student === 1 && (
+            {isOwnProfile && (
+              <>
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      // Cancel editing - restore original user data
+                      setEditedUser(user)
+                    }
+                    setIsEditing(!isEditing)
+                  }}
+                  className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  {isEditing ? 'Cancel' : 'Edit Profile'}
+                </button>
+                {user.is_student === 1 && (
+                  <button
+                    onClick={() => navigate('/upload', { state: { fromProfile: true, profileUsername: user?.username } })}
+                    className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Upload Project
+                  </button>
+                )}
+              </>
+            )}
+            {!currentUser && (
               <button
-                onClick={() => navigate('/upload', { state: { fromProfile: true } })}
-                className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
+                onClick={() => navigate('/login')}
+                className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Upload Project
+                Login
               </button>
             )}
           </div>
@@ -242,20 +336,20 @@ function ProfilePage() {
           <div className="flex items-start gap-6">
             {/* Avatar */}
             <div className="flex-shrink-0 flex flex-col items-center gap-2">
-              <div 
-                className="relative w-32 h-32 rounded-full overflow-hidden group cursor-pointer"
-                onMouseEnter={() => setHoveredAvatar(true)}
+              <div
+                className={`relative w-32 h-32 rounded-full overflow-hidden ${isOwnProfile ? 'group cursor-pointer' : ''}`}
+                onMouseEnter={() => isOwnProfile && setHoveredAvatar(true)}
                 onMouseLeave={() => setHoveredAvatar(false)}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => isOwnProfile && fileInputRef.current?.click()}
               >
                 {user.profile_picture ? (
                   <>
-                    <img 
-                      src={`/${user.profile_picture}?v=${profilePicVersion}`} 
+                    <img
+                      src={`/${user.profile_picture}?v=${profilePicVersion}`}
                       alt={user.username}
                       className="w-full h-full object-cover"
                     />
-                    {hoveredAvatar && (
+                    {isOwnProfile && hoveredAvatar && (
                       <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center gap-2">
                         <span
                           className="cursor-pointer flex flex-col items-center"
@@ -284,7 +378,7 @@ function ProfilePage() {
                         {user.username.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    {hoveredAvatar && (
+                    {isOwnProfile && hoveredAvatar && (
                       <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <span
                           className="cursor-pointer flex flex-col items-center"
@@ -304,20 +398,22 @@ function ProfilePage() {
                   </div>
                 )}
                 {/* Hidden file input for avatar click */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-                  onChange={handleProfilePictureUpload}
-                  className="hidden"
-                  disabled={uploadingPicture}
-                />
+                {isOwnProfile && (
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                    onChange={handleProfilePictureUpload}
+                    className="hidden"
+                    disabled={uploadingPicture}
+                  />
+                )}
               </div>
             </div>
 
             {/* User Info */}
             <div className="flex-1">
-              {isEditing ? (
+              {isEditing && isOwnProfile ? (
                 // Edit Mode
                 <div>
                   <div className="mb-4">
@@ -383,28 +479,7 @@ function ProfilePage() {
                     />
                   </div>
                   <button
-                    onClick={async () => {
-                      if (editedUser) {
-                        try {
-                          const token = localStorage.getItem('token')
-                          await axios.put('/api/me', {
-                            username: editedUser.username,
-                            email: editedUser.email,
-                            bio: editedUser.bio,
-                            is_student: editedUser.is_student,
-                            semester: editedUser.semester,
-                            study_programme: editedUser.study_programme,
-                            organization: editedUser.organization
-                          }, {
-                            headers: { Authorization: `Bearer ${token}` }
-                          })
-                          setUser(editedUser)
-                          setIsEditing(false)
-                        } catch (error) {
-                          console.error('Failed to update profile:', error)
-                        }
-                      }
-                    }}
+                    onClick={handleSaveChanges}
                     className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
                   >
                     Save Changes
@@ -414,8 +489,8 @@ function ProfilePage() {
                 // View Mode
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-2">{user.username}</h2>
-                  <p className="text-gray-400 mb-4">{user.email}</p>
-                  
+                  {isOwnProfile && <p className="text-gray-400 mb-4">{user.email}</p>}
+
                   {/* User Type Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {user.admin === 1 && (
@@ -438,7 +513,7 @@ function ProfilePage() {
                       <span className={`px-3 py-1 ${user.is_student === 1 ? 'bg-purple-600' : 'bg-indigo-600'} text-white text-sm rounded-full`}>{user.organization}</span>
                     )}
                   </div>
-                  
+
                   {/* Bio */}
                   {user.bio && (
                     <p className="text-gray-300 leading-relaxed mb-6 whitespace-pre-line">{user.bio}</p>
@@ -483,17 +558,21 @@ function ProfilePage() {
         {/* Projects Section - Only for Students */}
         {user && user.is_student === 1 && (
           <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold text-white mb-6">My Projects</h2>
-            
+            <h2 className="text-2xl font-bold text-white mb-6">
+              {isOwnProfile ? 'My Projects' : `${user.username}'s Projects`}
+            </h2>
+
             {userProjects.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-400 text-lg mb-4">No projects yet</p>
-                <button
-                  onClick={() => navigate('/upload')}
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
-                >
-                  Upload Your First Project
-                </button>
+                {isOwnProfile && (
+                  <button
+                    onClick={() => navigate('/upload', { state: { fromProfile: true, profileUsername: user?.username } })}
+                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
+                  >
+                    Upload Your First Project
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -503,6 +582,7 @@ function ProfilePage() {
                     project={project}
                     variant="profile"
                     fromProfile={true}
+                    profileUsername={user?.username}
                   />
                 ))}
               </div>
