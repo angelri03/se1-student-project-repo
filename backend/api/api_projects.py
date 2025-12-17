@@ -15,8 +15,8 @@ projects_bp = Blueprint('projects', __name__)
 # Configuration
 UPLOAD_FOLDER = 'uploads/projects'
 MEDIA_FOLDER = 'uploads/media'
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB in bytes
-ALLOWED_EXTENSIONS = {'zip'}
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB in bytes (NOTE: MAX_FILE_SIZE is unused for now, remove?)
+ALLOWED_EXTENSIONS = {'zip', '7z', 'rar', 'tar', 'gz'}
 ALLOWED_MEDIA_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'pdf'}
 
 # Ensure upload directories exist
@@ -39,7 +39,7 @@ def upload_project(current_user_id, current_username):
     Requires valid JWT token
     The creator is automatically added as the first owner
     Expects multipart/form-data with:
-    - file: zip file
+    - file: file of type ALLOWED_EXTENSIONS
     - name: project name
     - description: project description (optional)
     - tags: comma-separated tags (optional)
@@ -54,7 +54,7 @@ def upload_project(current_user_id, current_username):
         return jsonify({'success': False, 'message': 'No file selected'}), 400
     
     if not allowed_file(file.filename):
-        return jsonify({'success': False, 'message': 'Only .zip files are allowed'}), 400
+        return jsonify({'success': False, 'message': 'Only files of type (ZIP, 7z, RAR, TAR or GZ) are allowed'}), 400
     
     # Get form data
     name = request.form.get('name')
@@ -83,7 +83,8 @@ def upload_project(current_user_id, current_username):
     project_id = result['id']
     
     # Save file with project ID in filename
-    final_filename = f"{project_id}_{random_hash}.zip"
+    file_ext = file.filename.rsplit('.', 1)[1].lower()
+    final_filename = f"{project_id}_{random_hash}.{file_ext}"
     file_path = os.path.join(UPLOAD_FOLDER, final_filename)
     
     try:
@@ -211,11 +212,14 @@ def download_project(project_id):
     
     if not os.path.exists(file_path):
         return jsonify({'success': False, 'message': 'File not found'}), 404
-    
+
+    # grab file extension from actual file path
+    file_ext = os.path.splitext(file_path)[1]
+
     return send_file(
         file_path,
         as_attachment=True,
-        download_name=f"{project['name']}.zip"
+        download_name=f"{project['name']}{file_ext}"
     )
 
 @projects_bp.route('/api/projects/<int:project_id>', methods=['PUT'])
@@ -225,7 +229,7 @@ def update_project(project_id, current_user_id, current_username):
     Update a project (replace file, update name/description/tags)
     Any owner can update the project
     Expects multipart/form-data with:
-    - file: zip file (optional - only if replacing)
+    - file: file of type ALLOWED_EXTENSIONS (optional - only if replacing)
     - name: project name (optional)
     - description: project description (optional)
     - tags: comma-separated tags (optional)
@@ -269,7 +273,8 @@ def update_project(project_id, current_user_id, current_username):
             
             # Save new file
             random_hash = secrets.token_hex(8)
-            final_filename = f"{project_id}_{random_hash}.zip"
+            file_ext = file.filename.rsplit('.', 1)[1].lower()
+            final_filename = f"{project_id}_{random_hash}.{file_ext}"
             file_path = os.path.join(UPLOAD_FOLDER, final_filename)
             
             try:

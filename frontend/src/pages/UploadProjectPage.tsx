@@ -638,7 +638,7 @@ function UploadProjectPage() {
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">ZIP, RAR, 7Z up to 500MB</p>
+                  <p className="text-xs text-gray-500">ZIP, 7z, RAR, TAR or GZ up to 500MB</p>
                   {fileName && (
                     <p className="text-sm text-purple-400 mt-2">
                       Selected: {fileName}
