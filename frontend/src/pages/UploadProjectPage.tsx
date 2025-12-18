@@ -435,12 +435,13 @@ function UploadProjectPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {fromProfile ? 'Back to Profile' : 'Back to Explore'}
+            <span className="inline sm:hidden">Back</span>
+            <span className="hidden sm:inline">{fromProfile ? 'Back to Profile' : 'Back to Explore'}</span>
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Upload Your Project</h1>
+        <div className="text-center mb-8 relative">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">Upload Your Project</h1>
         </div>
 
         {/* Form Card */}

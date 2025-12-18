@@ -276,7 +276,7 @@ function ProfilePage() {
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 relative">
           <button
             onClick={handleBackNavigation}
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
@@ -284,9 +284,10 @@ function ProfilePage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            {getBackButtonText()}
+            <span className="inline sm:hidden">Back</span>
+            <span className="hidden sm:inline">{getBackButtonText()}</span>
           </button>
-          <h1 className="text-3xl font-bold text-white absolute left-1/2 transform -translate-x-1/2">
+          <h1 className="text-xl sm:text-3xl font-bold text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">
             {isOwnProfile ? 'My Profile' : `${user.username}'s Profile`}
           </h1>
           <div className="flex gap-3">
@@ -300,22 +301,24 @@ function ProfilePage() {
                     }
                     setIsEditing(!isEditing)
                   }}
-                  className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
+                  className="p-2 sm:px-6 sm:py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
+                  title={isEditing ? 'Cancel' : 'Edit profile'}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  {isEditing ? 'Cancel' : 'Edit Profile'}
+                  <span className="hidden sm:inline">{isEditing ? 'Cancel' : 'Edit Profile'}</span>
                 </button>
                 {user.is_student === 1 && (
                   <button
                     onClick={() => navigate('/upload', { state: { fromProfile: true, profileUsername: user?.username } })}
-                    className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
+                    className="p-2 sm:px-6 sm:py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 inline-flex items-center gap-2"
+                    title="Upload project"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Upload Project
+                    <span className="hidden sm:inline">Upload Project</span>
                   </button>
                 )}
               </>
@@ -333,11 +336,11 @@ function ProfilePage() {
 
         {/* Profile Card */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
             {/* Avatar */}
-            <div className="flex-shrink-0 flex flex-col items-center gap-2">
+            <div className="flex-shrink-0 flex flex-col items-center gap-2 mb-4 sm:mb-0">
               <div
-                className={`relative w-32 h-32 rounded-full overflow-hidden ${isOwnProfile ? 'group cursor-pointer' : ''}`}
+                className={`relative w-32 h-32 rounded-full overflow-hidden mx-auto sm:mx-0 ${isOwnProfile ? 'group cursor-pointer' : ''}`}
                 onMouseEnter={() => isOwnProfile && setHoveredAvatar(true)}
                 onMouseLeave={() => setHoveredAvatar(false)}
                 onClick={() => isOwnProfile && fileInputRef.current?.click()}

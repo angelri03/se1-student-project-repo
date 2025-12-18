@@ -172,7 +172,7 @@ function CourseManagementPage() {
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 relative">
           <button
             onClick={() => navigate('/explore')}
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
@@ -180,17 +180,19 @@ function CourseManagementPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Explore
+            <span className="inline sm:hidden">Back</span>
+            <span className="hidden sm:inline">Back to Explore</span>
           </button>
-          <h1 className="text-3xl font-bold text-white">Course Management</h1>
+          <h1 className="text-xl sm:text-3xl font-bold text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">Course Management</h1>
           <button
             onClick={openCreateModal}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200 inline-flex items-center gap-2"
+            className="p-2 sm:px-6 sm:py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200 inline-flex items-center gap-2"
+            title="Create course"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Create Course
+            <span className="hidden sm:inline">Create Course</span>
           </button>
         </div>
 
