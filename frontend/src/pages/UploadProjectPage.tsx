@@ -441,7 +441,7 @@ function UploadProjectPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Upload Your Project</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">Upload Your Project</h1>
         </div>
 
         {/* Form Card */}

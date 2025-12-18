@@ -125,10 +125,8 @@ function LoginPage() {
           Back to Explore
         </button>
 
-        <div className="text-center mb-8 relative">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">
-            {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-          </h1>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h1>
         </div>
 
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
