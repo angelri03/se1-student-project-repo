@@ -211,13 +211,13 @@ function ExploreProjectsPage() {
             {user && (
               <button
                 onClick={() => navigate('/bookmarks')}
-                className="px-4 py-2 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 transition duration-200 flex items-center gap-2"
+                className="p-2 sm:px-4 sm:py-2 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 transition duration-200 flex items-center gap-2"
                 title="View bookmarks"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
-                My Bookmarks
+                <span className="hidden sm:inline">My Bookmarks</span>
               </button>
             )}
           </div>
