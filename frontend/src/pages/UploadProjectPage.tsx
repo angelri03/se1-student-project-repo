@@ -606,53 +606,73 @@ function UploadProjectPage() {
               <label htmlFor="file" className="block text-sm font-medium text-gray-300 mb-2">
                 Project File <span className="text-fuchsia-500">*</span>
               </label>
-              <div
-                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition duration-200 ${
-                  isDraggingFile 
-                    ? 'border-purple-500 bg-purple-900/20' 
-                    : 'border-gray-600 hover:border-purple-500'
-                }`}
-                onDragOver={handleFileDragOver}
-                onDragLeave={handleFileDragLeave}
-                onDrop={handleFileDrop}
-              >
-                <div className="space-y-1 text-center">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex text-sm text-gray-400">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
+              {/* Desktop / larger screens: drag-and-drop area */}
+              <div className={`mt-1 hidden sm:block`}>
+                <div
+                  className={`flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition duration-200 ${
+                    isDraggingFile 
+                      ? 'border-purple-500 bg-purple-900/20' 
+                      : 'border-gray-600 hover:border-purple-500'
+                  }`}
+                  onDragOver={handleFileDragOver}
+                  onDragLeave={handleFileDragLeave}
+                  onDrop={handleFileDrop}
+                >
+                  <div className="space-y-1 text-center">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                      aria-hidden="true"
                     >
-                      <span>Upload a file</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        onChange={handleFileChange}
-                        accept=".zip,.rar,.7z,.tar,.gz"
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+                    </svg>
+                    <div className="flex text-sm text-gray-400">
+                      <label
+                        htmlFor="file-upload"
+                        className="relative cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="file-upload"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleFileChange}
+                          accept=".zip,.rar,.7z,.tar,.gz"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">ZIP, 7z, RAR, TAR or GZ up to 500MB</p>
+                    {fileName && (
+                      <p className="text-sm text-purple-400 mt-2">
+                        Selected: {fileName}
+                      </p>
+                    )}
                   </div>
+                </div>
+              </div>
+
+              {/* Mobile: simple upload button (no drag-and-drop) */}
+              <div className="mt-1 block sm:hidden">
+                <div className="flex flex-col gap-3">
+                  <label htmlFor="file-upload" className="w-full">
+                    <span className="w-full inline-flex justify-center px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm font-medium text-purple-400 hover:bg-gray-700/80 cursor-pointer">
+                      Choose Project File
+                    </span>
+                  </label>
                   <p className="text-xs text-gray-500">ZIP, 7z, RAR, TAR or GZ up to 500MB</p>
-                  {fileName && (
-                    <p className="text-sm text-purple-400 mt-2">
-                      Selected: {fileName}
-                    </p>
+                  {fileName ? (
+                    <p className="text-sm text-purple-400">Selected: {fileName}</p>
+                  ) : (
+                    <p className="text-sm text-gray-400">No file selected</p>
                   )}
                 </div>
               </div>
@@ -663,51 +683,76 @@ function UploadProjectPage() {
               <label htmlFor="media-upload" className="block text-sm font-medium text-gray-300 mb-2">
                 Media Attachments <span className="text-gray-500">(optional)</span>
               </label>
-              <div
-                className={`mt-1 px-6 py-4 border-2 border-dashed rounded-lg transition duration-200 ${
-                  isDraggingMedia 
-                    ? 'border-purple-500 bg-purple-900/20' 
-                    : 'border-gray-600 hover:border-purple-500'
-                }`}
-                onDragOver={handleMediaDragOver}
-                onDragLeave={handleMediaDragLeave}
-                onDrop={handleMediaDrop}
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <div className="flex-1">
-                      <label
-                        htmlFor="media-upload"
-                        className="cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300"
-                      >
-                        <span>Choose media files</span>
-                        <input
-                          id="media-upload"
-                          name="media-upload"
-                          type="file"
-                          multiple
-                          className="sr-only"
-                          onChange={handleMediaChange}
-                          accept="image/*,video/*,.pdf"
-                        />
-                      </label>
+              {/* Desktop / larger screens: drag-and-drop area */}
+              <div className="mt-1 hidden sm:block">
+                <div
+                  className={`px-6 py-4 border-2 border-dashed rounded-lg transition duration-200 ${
+                    isDraggingMedia 
+                      ? 'border-purple-500 bg-purple-900/20' 
+                      : 'border-gray-600 hover:border-purple-500'
+                  }`}
+                  onDragOver={handleMediaDragOver}
+                  onDragLeave={handleMediaDragLeave}
+                  onDrop={handleMediaDrop}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div className="flex-1">
+                        <label
+                          htmlFor="media-upload"
+                          className="cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300"
+                        >
+                          <span>Choose media files</span>
+                          <input
+                            id="media-upload"
+                            name="media-upload"
+                            type="file"
+                            multiple
+                            className="sr-only"
+                            onChange={handleMediaChange}
+                            accept="image/*,video/*,.pdf"
+                          />
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-xs text-gray-500">Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF</p>
-                  {formData.mediaFiles && formData.mediaFiles.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-sm text-purple-400 font-medium">
-                        {formData.mediaFiles.length} file(s) selected:
-                      </p>
-                      {Array.from(formData.mediaFiles).map((file, index) => (
-                        <p key={index} className="text-xs text-gray-400 truncate">
-                          • {file.name}
+                    <p className="text-xs text-gray-500">Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF</p>
+                    {formData.mediaFiles && formData.mediaFiles.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-purple-400 font-medium">
+                          {formData.mediaFiles.length} file(s) selected:
                         </p>
+                        {Array.from(formData.mediaFiles).map((file, index) => (
+                          <p key={index} className="text-xs text-gray-400 truncate">
+                            • {file.name}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile: simple upload button (no drag-and-drop) */}
+              <div className="mt-1 block sm:hidden">
+                <div className="flex flex-col gap-3">
+                  <label htmlFor="media-upload" className="w-full">
+                    <span className="w-full inline-flex justify-center px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm font-medium text-purple-400 hover:bg-gray-700/80 cursor-pointer">
+                      Choose Media Files
+                    </span>
+                  </label>
+                  <p className="text-xs text-gray-500">Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF</p>
+                  {formData.mediaFiles && formData.mediaFiles.length > 0 ? (
+                    <div className="space-y-1">
+                      <p className="text-sm text-purple-400 font-medium">{formData.mediaFiles.length} file(s) selected:</p>
+                      {Array.from(formData.mediaFiles).map((file, index) => (
+                        <p key={index} className="text-xs text-gray-400 truncate">• {file.name}</p>
                       ))}
                     </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">No media selected</p>
                   )}
                 </div>
               </div>
