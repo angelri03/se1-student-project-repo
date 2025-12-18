@@ -1219,6 +1219,16 @@ function ViewProjectPage() {
                           Delete
                         </button>
                       )}
+                      {item.file_type === 'pdf' && (
+                        <a
+                          href={`/api/media/${item.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition duration-200 text-center"
+                        >
+                          View
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
