@@ -335,12 +335,12 @@ function ProfilePage() {
         </div>
 
         {/* Profile Card */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
+        <div className="bg-gray-800 rounded-lg shadow-xl p-6 sm:p-8 border border-gray-700 mb-6">
           <div className="flex flex-col sm:flex-row items-start gap-6">
             {/* Avatar */}
-            <div className="flex-shrink-0 flex flex-col items-center gap-2 mb-4 sm:mb-0">
+            <div className="w-full sm:w-auto flex flex-col items-start gap-2 mb-4 sm:mb-0">
               <div
-                className={`relative w-32 h-32 rounded-full overflow-hidden mx-auto sm:mx-0 ${isOwnProfile ? 'group cursor-pointer' : ''}`}
+                className={`relative w-36 h-36 sm:w-32 sm:h-32 rounded-full overflow-hidden ${isOwnProfile ? 'group cursor-pointer' : ''}`}
                 onMouseEnter={() => isOwnProfile && setHoveredAvatar(true)}
                 onMouseLeave={() => setHoveredAvatar(false)}
                 onClick={() => isOwnProfile && fileInputRef.current?.click()}
@@ -415,7 +415,7 @@ function ProfilePage() {
             </div>
 
             {/* User Info */}
-            <div className="flex-1">
+            <div className="w-full flex-1">
               {isEditing && isOwnProfile ? (
                 // Edit Mode
                 <div>
