@@ -61,6 +61,41 @@ function ViewProjectPage() {
   const [uploadingMedia, setUploadingMedia] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoadingBookmark, setIsLoadingBookmark] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalItem, setModalItem] = useState<any | null>(null)
+  const [modalIndex, setModalIndex] = useState<number | null>(null)
+  const [showUpload, setShowUpload] = useState(false)
+
+  const openModalAt = (index: number) => {
+    setModalIndex(index)
+    setModalItem(media[index])
+    setModalOpen(true)
+  }
+
+  const showPrev = () => {
+    if (modalIndex === null) return
+    const prev = (modalIndex - 1 + media.length) % media.length
+    setModalIndex(prev)
+    setModalItem(media[prev])
+  }
+
+  const showNext = () => {
+    if (modalIndex === null) return
+    const next = (modalIndex + 1) % media.length
+    setModalIndex(next)
+    setModalItem(media[next])
+  }
+
+  useEffect(() => {
+    if (!modalOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') showPrev()
+      if (e.key === 'ArrowRight') showNext()
+      if (e.key === 'Escape') setModalOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [modalOpen, modalIndex, media])
 
   // Editing states
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -1100,45 +1135,62 @@ function ViewProjectPage() {
 
         {/* Media Attachments */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700">
-          <h2 className="text-xl font-bold text-white mb-4">Media Attachments</h2>
-
-          {/* Upload Section (only for owners) */}
-          {isOwner && (
-            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-              <h3 className="text-lg font-semibold text-white mb-3">Upload Media</h3>
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*,.pdf"
-                onChange={(e) => setSelectedFiles(e.target.files)}
-                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 mb-3"
-              />
-              <p className="text-xs text-gray-400 mb-3">
-                Accepts: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF
-              </p>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">Media Attachments</h2>
+            {isOwner && !showUpload && (
               <button
-                onClick={handleMediaUpload}
-                disabled={uploadingMedia || !selectedFiles}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                onClick={() => setShowUpload(true)}
+                title="Add media"
+                className="p-1 text-gray-400 hover:text-white transition"
               >
-                {uploadingMedia ? 'Uploading...' : 'Upload Media'}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
               </button>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Upload Section (only for owners) - expanded when toggled */}
+          {isOwner && showUpload && (
+            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold text-white">Upload Media</h3>
+                <button onClick={() => setShowUpload(false)} className="text-gray-300 hover:text-white">✕</button>
+              </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*,.pdf"
+                    onChange={(e) => setSelectedFiles(e.target.files)}
+                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 mb-3"
+                  />
+                  <p className="text-xs text-gray-400 mb-3">
+                    Accepts: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF
+                  </p>
+                  <button
+                    onClick={handleMediaUpload}
+                    disabled={uploadingMedia || !selectedFiles}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                  >
+                    {uploadingMedia ? 'Uploading...' : 'Upload Media'}
+                  </button>
+                </div>
+              )}
 
           {/* Media Grid */}
           {media.length === 0 ? (
             <p className="text-gray-400 text-center py-8">No media attachments yet</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {media.map((item) => (
+              {media.map((item, idx) => (
                 <div key={item.id} className="bg-gray-700 rounded-lg overflow-hidden border border-gray-600 hover:border-purple-500 transition duration-200">
                   {/* Media Preview */}
                   {item.file_type.match(/jpg|jpeg|png|gif/) ? (
                     <img
                       src={`/api/media/${item.id}`}
                       alt={item.file_name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48 object-cover cursor-pointer"
+                      onClick={() => { openModalAt(idx); }}
                     />
                   ) : item.file_type.match(/mp4|mov|avi/) ? (
                     <video controls className="w-full h-48 bg-black">
@@ -1159,14 +1211,6 @@ function ViewProjectPage() {
                       {(item.file_size / 1024).toFixed(0)} KB • {item.file_type.toUpperCase()}
                     </p>
                     <div className="flex gap-2">
-                      <a
-                        href={`/api/media/${item.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition duration-200 text-center"
-                      >
-                        View
-                      </a>
                       {isOwner && (
                         <button
                           onClick={() => handleDeleteMedia(item.id)}
@@ -1182,6 +1226,24 @@ function ViewProjectPage() {
             </div>
           )}
         </div>
+
+        {modalOpen && modalItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setModalOpen(false)}>
+            <div className="relative max-w-4xl max-h-[90vh] w-full mx-4" onClick={e => e.stopPropagation()}>
+              <button onClick={() => setModalOpen(false)} className="absolute top-2 right-2 text-white bg-gray-800 bg-opacity-50 p-2 rounded-full">✕</button>
+              <button onClick={showPrev} className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-gray-800 bg-opacity-40 p-3 rounded-full hover:bg-opacity-60">◀</button>
+              <button onClick={showNext} className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-gray-800 bg-opacity-40 p-3 rounded-full hover:bg-opacity-60">▶</button>
+              {modalItem.file_type.match(/jpg|jpeg|png|gif/) ? (
+                <img src={`/api/media/${modalItem.id}`} alt={modalItem.file_name} className="w-full h-auto max-h-[90vh] object-contain rounded" />
+              ) : modalItem.file_type.match(/mp4|mov|avi/) ? (
+                <video controls className="w-full h-auto max-h-[90vh] bg-black rounded"><source src={`/api/media/${modalItem.id}`} type={`video/${modalItem.file_type}`} /></video>
+              ) : (
+                <div className="p-6 bg-gray-800 text-white rounded">{modalItem.file_name}</div>
+              )}
+              <p className="text-sm text-gray-300 mt-2 text-center">{modalItem.file_name}</p>
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="bg-gray-800 rounded-lg shadow-xl mt-6 p-6 border border-gray-700">
