@@ -208,26 +208,26 @@ function CourseManagementPage() {
         )}
 
         {/* Courses Table */}
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
+        <div className="bg-gray-800 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
           <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-750">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Code
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Course Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Semester
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Term
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -235,35 +235,35 @@ function CourseManagementPage() {
             <tbody className="bg-gray-800 divide-y divide-gray-700">
               {courses.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-3 sm:px-6 py-6 sm:py-8 text-center text-gray-400">
                     No courses found. Create your first course to get started.
                   </td>
                 </tr>
               ) : (
                 courses.map((course) => (
                   <tr key={course.id} className="hover:bg-gray-750 transition duration-150">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-purple-400">{course.code}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-white">{course.name}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-300">
                         {course.semester || <span className="text-gray-500 italic">N/A</span>}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-300">
                         {course.term || <span className="text-gray-500 italic">N/A</span>}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4">
                       <div className="text-sm text-gray-300">
                         {course.description || <span className="text-gray-500 italic">No description</span>}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => openEditModal(course)}
                         className="text-indigo-400 hover:text-indigo-300 mr-4"
