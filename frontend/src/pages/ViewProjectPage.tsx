@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import CoursePopup from '../components/CoursePopup'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
@@ -65,6 +65,7 @@ function ViewProjectPage() {
   const [modalItem, setModalItem] = useState<any | null>(null)
   const [modalIndex, setModalIndex] = useState<number | null>(null)
   const [showUpload, setShowUpload] = useState(false)
+  const modalVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const openModalAt = (index: number) => {
     setModalIndex(index)
@@ -96,6 +97,26 @@ function ViewProjectPage() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [modalOpen, modalIndex, media])
+
+  useEffect(() => {
+    if (modalOpen && modalItem && modalItem.file_type.match(/mp4|mov|avi/)) {
+      const v = modalVideoRef.current
+      if (v) {
+        const playPromise = v.play()
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.catch(() => {})
+        }
+      }
+    } else {
+      const v = modalVideoRef.current
+      if (v) {
+        try {
+          v.pause()
+          v.currentTime = 0
+        } catch (e) {}
+      }
+    }
+  }, [modalOpen, modalItem])
 
   // Editing states
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -1193,9 +1214,25 @@ function ViewProjectPage() {
                       onClick={() => { openModalAt(idx); }}
                     />
                   ) : item.file_type.match(/mp4|mov|avi/) ? (
-                    <video controls className="w-full h-48 bg-black">
-                      <source src={`/api/media/${item.id}`} type={`video/${item.file_type}`} />
-                    </video>
+                    <div
+                      className="relative w-full h-48 bg-black cursor-pointer"
+                      onClick={() => { openModalAt(idx); }}
+                    >
+                      <video
+                        className="w-full h-48 object-cover"
+                        src={`/api/media/${item.id}`}
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-full h-48 bg-gray-600 flex items-center justify-center">
                       <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1246,7 +1283,14 @@ function ViewProjectPage() {
               {modalItem.file_type.match(/jpg|jpeg|png|gif/) ? (
                 <img src={`/api/media/${modalItem.id}`} alt={modalItem.file_name} className="w-full h-auto max-h-[90vh] object-contain rounded" />
               ) : modalItem.file_type.match(/mp4|mov|avi/) ? (
-                <video controls className="w-full h-auto max-h-[90vh] bg-black rounded"><source src={`/api/media/${modalItem.id}`} type={`video/${modalItem.file_type}`} /></video>
+                <video
+                  ref={modalVideoRef}
+                  controls
+                  autoPlay
+                  className="w-full h-auto max-h-[90vh] bg-black rounded"
+                >
+                  <source src={`/api/media/${modalItem.id}`} type={`video/${modalItem.file_type}`} />
+                </video>
               ) : (
                 <div className="p-6 bg-gray-800 text-white rounded">{modalItem.file_name}</div>
               )}
