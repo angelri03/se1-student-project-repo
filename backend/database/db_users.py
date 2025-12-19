@@ -6,7 +6,7 @@ Handles user CRUD operations and authentication
 import sqlite3
 import bcrypt
 from typing import Dict, Optional
-from .db_core import DATABASE_NAME
+from .db_core import DATABASE_NAME, get_connection
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt"""
@@ -25,7 +25,7 @@ def create_user(username: str, password: str, email: str, is_student: int = 1,
     Returns: {'success': bool, 'message': str, 'id': int (if successful)}
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         cursor = conn.cursor()
         
         hashed_password = hash_password(password)
@@ -52,7 +52,7 @@ def get_user_by_username(username: str) -> Optional[Dict]:
     Returns: Dict with user data or None if not found
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -74,7 +74,7 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
     Returns: Dict with user data or None if not found
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -104,7 +104,7 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
     Returns: {'success': bool, 'message': str}
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         cursor = conn.cursor()
         
         update_fields = []
@@ -178,7 +178,7 @@ def delete_user(user_id: int) -> Dict:
     Returns: {'success': bool, 'message': str}
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         cursor = conn.cursor()
 
         cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
@@ -200,7 +200,7 @@ def is_admin(user_id: int) -> bool:
     Returns: True if user is admin, False otherwise
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -222,7 +222,7 @@ def get_all_users() -> Dict:
     Returns: {'success': bool, 'data': List[Dict] or 'message': str}
     """
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 

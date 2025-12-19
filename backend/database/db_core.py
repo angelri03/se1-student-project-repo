@@ -204,3 +204,11 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+
+def get_connection(timeout: int = 30):
+    """
+    Return a new sqlite3 connection.
+    Uses longer timeout.
+    """
+    return sqlite3.connect(DATABASE_NAME, timeout=timeout, check_same_thread=False)
