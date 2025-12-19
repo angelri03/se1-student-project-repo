@@ -36,6 +36,7 @@ function ExploreProjectsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAdminMenu, setShowAdminMenu] = useState(false)
+  const [sortOption, setSortOption] = useState<string>('none')
 
   // Close admin menu when clicking outside
   useEffect(() => {
@@ -118,8 +119,9 @@ function ExploreProjectsPage() {
   const topics = ['all', ...Array.from(new Set(projects.flatMap(p => p.tags || [])))]
 
   // Filter projects based on search and filters
-  const handleFilter = (search: string, course: string, topic: string, approvalStatus: string) => {
+  const handleFilter = (search: string, course: string, topic: string, approvalStatus: string, sort?: string) => {
     let filtered = projects
+    const activeSort = sort ?? sortOption
 
     // Filter by search query
     if (search) {
@@ -148,7 +150,30 @@ function ExploreProjectsPage() {
     }
 
     // 'all' shows everything
+    // Apply sorting
+    switch (activeSort) {
+      case 'name_asc':
+        filtered = filtered.slice().sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'name_desc':
+        filtered = filtered.slice().sort((a, b) => b.name.localeCompare(a.name))
+        break
+      case 'date_new':
+        filtered = filtered.slice().sort((a, b) => (new Date(a.created_at).getTime() || 0) - (new Date(b.created_at).getTime() || 0))
+        break
+      case 'date_old':
+        filtered = filtered.slice().sort((a, b) => (new Date(b.created_at).getTime() || 0) - (new Date(a.created_at).getTime() || 0))
+        break
+      default:
+        break
+    }
+
     setFilteredProjects(filtered)
+  }
+
+  const handleSortChange = (value: string) => {
+    setSortOption(value)
+    handleFilter(searchQuery, selectedCourse, selectedTopic, selectedApprovalStatus, value)
   }
 
   const handleSearchChange = (value: string) => {
@@ -176,6 +201,7 @@ function ExploreProjectsPage() {
     setSelectedCourse('all')
     setSelectedTopic('all')
     setSelectedApprovalStatus('all')
+    setSortOption('none')
     setFilteredProjects(projects)
   }
 
@@ -239,7 +265,7 @@ function ExploreProjectsPage() {
 
         {/* Filters Section */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 mb-8 border border-gray-700">
-          <div className={`grid grid-cols-1 gap-4 ${user?.admin === 1 ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
+          <div className={`grid grid-cols-1 gap-4 ${user?.admin === 1 ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
             {/* Search Bar */}
             <div className="md:col-span-2">
               <label htmlFor="search" className="block text-sm font-medium text-gray-300 mb-2">
@@ -290,6 +316,25 @@ function ExploreProjectsPage() {
                     {topic === 'all' ? 'All Topics' : topic}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Sort */}
+            <div>
+              <label htmlFor="sort" className="block text-sm font-medium text-gray-300 mb-2">
+                Sort
+              </label>
+              <select
+                id="sort"
+                value={sortOption}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              >
+                <option value="none">Default</option>
+                <option value="name_asc">Name (A → Z)</option>
+                <option value="name_desc">Name (Z → A)</option>
+                <option value="date_new">Date (Newest First)</option>
+                <option value="date_old">Date (Oldest First)</option>
               </select>
             </div>
 
