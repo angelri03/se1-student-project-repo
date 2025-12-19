@@ -47,6 +47,9 @@ function ProfilePage() {
   const [hoveredAvatar, setHoveredAvatar] = useState(false)
   const [showFlagDetails, setShowFlagDetails] = useState(false)
   const [profilePicVersion, setProfilePicVersion] = useState(Date.now())
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isOwnProfile = currentUser && user && currentUser.id === user.id
@@ -622,6 +625,92 @@ function ProfilePage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Delete account (self) */}
+        {isOwnProfile && user && user.admin !== 1 && (
+          <div className="mt-6">
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200"
+            >
+              Delete Account
+            </button>
+          </div>
+        )}
+
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold text-white mb-2">Confirm account deletion</h3>
+              <p className="text-gray-400 text-sm mb-4">Enter your password to confirm deletion. This action is irreversible.</p>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Password"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white mb-4"
+              />
+              <div className="flex justify-end gap-3">
+                <button onClick={() => { setShowDeleteModal(false); setDeletePassword('') }} className="px-4 py-2 bg-gray-600 text-white rounded-lg">Cancel</button>
+                <button
+                  onClick={async () => {
+                    if (!deletePassword) {
+                      alert('Please enter your password')
+                      return
+                    }
+                    setDeleting(true)
+                    try {
+                      const token = localStorage.getItem('token')
+                      const response = await axios.delete('/api/account', { data: { password: deletePassword }, headers: { Authorization: `Bearer ${token}` } })
+                      if (response.data.success) {
+                        localStorage.removeItem('token')
+                        navigate('/login')
+                      } else {
+                        alert(response.data.message || 'Failed to delete account')
+                      }
+                    } catch (err: any) {
+                      alert(err.response?.data?.message || 'Failed to delete account')
+                    } finally {
+                      setDeleting(false)
+                      setShowDeleteModal(false)
+                      setDeletePassword('')
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-700 text-white rounded-lg"
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Admin delete user (doesn't require user password) */}
+        {currentUser?.admin === 1 && user && !isOwnProfile && user.admin !== 1 && (
+          <div className="mt-4">
+            <button
+              onClick={async () => {
+                if (!confirm(`Delete user ${user.username}? This cannot be undone.`)) return
+                try {
+                  const token = localStorage.getItem('token')
+                  const response = await axios.delete(`/api/users/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
+                  if (response.data.success) {
+                    alert('User deleted')
+                    if (fromAdminUsers) navigate('/admin/users')
+                    else navigate('/explore')
+                  } else {
+                    alert(response.data.message || 'Failed to delete user')
+                  }
+                } catch (err: any) {
+                  alert(err.response?.data?.message || 'Failed to delete user')
+                }
+              }}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200"
+            >
+              Delete User
+            </button>
           </div>
         )}
       </div>

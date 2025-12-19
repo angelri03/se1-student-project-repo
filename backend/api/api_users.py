@@ -129,9 +129,23 @@ def delete_account(current_user_id, current_username):
     if database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'Admin accounts cannot be deleted'}), 403
 
+    # Require password confirmation in request body
+    data = request.get_json() or {}
+    password = data.get('password')
+    if not password:
+        return jsonify({'success': False, 'message': 'Password confirmation required'}), 400
+
+    # Verify password
+    user = database.get_user_by_id(current_user_id)
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+
+    if not database.verify_password(password, user['password']):
+        return jsonify({'success': False, 'message': 'Invalid password'}), 401
+
     # Delete the user's account
     result = database.delete_user(current_user_id)
-    
+
     if result['success']:
         return jsonify({
             'success': True,
