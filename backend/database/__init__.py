@@ -13,7 +13,9 @@ from .db_users import (
     update_user,
     delete_user,
     get_all_users,
-    is_admin
+    is_admin,
+    flag_user,
+    get_user_flags,
 )
 from .db_projects import (
     create_project,
@@ -93,6 +95,8 @@ __all__ = [
     'delete_user',
     'get_all_users',
     'is_admin',
+    'flag_user',
+    'get_user_flags',
     
     # Projects
     'create_project',

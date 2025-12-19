@@ -125,6 +125,10 @@ def delete_account(current_user_id, current_username):
     Requires valid JWT token in Authorization header
     Users can only delete their own account
     """
+    # Prevent deleting admin accounts
+    if database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Admin accounts cannot be deleted'}), 403
+
     # Delete the user's account
     result = database.delete_user(current_user_id)
     
@@ -190,6 +194,120 @@ def get_all_users(current_user_id, current_username):
         'success': True,
         'data': result['data']
     }), 200
+
+
+@users_bp.route('/api/users/<int:user_id>', methods=['DELETE'])
+@token_required
+def admin_delete_user(current_user_id, current_username, user_id):
+    """
+    Delete a user by id (admin only)
+    """
+    # Check admin
+    if not database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+
+    # Prevent deleting self via admin endpoint (use /api/account to delete own account)
+    if current_user_id == user_id:
+        return jsonify({'success': False, 'message': 'Use account delete endpoint to remove your own account'}), 400
+
+    # Prevent deleting users with admin role
+    if database.is_admin(user_id):
+        return jsonify({'success': False, 'message': 'Cannot delete admin users'}), 403
+
+    result = database.delete_user(user_id)
+    if result['success']:
+        return jsonify({'success': True, 'message': 'User deleted successfully'}), 200
+    else:
+        return jsonify(result), 400
+
+
+@users_bp.route('/api/users/<int:user_id>', methods=['PUT'])
+@token_required
+def admin_update_user(current_user_id, current_username, user_id):
+    """
+    Update a user's profile (admin only)
+    Expected JSON: any of username, email, bio, is_student, semester, study_programme, organization, admin
+    """
+    if not database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+
+    data = request.get_json() or {}
+
+    # Validate email if provided
+    if 'email' in data and data['email'] and '@' not in data['email']:
+        return jsonify({'success': False, 'message': 'Invalid email address'}), 400
+
+    # If changing username, ensure no conflict
+    if 'username' in data and data['username']:
+        existing = database.get_user_by_username(data['username'])
+        if existing and existing['id'] != user_id:
+            return jsonify({'success': False, 'message': 'Username already taken'}), 400
+
+    # Build update args
+    update_kwargs = {
+        'username': data.get('username'),
+        'email': data.get('email'),
+        'bio': data.get('bio'),
+        'is_student': data.get('is_student'),
+        'semester': data.get('semester'),
+        'study_programme': data.get('study_programme'),
+        'organization': data.get('organization'),
+        'admin': data.get('admin')
+    }
+
+    # Remove keys with None to allow partial updates handled by database.update_user
+    cleaned = {k: v for k, v in update_kwargs.items() if v is not None}
+
+    if not cleaned:
+        return jsonify({'success': False, 'message': 'No fields to update'}), 400
+
+    result = database.update_user(user_id=user_id, **cleaned)
+
+    if not result['success']:
+        return jsonify(result), 400
+
+    updated = database.get_user_by_id(user_id)
+    if not updated:
+        return jsonify({'success': False, 'message': 'User not found after update'}), 404
+
+    user_data = {
+        'id': updated['id'],
+        'username': updated['username'],
+        'email': updated['email'],
+        'bio': updated.get('bio'),
+        'admin': updated.get('admin', 0),
+        'created_at': updated.get('created_at')
+    }
+
+    return jsonify({'success': True, 'message': 'User updated', 'user': user_data}), 200
+
+
+@users_bp.route('/api/users/<int:user_id>/flag', methods=['POST'])
+@token_required
+def admin_flag_user(current_user_id, current_username, user_id):
+    """
+    Flag a user (admin only). Expected JSON: {"reason": "..."}
+    """
+    if not database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+
+    # Prevent admins from flagging their own account
+    if current_user_id == user_id:
+        return jsonify({'success': False, 'message': 'Cannot flag your own account'}), 400
+
+    # Prevent flagging users with admin role
+    if database.is_admin(user_id):
+        return jsonify({'success': False, 'message': 'Cannot flag admin users'}), 403
+
+    data = request.get_json() or {}
+    reason = data.get('reason')
+
+    result = database.flag_user(user_id=user_id, flagged_by=current_user_id, reason=reason)
+
+    if not result['success']:
+        return jsonify(result), 500
+
+    return jsonify({'success': True, 'message': 'User flagged'}), 200
 
 @users_bp.route('/api/me', methods=['PUT'])
 @token_required
@@ -391,5 +509,12 @@ def get_user_profile(username):
         'total_ratings': rating_stats.get('total_ratings', 0) if rating_stats else 0,
         'average_rating': rating_stats.get('average_rating', 0) if rating_stats else 0
     }
+
+    # Include flags (if any)
+    flags_result = database.get_user_flags(user['id'])
+    if flags_result.get('success'):
+        public_user['flags'] = flags_result.get('data', [])
+    else:
+        public_user['flags'] = []
 
     return jsonify({'success': True, 'user': public_user}), 200

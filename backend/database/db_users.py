@@ -95,7 +95,7 @@ _UNSET = object()
 
 def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None,
                 is_student: int = None, semester: str = None, study_programme: str = None, organization: str = None,
-                profile_picture = _UNSET) -> Dict:
+                admin: int = None, profile_picture = _UNSET) -> Dict:
     """
     Update user information
     Only updates fields that are provided (not None)
@@ -141,6 +141,10 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
         if organization is not None:
             update_fields.append('organization = ?')
             values.append(organization)
+
+        if admin is not None:
+            update_fields.append('admin = ?')
+            values.append(admin)
         
         # Allow explicitly setting profile_picture to None to remove it
         if profile_picture is not _UNSET:
@@ -222,7 +226,7 @@ def get_all_users() -> Dict:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        cursor.execute('SELECT id, username, email, admin FROM users ORDER BY username ASC')
+        cursor.execute('SELECT id, username, email, admin, created_at FROM users ORDER BY username ASC')
         rows = cursor.fetchall()
 
         conn.close()
@@ -230,5 +234,48 @@ def get_all_users() -> Dict:
         users = [dict(row) for row in rows]
         return {'success': True, 'data': users}
 
+    except Exception as e:
+        return {'success': False, 'message': f'Error: {str(e)}'}
+
+
+def flag_user(user_id: int, flagged_by: int, reason: str = None) -> Dict:
+    """
+    Insert a flag for a user. Returns {'success': bool}
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO user_flags (user_id, flagged_by, reason) VALUES (?, ?, ?)', (user_id, flagged_by, reason))
+        conn.commit()
+        conn.close()
+        return {'success': True}
+    except Exception as e:
+        return {'success': False, 'message': f'Error: {str(e)}'}
+
+
+def get_user_flags(user_id: int) -> Dict:
+    """
+    Retrieve flags for a given user.
+    Returns: {'success': bool, 'data': List[Dict] or 'message': str}
+    Each flag: id, user_id, flagged_by, reason, created_at, flagged_by_username
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT uf.id, uf.user_id, uf.flagged_by, uf.reason, uf.created_at, u.username as flagged_by_username
+            FROM user_flags uf
+            LEFT JOIN users u ON uf.flagged_by = u.id
+            WHERE uf.user_id = ?
+            ORDER BY uf.created_at DESC
+        ''', (user_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        flags = [dict(row) for row in rows]
+        return {'success': True, 'data': flags}
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}

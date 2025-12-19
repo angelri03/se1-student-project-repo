@@ -189,5 +189,18 @@ def init_db():
         ON bookmarks(project_id)
     ''')
 
+    # User flags table (admin can flag problematic users)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_flags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            flagged_by INTEGER,
+            reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (flagged_by) REFERENCES users(id) ON DELETE SET NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()

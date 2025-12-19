@@ -113,6 +113,28 @@ def migrate_database():
             print("Project media table already exists.")
 
 
+        # Create user_flags table
+        print("\nChecking user_flags table...")
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user_flags'")
+        if cursor.fetchone() is None:
+            print("  Creating user_flags table...")
+            cursor.execute('''
+                CREATE TABLE user_flags (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    flagged_by INTEGER,
+                    reason TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (flagged_by) REFERENCES users(id) ON DELETE SET NULL
+                )
+            ''')
+            conn.commit()
+            print("User_flags table created successfully!")
+        else:
+            print("User_flags table already exists.")
+
+
         # Update courses table
         print("\nChecking courses table...")
         cursor.execute("PRAGMA table_info(courses)")

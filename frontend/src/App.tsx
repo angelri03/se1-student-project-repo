@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import CourseManagementPage from './pages/CourseManagementPage'
 import TopicManagementPage from './pages/TopicManagementPage'
+import AdminUsersPage from './pages/AdminUsersPage'
 import BookmarksPage from './pages/BookmarksPage'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/bookmarks" element={<BookmarksPage />} />
           <Route path="/admin/courses" element={<CourseManagementPage />} />
           <Route path="/admin/topics" element={<TopicManagementPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
         </Routes>
       </div>
     </Router>

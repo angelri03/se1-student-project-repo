@@ -17,6 +17,7 @@ interface User {
   organization?: string
   admin?: number
   profile_picture?: string
+  flags?: Array<{ id: number; reason?: string; flagged_by?: number; flagged_by_username?: string; created_at?: string }>
 }
 
 interface CurrentUser {
@@ -33,6 +34,7 @@ function ProfilePage() {
   const fromBookmarks = location.state?.fromBookmarks || false
   const fromProfile = location.state?.fromProfile || false
   const previousProfileUsername = location.state?.profileUsername || null
+  const fromAdminUsers = location.state?.fromAdminUsers || false
 
   const [user, setUser] = useState<User | null>(null)
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
@@ -43,12 +45,17 @@ function ProfilePage() {
   const [notFound, setNotFound] = useState(false)
   const [uploadingPicture, setUploadingPicture] = useState(false)
   const [hoveredAvatar, setHoveredAvatar] = useState(false)
+  const [showFlagDetails, setShowFlagDetails] = useState(false)
   const [profilePicVersion, setProfilePicVersion] = useState(Date.now())
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isOwnProfile = currentUser && user && currentUser.id === user.id
 
   const handleBackNavigation = () => {
+    if (fromAdminUsers) {
+      navigate('/admin/users')
+      return
+    }
     if (fromBookmarks) {
       navigate('/bookmarks')
     } else if (fromProfile && previousProfileUsername) {
@@ -59,6 +66,7 @@ function ProfilePage() {
   }
 
   const getBackButtonText = () => {
+    if (fromAdminUsers) return 'Back to Manage Users'
     if (fromBookmarks) return 'Back to Bookmarks'
     if (fromProfile) return 'Back to Profile'
     return 'Back to Explore'
@@ -493,6 +501,30 @@ function ProfilePage() {
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-2">{user.username}</h2>
                   {isOwnProfile && <p className="text-gray-400 mb-4">{user.email}</p>}
+
+                  {/* Flag banner */}
+                  {user.flags && user.flags.length > 0 && (
+                    <div className="mb-4">
+                      <div className="px-4 py-3 bg-red-700 text-white rounded-lg mb-2 flex items-center justify-between">
+                        <div>
+                          <strong>Flagged:</strong> This user has been flagged by admins ({user.flags.length}).
+                        </div>
+                        <button onClick={() => setShowFlagDetails(s => !s)} className="text-sm underline">
+                          {showFlagDetails ? 'Hide' : 'View'}
+                        </button>
+                      </div>
+                      {showFlagDetails && (
+                        <div className="bg-red-800/20 rounded-lg p-3">
+                          {user.flags.map((f) => (
+                            <div key={f.id} className="mb-2">
+                              <div className="text-sm text-gray-200">{f.reason || 'No reason provided'}</div>
+                              <div className="text-xs text-gray-400">Flagged by: {f.flagged_by_username || 'Admin'} - {f.created_at ? new Date(f.created_at).toLocaleDateString() : ''}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* User Type Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">

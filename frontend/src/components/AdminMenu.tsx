@@ -51,6 +51,18 @@ function AdminMenu({ showAdminMenu, setShowAdminMenu }: AdminMenuProps) {
               </svg>
               <span>Manage Topics</span>
             </button>
+            <button
+              onClick={() => {
+                navigate('/admin/users')
+                setShowAdminMenu(false)
+              }}
+              className="w-full text-left px-4 py-3 text-gray-300 hover:bg-gray-700 transition duration-200 flex items-center gap-3"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span>Manage Users</span>
+            </button>
           </div>
         </div>
       )}
