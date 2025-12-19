@@ -422,6 +422,11 @@ def remove_project_owner(project_id, user_id, current_user_id, current_username)
     if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'You do not have permission to remove owners'}), 403
 
+    # Prevent non-admin owners from removing the project creator
+    creator_id = database.get_project_creator(project_id)
+    if creator_id is not None and creator_id == user_id and current_user_id != user_id and not database.is_admin(current_user_id):
+        return jsonify({'success': False, 'message': 'Cannot remove the project creator'}), 403
+
     # Remove the owner
     result = database.remove_owner_from_project(project_id, user_id)
 

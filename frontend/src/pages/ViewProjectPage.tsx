@@ -696,6 +696,9 @@ function ViewProjectPage() {
 
   const topics = project.tags || []
 
+  // Determine project creator (first owner is the creator)
+  const creatorId = project.owners && project.owners.length > 0 ? project.owners[0].id : null
+
   // Helper function to get topic description
   const getTopicDescription = (topicName: string): string => {
     const topic = allTopics.find(t => t.name === topicName)
@@ -941,16 +944,22 @@ function ViewProjectPage() {
                   {owner.id === currentUserId && (
                     <span className="text-xs text-purple-400">(you)</span>
                   )}
+                  {owner.id === creatorId && owner.id !== currentUserId && (
+                    <span className="text-xs text-gray-400">(creator)</span>
+                  )}
                   {isOwner && project.owners.length > 1 && owner.id !== currentUserId && (
-                    <button
-                      onClick={() => removeCollaborator(owner.id)}
-                      className="ml-1 text-gray-400 hover:text-red-400 transition"
-                      title="Remove collaborator"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                    // Hide the remove button for the creator unless current user is an admin
+                    (isAdmin || owner.id !== creatorId) && (
+                      <button
+                        onClick={() => removeCollaborator(owner.id)}
+                        className="ml-1 text-gray-400 hover:text-red-400 transition"
+                        title="Remove collaborator"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )
                   )}
                 </span>
               ))}

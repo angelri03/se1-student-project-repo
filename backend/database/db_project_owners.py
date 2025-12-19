@@ -1,11 +1,12 @@
 """
 Project owners database operations
 Handles the many-to-many relationship between users and projects
-All owners have equal privileges
+The first owner added to a project is considered the creator and cannot
+be removed by other collaborators (only admin can)
 """
 
 import sqlite3
-from typing import Dict, List
+from typing import Dict, List, Optional
 from .db_core import DATABASE_NAME
 
 def add_owner_to_project(project_id: int, user_id: int) -> Dict:
@@ -201,3 +202,29 @@ def get_owner_usernames(project_id: int) -> List[str]:
     
     except Exception:
         return []
+
+def get_project_creator(project_id: int) -> Optional[int]:
+    """
+    Return the user_id of the project creator (the first owner added).
+    Returns None on error or if no owners exist.
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT user_id FROM project_owners
+            WHERE project_id = ?
+            ORDER BY added_at ASC
+            LIMIT 1
+        ''', (project_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return row[0]
+        return None
+
+    except Exception:
+        return None

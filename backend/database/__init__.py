@@ -38,7 +38,8 @@ from .db_project_owners import (
     get_project_owners,
     get_user_projects,
     is_project_owner,
-    get_owner_usernames
+    get_owner_usernames,
+    get_project_creator
 )
 from .db_courses import (
     create_course,
@@ -120,6 +121,7 @@ __all__ = [
     'get_user_projects',
     'is_project_owner',
     'get_owner_usernames',
+    'get_project_creator',
     
     # Courses
     'create_course',
