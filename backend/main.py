@@ -3,11 +3,14 @@ Main application entry point
 Aggregates all blueprints and runs the Flask server
 """
 
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request, g
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_cors import CORS
 import database
-from api import users_bp, projects_bp, courses_bp, topics_bp, bookmarks_bp
+from api import users_bp, projects_bp, courses_bp, topics_bp, bookmarks_bp, logs_bp
+from logging_config import get_logger
+import time
+from api import auth as auth_utils
 import os
 
 app = Flask(__name__)
@@ -25,12 +28,66 @@ def handle_file_too_large(e):
 # Initialize the database when the server starts
 database.init_db()
 
+# Initialize action logger
+actions_logger = get_logger()
+
+@app.before_request
+def _log_before_request():
+    g.start_time = time.time()
+    g.username = None
+    # extract username from authorization header if present
+    auth_header = request.headers.get('Authorization')
+    if auth_header:
+        try:
+            token = auth_header.split(' ')[1]
+            result = auth_utils.decode_token(token)
+            if result.get('success'):
+                g.username = result['payload'].get('username')
+        except Exception:
+            g.username = None
+
+
+@app.after_request
+def _log_after_request(response):
+    try:
+        remote_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
+        username = getattr(g, 'username', None) or 'anonymous'
+        status = getattr(response, 'status_code', '')
+        method = request.method
+        path = request.path
+
+        payload = None
+        try:
+            payload = request.get_json(silent=True)
+        except Exception:
+            payload = None
+
+        if not payload:
+            payload = request.values.to_dict()
+
+        payload_str = str(payload)
+        if len(payload_str) > 2000:
+            payload_str = payload_str[:2000] + '...'
+
+        actions_logger.info(payload_str, extra={
+            'remote_addr': remote_addr,
+            'username': username,
+            'method': method,
+            'path': path,
+            'status': status,
+        })
+    except Exception:
+        pass
+
+    return response
+
 # Register blueprints
 app.register_blueprint(users_bp)
 app.register_blueprint(projects_bp)
 app.register_blueprint(courses_bp)
 app.register_blueprint(topics_bp)
 app.register_blueprint(bookmarks_bp)
+app.register_blueprint(logs_bp)
 
 # Health check endpoint
 @app.route('/api/health', methods=['GET'])

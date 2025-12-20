@@ -58,10 +58,23 @@ function AdminMenu({ showAdminMenu, setShowAdminMenu }: AdminMenuProps) {
               }}
               className="w-full text-left px-4 py-3 text-gray-300 hover:bg-gray-700 transition duration-200 flex items-center gap-3"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 11-8 0 4 4 0 018 0z" />
+              <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <span>Manage Users</span>
+            </button>
+            <button
+              onClick={() => {
+                navigate('/admin/logs')
+                setShowAdminMenu(false)
+              }}
+              className="w-full text-left px-4 py-3 text-gray-300 hover:bg-gray-700 transition duration-200 flex items-center gap-3"
+            >
+              <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10M7 11h10M7 15h6" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+              </svg>
+              <span>View Logs</span>
             </button>
           </div>
         </div>
