@@ -39,6 +39,7 @@ function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
   const [userProjects, setUserProjects] = useState<any[]>([])
+  const [pendingProjects, setPendingProjects] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editedUser, setEditedUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -83,13 +84,15 @@ function ProfilePage() {
       try {
         // get current logged-in user (if any)
         const token = localStorage.getItem('token')
+        let meUser: any = null
         if (token) {
           try {
             const meResponse = await axios.get('/api/me', {
               headers: { Authorization: `Bearer ${token}` }
             })
             if (meResponse.data.success) {
-              setCurrentUser(meResponse.data.user)
+              meUser = meResponse.data.user
+              setCurrentUser(meUser)
             }
           } catch {
             // user not logged in or token invalid -> okay for viewing profiles
@@ -130,6 +133,37 @@ function ProfilePage() {
             )
 
             setUserProjects(projectsWithCourses)
+          }
+
+          // pending projects on profile (only visible to profile owner)
+          if (meUser && meUser.id === userData.id) {
+            const token = localStorage.getItem('token')
+            if (token) {
+              try {
+                const pendingResp = await axios.get('/api/my-projects/pending', {
+                  headers: { Authorization: `Bearer ${token}` }
+                })
+                if (pendingResp.data.success) {
+                  const pending = pendingResp.data.data
+                  const pendingWithCourses = await Promise.all(
+                    pending.map(async (project: any) => {
+                      try {
+                        const courseResponse = await axios.get(`/api/projects/${project.id}/course`)
+                        if (courseResponse.data.success) {
+                          return { ...project, course: courseResponse.data.course.name }
+                        }
+                      } catch {
+                        console.error('Failed to fetch course for pending project ID:', project.id)
+                      }
+                      return { ...project, course: 'Uncategorized' }
+                    })
+                  )
+                  setPendingProjects(pendingWithCourses)
+                }
+              } catch (e) {
+                console.error('Failed to fetch pending projects:', e)
+              }
+            }
           }
         } else {
           setNotFound(true)
@@ -625,6 +659,26 @@ function ProfilePage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Pending Projects */}
+        {isOwnProfile && pendingProjects && pendingProjects.length > 0 && (
+          <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-yellow-600 mt-6">
+            <h2 className="text-2xl font-bold text-yellow-300 mb-4">Pending Projects</h2>
+            <div className="text-gray-400 mb-4">Projects awaiting admin approval. Only you can view these.</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pendingProjects.map((project) => (
+                <ProjectCard
+                  key={`pending-${project.id}`}
+                  project={project}
+                  variant="default"
+                  fromProfile={true}
+                  profileUsername={user?.username}
+                  showBookmarkButton={false}
+                />
+              ))}
+            </div>
           </div>
         )}
 

@@ -25,6 +25,7 @@ interface Project {
   owners: User[]
   created_at: string
   file_path: string
+  approved?: number
 }
 
 interface RatingData {
@@ -722,6 +723,12 @@ function ViewProjectPage() {
 
         {/* Project Header Card */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
+          {/* Pending indicator */}
+          {project && project.approved === 0 && (isOwner) && (
+            <div className="mb-4 p-3 rounded-md bg-yellow-600 text-yellow-900 border border-yellow-500">
+              <strong>Pending approval:</strong> This project is not yet approved and is only visible to you.
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-3">
             {/* Editable Title */}
             {isEditingTitle ? (

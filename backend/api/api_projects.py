@@ -171,8 +171,9 @@ def get_project(project_id):
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
 
-    # Check if user is admin (optional token)
+    # Check if user is admin or owner (optional token)
     is_admin = False
+    is_owner = False
     if 'Authorization' in request.headers:
         auth_header = request.headers['Authorization']
         try:
@@ -182,11 +183,15 @@ def get_project(project_id):
             if result['success']:
                 user_id = result['payload']['user_id']
                 is_admin = database.is_admin(user_id)
+                try:
+                    is_owner = database.is_project_owner(project_id, user_id)
+                except Exception:
+                    is_owner = False
         except (IndexError, KeyError):
             pass
 
-    # Only show approved projects to public, admins can see all
-    if not project['approved'] and not is_admin:
+    # Allow owners and admins to see unapproved projects; public sees only approved
+    if not project['approved'] and not (is_admin or is_owner):
         return jsonify({'success': False, 'message': 'Project not found'}), 404
 
     return jsonify({
@@ -205,8 +210,28 @@ def download_project(project_id):
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
     
+    # Allow owners/admin to download unapproved projects
     if not project['approved']:
-        return jsonify({'success': False, 'message': 'Project not available'}), 403
+        is_admin = False
+        is_owner = False
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            try:
+                from .auth import decode_token
+                token = auth_header.split(' ')[1]
+                result = decode_token(token)
+                if result['success']:
+                    user_id = result['payload']['user_id']
+                    is_admin = database.is_admin(user_id)
+                    try:
+                        is_owner = database.is_project_owner(project_id, user_id)
+                    except Exception:
+                        is_owner = False
+            except (IndexError, KeyError):
+                pass
+
+        if not (is_admin or is_owner):
+            return jsonify({'success': False, 'message': 'Project not available'}), 403
     
     file_path = project['file_path']
     
@@ -340,6 +365,16 @@ def get_my_projects(current_user_id, current_username):
     Includes both approved and unapproved projects
     """
     result = database.get_user_projects(current_user_id)
+    return jsonify(result), 200 if result['success'] else 500
+
+
+@projects_bp.route('/api/my-projects/pending', methods=['GET'])
+@token_required
+def get_my_pending_projects(current_user_id, current_username):
+    """
+    Get pending (unapproved) projects owned by the authenticated user
+    """
+    result = database.get_user_pending_projects(current_user_id)
     return jsonify(result), 200 if result['success'] else 500
 
 @projects_bp.route('/api/projects/search', methods=['GET'])
@@ -568,8 +603,31 @@ def get_project_media_list(project_id):
     Public endpoint for approved projects
     """
     project = database.get_project_by_id(project_id)
-    if not project or not project['approved']:
+    # Allow owners and admins to view media for unapproved projects
+    if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
+
+    if not project['approved']:
+        is_admin = False
+        is_owner = False
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            try:
+                from .auth import decode_token
+                token = auth_header.split(' ')[1]
+                result = decode_token(token)
+                if result['success']:
+                    user_id = result['payload']['user_id']
+                    is_admin = database.is_admin(user_id)
+                    try:
+                        is_owner = database.is_project_owner(project_id, user_id)
+                    except Exception:
+                        is_owner = False
+            except (IndexError, KeyError):
+                pass
+
+        if not (is_admin or is_owner):
+            return jsonify({'success': False, 'message': 'Project not found'}), 404
     
     media = database.get_project_media(project_id)
     return jsonify({'success': True, 'media': media}), 200

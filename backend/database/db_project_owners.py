@@ -156,6 +156,57 @@ def get_user_projects(user_id: int) -> Dict:
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
+def get_user_pending_projects(user_id: int) -> Dict:
+    """
+    Get all pending (unapproved) projects a user owns
+    Returns: {'success': bool, 'data': List[Dict] or 'message': str}
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT p.*
+            FROM projects p
+            JOIN project_owners po ON p.id = po.project_id
+            WHERE po.user_id = ? AND p.approved = 0
+            ORDER BY p.created_at DESC
+        ''', (user_id,))
+        
+        rows = cursor.fetchall()
+        projects = []
+        
+        for row in rows:
+            project = dict(row)
+            
+            # Get tags for each project (join with topics table)
+            cursor.execute('''
+                SELECT t.name FROM project_tags pt
+                JOIN topics t ON pt.topic_id = t.id
+                WHERE pt.project_id = ?
+            ''', (project['id'],))
+
+            project['tags'] = [tag_row['name'] for tag_row in cursor.fetchall()]
+            
+            # Get all owners for each project
+            cursor.execute('''
+                SELECT u.id, u.username, u.email
+                FROM users u
+                JOIN project_owners po ON u.id = po.user_id
+                WHERE po.project_id = ?
+            ''', (project['id'],))
+            
+            project['owners'] = [dict(owner_row) for owner_row in cursor.fetchall()]
+            
+            projects.append(project)
+        
+        conn.close()
+        return {'success': True, 'data': projects}
+    
+    except Exception as e:
+        return {'success': False, 'message': f'Error: {str(e)}'}
+
 def is_project_owner(project_id: int, user_id: int) -> bool:
     """
     Check if a user is an owner of a project

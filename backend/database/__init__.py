@@ -37,6 +37,7 @@ from .db_project_owners import (
     remove_owner_from_project,
     get_project_owners,
     get_user_projects,
+    get_user_pending_projects,
     is_project_owner,
     get_owner_usernames,
     get_project_creator
@@ -119,6 +120,7 @@ __all__ = [
     'remove_owner_from_project',
     'get_project_owners',
     'get_user_projects',
+    'get_user_pending_projects',
     'is_project_owner',
     'get_owner_usernames',
     'get_project_creator',
