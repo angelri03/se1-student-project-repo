@@ -81,6 +81,15 @@ from .db_bookmarks import (
     is_bookmarked,
     get_bookmark_count
 )
+from .db_notifications import (
+    create_notification,
+    get_user_notifications,
+    mark_notification_as_read,
+    mark_all_notifications_as_read,
+    delete_notification,
+    get_unread_count,
+    create_notification_for_project_owners
+)
 
 __all__ = [
     # Core
@@ -162,5 +171,14 @@ __all__ = [
     'remove_bookmark',
     'get_user_bookmarks',
     'is_bookmarked',
-    'get_bookmark_count'
+    'get_bookmark_count',
+    
+    # Notifications
+    'create_notification',
+    'get_user_notifications',
+    'mark_notification_as_read',
+    'mark_all_notifications_as_read',
+    'delete_notification',
+    'get_unread_count',
+    'create_notification_for_project_owners'
 ]

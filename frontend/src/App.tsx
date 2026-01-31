@@ -9,6 +9,7 @@ import TopicManagementPage from './pages/TopicManagementPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import AdminLogsPage from './pages/AdminLogsPage'
 import BookmarksPage from './pages/BookmarksPage'
+import NotificationsPage from './pages/NotificationsPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile/:username" element={<ProfilePage />} />
           <Route path="/bookmarks" element={<BookmarksPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/admin/courses" element={<CourseManagementPage />} />
           <Route path="/admin/topics" element={<TopicManagementPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />

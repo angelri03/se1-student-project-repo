@@ -157,7 +157,22 @@ def approve_project_endpoint(project_id, current_user_id, current_username):
     if not database.is_admin(current_user_id):
         return jsonify({'success': False, 'message': 'Admin access required'}), 403
 
+    project = database.get_project_by_id(project_id)
+    if not project:
+        return jsonify({'success': False, 'message': 'Project not found'}), 404
+
     result = database.approve_project(project_id)
+    
+    if result['success']:
+        # Create notification for project owners
+        message = f'Your project "{project["name"]}" has been approved and is now publicly visible!'
+        database.create_notification_for_project_owners(
+            project_id=project_id,
+            type='project_approved',
+            message=message,
+            exclude_user_id=current_user_id
+        )
+    
     return jsonify(result), 200 if result['success'] else 400
 
 @projects_bp.route('/api/projects/<int:project_id>', methods=['GET'])
@@ -265,9 +280,15 @@ def update_project(project_id, current_user_id, current_username):
         return jsonify({'success': False, 'message': 'Project not found'}), 404
     
     # Check if user is an owner or admin
-    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
+    is_admin = database.is_admin(current_user_id)
+    is_owner = database.is_project_owner(project_id, current_user_id)
+    
+    if not is_owner and not is_admin:
         return jsonify({'success': False, 'message': 'You do not have permission to update this project'}), 403
 
+    # Track if admin is editing someone else's project
+    admin_editing_others = is_admin and not is_owner
+    
     # Get form data
     name = request.form.get('name')
     description = request.form.get('description')
@@ -325,6 +346,16 @@ def update_project(project_id, current_user_id, current_username):
     # Get updated project
     updated_project = database.get_project_by_id(project_id)
     
+    # If admin edited someone else's project, notify the owners
+    if admin_editing_others:
+        message = f'Your project "{project["name"]}" has been edited by an administrator.'
+        database.create_notification_for_project_owners(
+            project_id=project_id,
+            type='project_edited',
+            message=message,
+            exclude_user_id=current_user_id
+        )
+    
     return jsonify({
         'success': True,
         'message': 'Project updated successfully',
@@ -336,16 +367,39 @@ def update_project(project_id, current_user_id, current_username):
 def delete_project(project_id, current_user_id, current_username):
     """
     Delete a project
-    Any owner can delete the project
+    Only the project creator or admin can delete the project
     """
     project = database.get_project_by_id(project_id)
     
     if not project:
         return jsonify({'success': False, 'message': 'Project not found'}), 404
 
-    # Check if user is an owner or admin
-    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
+    # Check if user is admin or the project creator
+    is_admin = database.is_admin(current_user_id)
+    is_creator = database.get_project_creator(project_id) == current_user_id
+    
+    if not is_creator and not is_admin:
         return jsonify({'success': False, 'message': 'You do not have permission to delete this project'}), 403
+
+    # Notify other project owners about deletion
+    if is_admin and not is_creator:
+        # Admin is deleting - notify all owners
+        message = f'Your project "{project["name"]}" has been deleted by an administrator.'
+        database.create_notification_for_project_owners(
+            project_id=project_id,
+            type='project_deleted',
+            message=message,
+            exclude_user_id=current_user_id
+        )
+    elif is_creator:
+        # Creator is deleting - notify other owners
+        message = f'The project "{project["name"]}" has been deleted by the creator.'
+        database.create_notification_for_project_owners(
+            project_id=project_id,
+            type='project_deleted',
+            message=message,
+            exclude_user_id=current_user_id
+        )
 
     # Delete file
     file_path = project['file_path']
@@ -508,6 +562,18 @@ def rate_project(project_id, current_user_id, current_username):
         return jsonify({'success': False, 'message': 'Cannot rate unapproved projects'}), 403
 
     result = database.rate_project(project_id, current_user_id, rating)
+    
+    if result['success']:
+        # Create notification for project owners
+        star_text = 'star' if rating == 1 else 'stars'
+        message = f'Your project "{project["name"]}" has received a new rating!: {rating} {star_text}.'
+        database.create_notification_for_project_owners(
+            project_id=project_id,
+            type='project_rated',
+            message=message,
+            exclude_user_id=current_user_id
+        )
+    
     return jsonify(result), 200 if result['success'] else 400
 
 @projects_bp.route('/api/projects/<int:project_id>/rating/me', methods=['GET'])
