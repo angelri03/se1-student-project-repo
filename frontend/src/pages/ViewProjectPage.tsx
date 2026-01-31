@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import CoursePopup from '../components/CoursePopup'
+import ReportModal from '../components/ReportModal'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
@@ -64,6 +65,7 @@ function ViewProjectPage() {
   const [uploadingMedia, setUploadingMedia] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoadingBookmark, setIsLoadingBookmark] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalItem, setModalItem] = useState<any | null>(null)
   const [modalIndex, setModalIndex] = useState<number | null>(null)
@@ -831,6 +833,22 @@ function ViewProjectPage() {
                     </button>
                   )}
                   
+                  {/* Report (only for logged in non-owners and non-admins) */}
+                  {isLoggedIn && !isOwner && !isAdmin && (
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="p-2 text-gray-400 hover:text-red-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
+                      title="Report"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                        Report Project
+                      </span>
+                    </button>
+                  )}
+                  
                   {/* Delete (only for owners) */}
                   {isOwner && (
                     <button
@@ -1502,6 +1520,28 @@ function ViewProjectPage() {
                 )}
               </button>
             )}
+            {isLoggedIn && !isOwner && !isAdmin && (
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="px-6 py-3 border border-red-600 rounded-lg text-red-400 font-medium hover:bg-red-900 hover:bg-opacity-20 transition duration-200 inline-flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Report Project
+              </button>
+            )}
+            {!isLoggedIn && (
+              <button
+                onClick={() => navigate('/login')}
+                className="px-6 py-3 border border-red-600 rounded-lg text-red-400 font-medium hover:bg-red-900 hover:bg-opacity-20 transition duration-200 inline-flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Log in to Report Project
+              </button>
+            )}
             {isOwner && (
               <button
                 onClick={handleDeleteProject}
@@ -1517,6 +1557,17 @@ function ViewProjectPage() {
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {project && (
+        <ReportModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          reportType="project"
+          reportedId={project.id}
+          reportedName={project.name}
+        />
+      )}
     </div>
   )
 }

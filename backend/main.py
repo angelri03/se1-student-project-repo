@@ -7,7 +7,7 @@ from flask import Flask, jsonify, send_from_directory, request, g
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_cors import CORS
 import database
-from api import users_bp, projects_bp, courses_bp, topics_bp, bookmarks_bp, logs_bp, notifications_bp
+from api import users_bp, projects_bp, courses_bp, topics_bp, bookmarks_bp, logs_bp, notifications_bp, reports_bp
 from logging_config import get_logger
 import time
 from api import auth as auth_utils
@@ -89,6 +89,7 @@ app.register_blueprint(topics_bp)
 app.register_blueprint(bookmarks_bp)
 app.register_blueprint(logs_bp)
 app.register_blueprint(notifications_bp)
+app.register_blueprint(reports_bp)
 
 # Health check endpoint
 @app.route('/api/health', methods=['GET'])

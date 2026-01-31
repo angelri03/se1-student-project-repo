@@ -228,6 +228,37 @@ def init_db():
         ON notifications(is_read)
     ''')
 
+    # Reports table (users can report projects or other users)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reporter_id INTEGER NOT NULL,
+            reported_user_id INTEGER,
+            reported_project_id INTEGER,
+            reason TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            admin_notes TEXT,
+            resolved_by INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            resolved_at TIMESTAMP,
+            FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (reported_project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (resolved_by) REFERENCES users(id) ON DELETE SET NULL,
+            CHECK ((reported_user_id IS NOT NULL) OR (reported_project_id IS NOT NULL))
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_reports_reporter
+        ON reports(reporter_id)
+    ''')
+
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_reports_status
+        ON reports(status)
+    ''')
+
     conn.commit()
     conn.close()
 

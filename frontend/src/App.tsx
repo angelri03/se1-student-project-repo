@@ -8,6 +8,7 @@ import CourseManagementPage from './pages/CourseManagementPage'
 import TopicManagementPage from './pages/TopicManagementPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import AdminLogsPage from './pages/AdminLogsPage'
+import AdminReportsPage from './pages/AdminReportsPage'
 import BookmarksPage from './pages/BookmarksPage'
 import NotificationsPage from './pages/NotificationsPage'
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/admin/topics" element={<TopicManagementPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/logs" element={<AdminLogsPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
         </Routes>
       </div>
     </Router>

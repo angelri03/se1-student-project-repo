@@ -190,6 +190,46 @@ def migrate_database():
         else:
             print("Last_edited_by_id column already exists.")
         
+        # Create reports table
+        print("\nChecking reports table...")
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='reports'")
+        if cursor.fetchone() is None:
+            print("  Creating reports table...")
+            cursor.execute('''
+                CREATE TABLE reports (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    reporter_id INTEGER NOT NULL,
+                    reported_user_id INTEGER,
+                    reported_project_id INTEGER,
+                    reason TEXT NOT NULL,
+                    status TEXT DEFAULT 'pending',
+                    admin_notes TEXT,
+                    resolved_by INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    resolved_at TIMESTAMP,
+                    FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (reported_project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                    FOREIGN KEY (resolved_by) REFERENCES users(id) ON DELETE SET NULL,
+                    CHECK ((reported_user_id IS NOT NULL) OR (reported_project_id IS NOT NULL))
+                )
+            ''')
+            
+            print("  Creating report indexes...")
+            cursor.execute('''
+                CREATE INDEX idx_reports_reporter
+                ON reports(reporter_id)
+            ''')
+            cursor.execute('''
+                CREATE INDEX idx_reports_status
+                ON reports(status)
+            ''')
+            
+            conn.commit()
+            print("Reports table created successfully!")
+        else:
+            print("Reports table already exists.")
+        
         conn.close()
         print("\nMigration completed successfully!")
         

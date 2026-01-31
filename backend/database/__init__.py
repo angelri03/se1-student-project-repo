@@ -91,6 +91,14 @@ from .db_notifications import (
     get_unread_count,
     create_notification_for_project_owners
 )
+from .db_reports import (
+    create_report,
+    get_all_reports,
+    get_report_by_id,
+    update_report_status,
+    delete_report,
+    get_pending_reports_count
+)
 
 __all__ = [
     # Core
@@ -182,5 +190,13 @@ __all__ = [
     'mark_all_notifications_as_read',
     'delete_notification',
     'get_unread_count',
-    'create_notification_for_project_owners'
+    'create_notification_for_project_owners',
+    
+    # Reports
+    'create_report',
+    'get_all_reports',
+    'get_report_by_id',
+    'update_report_status',
+    'delete_report',
+    'get_pending_reports_count'
 ]
