@@ -24,6 +24,8 @@ interface Project {
   tags: string[]
   owners: User[]
   created_at: string
+  updated_at?: string
+  last_edited_by?: string
   file_path: string
   approved?: number
 }
@@ -755,34 +757,106 @@ function ViewProjectPage() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold text-white">{project.name}</h1>
-                {isOwner && (
-                  <button
-                    onClick={startEditingTitle}
-                    className="p-1 text-gray-400 hover:text-white transition"
-                    title="Edit title"
+              <div className="flex items-center justify-between w-full gap-3">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-4xl font-bold text-white">{project.name}</h1>
+                  {isOwner && (
+                    <button
+                      onClick={startEditingTitle}
+                      className="p-2 text-gray-400 hover:text-purple-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg"
+                      title="Edit title"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                
+                {/* Action Icons */}
+                <div className="flex items-center gap-2">
+                  {/* Download */}
+                  <a
+                    href={`/api/projects/${project.id}/download`}
+                    className="p-2 text-gray-400 hover:text-purple-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
+                    title="Download"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                      Download
+                    </span>
+                  </a>
+                  
+                  {/* Share */}
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href)
+                      alert('Link copied to clipboard!')
+                    }}
+                    className="p-2 text-gray-400 hover:text-blue-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
+                    title="Share"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                      Share Link
+                    </span>
                   </button>
-                )}
+                  
+                  {/* Bookmark (only for logged in users) */}
+                  {isLoggedIn && (
+                    <button
+                      onClick={handleBookmarkToggle}
+                      disabled={isLoadingBookmark}
+                      className={`p-2 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group disabled:opacity-50 ${
+                        isBookmarked ? 'text-fuchsia-400 hover:text-fuchsia-300' : 'text-gray-400 hover:text-fuchsia-400'
+                      }`}
+                      title="Bookmark"
+                    >
+                      {isBookmarked ? (
+                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                          <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                      )}
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                        {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                      </span>
+                    </button>
+                  )}
+                  
+                  {/* Delete (only for owners) */}
+                  {isOwner && (
+                    <button
+                      onClick={handleDeleteProject}
+                      disabled={deleting}
+                      className="p-2 text-gray-400 hover:text-red-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group disabled:opacity-50"
+                      title="Delete"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                        {deleting ? 'Deleting...' : 'Delete'}
+                      </span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
-            <a
-              href={`/api/projects/${project.id}/download`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200 shrink-0"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download project file
-            </a>
           </div>
 
-          {/* Course Tag */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          {/* Course & Topic Tags */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
             <button
               type="button"
               className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-purple-900 text-purple-200 hover:bg-purple-800 hover:text-white transition"
@@ -791,27 +865,36 @@ function ViewProjectPage() {
             >
               {project.course}
             </button>
+            
+            {!isEditingTags && topics.length > 0 && topics.map((topic, index) => (
+              <span key={index} className="relative inline-block px-4 py-2 text-sm font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200 hover:bg-fuchsia-800 hover:text-white transition group">
+                {topic}
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap max-w-xs">
+                  {getTopicDescription(topic)}
+                </span>
+              </span>
+            ))}
+            
+            {isOwner && !isEditingTags && (
+              <button
+                onClick={startEditingTags}
+                className="inline-flex items-center text-gray-400 hover:text-purple-400 transition"
+                title="Edit tags"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+            )}
           </div>
+          
           {showCoursePopup && project.course_info && (
             <CoursePopup course={project.course_info} onClose={() => setShowCoursePopup(false)} />
           )}
 
-          {/* Editable Topic Tags */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-sm font-medium text-gray-400">Topics</h3>
-              {isOwner && !isEditingTags && (
-                <button
-                  onClick={startEditingTags}
-                  className="p-1 text-gray-400 hover:text-white transition"
-                  title="Edit tags"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
-              )}
-            </div>
+          {/* Topic Editing Mode */}
+          {isEditingTags && (
+            <div className="mb-4 p-4 bg-gray-750 rounded-lg border border-gray-700">
             {isEditingTags ? (
               <div className="space-y-3">
                 {/* Selected tags */}
@@ -920,34 +1003,33 @@ function ViewProjectPage() {
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {topics.length > 0 ? topics.map((topic, index) => (
-                  <span key={index} className="relative inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200 group">
-                    {topic}
-                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap max-w-xs">
-                      {getTopicDescription(topic)}
-                    </span>
-                  </span>
-                )) : (
-                  <span className="text-gray-500 text-sm">No tags</span>
-                )}
-              </div>
-            )}
-          </div>
+            ) : null}
+            </div>
+          )}
 
           {/* Authors/Collaborators */}
           <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-sm font-medium text-gray-400">Authors</h3>
-            </div>
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Authors & Collaborators</h3>
             <div className="flex flex-wrap gap-2">
               {project.owners.map((owner) => (
-                <span key={owner.id} className="inline-flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-lg text-gray-300">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div key={owner.id} className="inline-flex items-center gap-2 px-3 py-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg text-white border border-gray-600 transition-colors">
+                  <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  {owner.username}
+                  <button
+                    onClick={() => navigate(`/profile/${owner.username}`, {
+                      state: { fromProject: true, projectId: project.id }
+                    })}
+                    className="font-medium hover:text-purple-400 transition-colors"
+                    title="View profile"
+                  >
+                    {owner.username}
+                  </button>
                   {owner.id === currentUserId && (
                     <span className="text-xs text-purple-400">(you)</span>
                   )}
@@ -968,7 +1050,7 @@ function ViewProjectPage() {
                       </button>
                     )
                   )}
-                </span>
+                </div>
               ))}
 
               {/* Add Collaborator Dropdown */}
@@ -976,12 +1058,12 @@ function ViewProjectPage() {
                 <div className="relative">
                   <button
                     onClick={() => setIsCollaboratorDropdownOpen(!isCollaboratorDropdownOpen)}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition"
+                    className="inline-flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors font-medium"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Add
+                    Add Collaborator
                   </button>
 
                   {isCollaboratorDropdownOpen && (
@@ -1006,43 +1088,88 @@ function ViewProjectPage() {
                 </div>
               )}
             </div>
+              </div>
+            </div>
           </div>
 
-          {/* Upload Date */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-400 mb-1">Upload Date</h3>
-            <p className="text-gray-300">
-              {new Date(project.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </p>
-          </div>
+          {/* Project Info Grid */}
+          <div className="space-y-3">
+            {/* Date Information Row */}
+            <div className={`grid gap-3 ${isAdmin && project.updated_at && project.updated_at !== project.created_at ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+              {/* Upload Date */}
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Upload Date</h3>
+                  <p className="text-white font-semibold text-sm">
+                    {new Date(project.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
 
-          {/* File Name */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-400 mb-1">File</h3>
-            <p className="text-gray-300 font-mono text-sm">{project.file_path.split('/').pop()}</p>
+              {/* Last Edited (Admin Only) */}
+              {isAdmin && project.updated_at && project.updated_at !== project.created_at && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Last Edited</h3>
+                    <p className="text-white font-semibold text-sm">
+                      {new Date(project.updated_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                      {project.last_edited_by && (
+                        <span className="text-gray-400 font-normal"> by {project.last_edited_by}</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* File Information */}
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project File</h3>
+                <p className="text-white font-semibold text-sm font-mono break-all">{project.file_path.split('/').pop()}</p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Description Card */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-2xl font-bold text-white">Description</h2>
-            {isOwner && !isEditingDescription && (
-              <button
-                onClick={startEditingDescription}
-                className="p-1 text-gray-400 hover:text-white transition"
-                title="Edit description"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-            )}
-          </div>
+          <div className="flex items-start gap-3 mb-4">
+            <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</h3>
+                {isOwner && !isEditingDescription && (
+                  <button
+                    onClick={startEditingDescription}
+                    className="p-1 text-gray-400 hover:text-blue-400 transition"
+                    title="Edit description"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
           {isEditingDescription ? (
             <div className="space-y-3">
               <textarea
@@ -1073,120 +1200,32 @@ function ViewProjectPage() {
               {project.description || 'No description provided.'}
             </p>
           )}
+            </div>
+          </div>
         </div>
 
-        {/* Rating Section */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
-          <h2 className="text-2xl font-bold text-white mb-6">Rating</h2>
-
-          {/* Current Rating Display */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="text-5xl font-bold text-white">
-              {ratingData.count > 0 ? ratingData.average.toFixed(1) : '-'}
-            </div>
-            <div>
-              <div className="flex items-center gap-1 mb-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg
-                    key={star}
-                    className={`w-6 h-6 ${
-                      star <= Math.round(ratingData.average)
-                        ? 'text-fuchsia-400 fill-fuchsia-400'
-                        : 'text-gray-600'
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+        {/* Media Attachments - Hide if empty and user is not owner */}
+        {(media.length > 0 || isOwner) && (
+        <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700 mb-6">
+          <div className="flex items-start gap-3 mb-4">
+            <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Media Attachments</h3>
+                {isOwner && !showUpload && (
+                  <button
+                    onClick={() => setShowUpload(true)}
+                    title="Add media"
+                    className="p-1 text-gray-400 hover:text-pink-400 transition"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                    />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-sm text-gray-400">
-                {ratingData.count} {ratingData.count === 1 ? 'rating' : 'ratings'}
-              </p>
-            </div>
-          </div>
-
-          {/* User Rating Input */}
-          <div className="border-t border-gray-700 pt-6">
-            <h3 className="text-lg font-semibold text-white mb-3">Rate this project</h3>
-            {isOwner ? (
-              <p className="text-gray-400">
-                {isAdmin ? "Admins cannot rate projects." : "You cannot rate your own project."}
-              </p>
-            ) : isLoggedIn ? (
-              <>
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => handleRating(star)}
-                      onMouseEnter={() => setHoveredStar(star)}
-                      onMouseLeave={() => setHoveredStar(0)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <svg
-                        className={`w-10 h-10 ${
-                          star <= (hoveredStar || userRating)
-                            ? 'text-fuchsia-400 fill-fuchsia-400'
-                            : 'text-gray-600'
-                        } transition-colors`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                        />
-                      </svg>
-                    </button>
-                  ))}
-                </div>
-                {ratingMessage && (
-                  <p className={`mt-3 text-sm ${ratingMessage.includes('Thank you') ? 'text-green-400' : 'text-red-400'}`}>
-                    {ratingMessage}
-                  </p>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
                 )}
-              </>
-            ) : (
-              <p className="text-gray-400">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="text-purple-400 hover:text-purple-300 underline"
-                >
-                  Log in
-                </button>
-                {' '}to rate this project
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Media Attachments */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Media Attachments</h2>
-            {isOwner && !showUpload && (
-              <button
-                onClick={() => setShowUpload(true)}
-                title="Add media"
-                className="p-1 text-gray-400 hover:text-white transition"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            )}
-          </div>
+              </div>
 
           {/* Upload Section (only for owners) - expanded when toggled */}
           {isOwner && showUpload && (
@@ -1260,10 +1299,6 @@ function ViewProjectPage() {
 
                   {/* Media Info */}
                   <div className="p-3">
-                    <p className="text-sm text-white font-medium truncate mb-1">{item.file_name}</p>
-                    <p className="text-xs text-gray-400 mb-2">
-                      {(item.file_size / 1024).toFixed(0)} KB • {item.file_type.toUpperCase()}
-                    </p>
                     <div className="flex gap-2">
                       {isOwner && (
                         <button
@@ -1289,6 +1324,115 @@ function ViewProjectPage() {
               ))}
             </div>
           )}
+            </div>
+          </div>
+        </div>
+        )}
+
+        {/* Rating Section */}
+        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
+          <div className="flex items-start gap-3 mb-6">
+            <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Rating</h3>
+
+          {/* Current Rating Display and User Rating Input side by side */}
+          <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center">
+            {/* Left: Current Rating Display */}
+            <div className="flex items-center gap-4">
+              <div className="text-5xl font-bold text-white">
+                {ratingData.count > 0 ? ratingData.average.toFixed(1) : '-'}
+              </div>
+              <div>
+                <div className="flex items-center gap-1 mb-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`w-10 h-10 ${
+                        star <= Math.round(ratingData.average)
+                          ? 'text-fuchsia-400 fill-fuchsia-400'
+                          : 'text-gray-600'
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                      />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-base text-gray-400">
+                  {ratingData.count} {ratingData.count === 1 ? 'rating' : 'ratings'}
+                </p>
+              </div>
+            </div>
+
+            {/* Right: User Rating Input */}
+            <div className="flex-1 lg:border-l lg:border-gray-700 lg:pl-8">
+              <h4 className="text-sm font-semibold text-gray-300 mb-3">Rate this project</h4>
+              {isOwner ? (
+                <p className="text-gray-400 text-sm">
+                  {isAdmin ? "Admins cannot rate projects." : "You cannot rate your own project."}
+                </p>
+              ) : isLoggedIn ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => handleRating(star)}
+                        onMouseEnter={() => setHoveredStar(star)}
+                        onMouseLeave={() => setHoveredStar(0)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <svg
+                          className={`w-10 h-10 ${
+                            star <= (hoveredStar || userRating)
+                              ? 'text-fuchsia-400 fill-fuchsia-400'
+                              : 'text-gray-600'
+                          } transition-colors`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                          />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                  {ratingMessage && (
+                    <p className={`mt-3 text-sm ${ratingMessage.includes('Thank you') ? 'text-green-400' : 'text-red-400'}`}>
+                      {ratingMessage}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-gray-400 text-sm">
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="text-purple-400 hover:text-purple-300 underline"
+                  >
+                    Log in
+                  </button>
+                  {' '}to rate this project
+                </p>
+              )}
+            </div>
+          </div>
+            </div>
+          </div>
         </div>
 
         {modalOpen && modalItem && (
@@ -1318,7 +1462,12 @@ function ViewProjectPage() {
 
         {/* Action Buttons */}
         <div className="bg-gray-800 rounded-lg shadow-xl mt-6 p-6 border border-gray-700">
-          <h2 className="text-xl font-bold text-white mb-4">Actions</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</h2>
+          </div>
           <div className="flex flex-wrap gap-3">
             <button className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

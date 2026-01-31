@@ -80,6 +80,13 @@ def get_project_by_id(project_id: int) -> Optional[Dict]:
         tags = [tag_row['name'] for tag_row in cursor.fetchall()]
         project['tags'] = tags
         
+        # Get last editor's username if available
+        if project.get('last_edited_by_id'):
+            cursor.execute('SELECT username FROM users WHERE id = ?', (project['last_edited_by_id'],))
+            editor_row = cursor.fetchone()
+            if editor_row:
+                project['last_edited_by'] = editor_row['username']
+        
         conn.close()
         return project
     
@@ -126,6 +133,17 @@ def get_all_approved_projects() -> Dict:
             ''', (project['id'],))
 
             project['tags'] = [tag_row['name'] for tag_row in cursor.fetchall()]
+            
+            # Get average rating for each project
+            cursor.execute('''
+                SELECT AVG(rating) as avg_rating, COUNT(*) as total_ratings
+                FROM project_ratings
+                WHERE project_id = ?
+            ''', (project['id'],))
+            rating_row = cursor.fetchone()
+            project['average_rating'] = round(rating_row['avg_rating'], 2) if rating_row['avg_rating'] else None
+            project['total_ratings'] = rating_row['total_ratings'] if rating_row['total_ratings'] else 0
+            
             projects.append(project)
 
         conn.close()
@@ -173,6 +191,17 @@ def get_all_projects() -> Dict:
             ''', (project['id'],))
 
             project['tags'] = [tag_row['name'] for tag_row in cursor.fetchall()]
+            
+            # Get average rating for each project
+            cursor.execute('''
+                SELECT AVG(rating) as avg_rating, COUNT(*) as total_ratings
+                FROM project_ratings
+                WHERE project_id = ?
+            ''', (project['id'],))
+            rating_row = cursor.fetchone()
+            project['average_rating'] = round(rating_row['avg_rating'], 2) if rating_row['avg_rating'] else None
+            project['total_ratings'] = rating_row['total_ratings'] if rating_row['total_ratings'] else 0
+            
             projects.append(project)
 
         conn.close()
@@ -233,7 +262,7 @@ def search_projects_by_tag(tag: str) -> Dict:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
 def update_project(project_id: int, name: str = None, description: str = None, 
-                   file_path: str = None, file_size: int = None) -> Dict:
+                   file_path: str = None, file_size: int = None, last_edited_by_id: int = None) -> Dict:
     """
     Update project information
     Only updates fields that are provided (not None)
@@ -262,6 +291,10 @@ def update_project(project_id: int, name: str = None, description: str = None,
         if file_size is not None:
             update_fields.append('file_size = ?')
             values.append(file_size)
+        
+        if last_edited_by_id is not None:
+            update_fields.append('last_edited_by_id = ?')
+            values.append(last_edited_by_id)
         
         if not update_fields:
             return {'success': False, 'message': 'No fields to update'}

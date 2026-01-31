@@ -35,6 +35,8 @@ function ProfilePage() {
   const fromProfile = location.state?.fromProfile || false
   const previousProfileUsername = location.state?.profileUsername || null
   const fromAdminUsers = location.state?.fromAdminUsers || false
+  const fromProject = location.state?.fromProject || false
+  const projectId = location.state?.projectId || null
 
   const [user, setUser] = useState<User | null>(null)
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
@@ -60,7 +62,9 @@ function ProfilePage() {
       navigate('/admin/users')
       return
     }
-    if (fromBookmarks) {
+    if (fromProject && projectId) {
+      navigate(`/project/${projectId}`)
+    } else if (fromBookmarks) {
       navigate('/bookmarks')
     } else if (fromProfile && previousProfileUsername) {
       navigate(`/profile/${previousProfileUsername}`)
@@ -71,6 +75,7 @@ function ProfilePage() {
 
   const getBackButtonText = () => {
     if (fromAdminUsers) return 'Back to Manage Users'
+    if (fromProject) return 'Back to Project'
     if (fromBookmarks) return 'Back to Bookmarks'
     if (fromProfile) return 'Back to Profile'
     return 'Back to Explore'
@@ -541,21 +546,45 @@ function ProfilePage() {
 
                   {/* Flag banner */}
                   {user.flags && user.flags.length > 0 && (
-                    <div className="mb-4">
-                      <div className="px-4 py-3 bg-red-700 text-white rounded-lg mb-2 flex items-center justify-between">
-                        <div>
-                          <strong>Flagged:</strong> This user has been flagged by admins ({user.flags.length}).
+                    <div className="mb-4 border border-red-500 rounded-lg overflow-hidden">
+                      <div className="px-4 py-3 bg-red-900/40 border-l-4 border-red-500 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <div>
+                            <p className="text-red-200 font-semibold">User Flagged</p>
+                            <p className="text-sm text-red-300">This user has {user.flags.length} active {user.flags.length === 1 ? 'flag' : 'flags'}</p>
+                          </div>
                         </div>
-                        <button onClick={() => setShowFlagDetails(s => !s)} className="text-sm underline">
-                          {showFlagDetails ? 'Hide' : 'View'}
+                        <button 
+                          onClick={() => setShowFlagDetails(s => !s)} 
+                          className="px-3 py-1 text-sm bg-red-700 hover:bg-red-600 text-white rounded transition-colors duration-200"
+                        >
+                          {showFlagDetails ? 'Hide Details' : 'View Details'}
                         </button>
                       </div>
                       {showFlagDetails && (
-                        <div className="bg-red-800/20 rounded-lg p-3">
+                        <div className="bg-gray-800/50 p-4 space-y-3">
                           {user.flags.map((f) => (
-                            <div key={f.id} className="mb-2">
-                              <div className="text-sm text-gray-200">{f.reason || 'No reason provided'}</div>
-                              <div className="text-xs text-gray-400">Flagged by: {f.flagged_by_username || 'Admin'} - {f.created_at ? new Date(f.created_at).toLocaleDateString() : ''}</div>
+                            <div key={f.id} className="bg-gray-700/50 rounded-lg p-3 border border-gray-600">
+                              <div className="flex items-start gap-2 mb-2">
+                                <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div className="flex-1">
+                                  <p className="text-sm text-gray-200 font-medium mb-1">Reason:</p>
+                                  <p className="text-sm text-gray-300">{f.reason || 'No reason provided'}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-400 mt-2 pt-2 border-t border-gray-600">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Flagged by: {f.flagged_by_username || 'Admin'}</span>
+                                <span className="mx-1">•</span>
+                                <span>{f.created_at ? new Date(f.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown date'}</span>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -564,10 +593,17 @@ function ProfilePage() {
                   )}
 
                   {/* User Type Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {user.admin === 1 && (
-                      <span className="px-3 py-1 bg-red-600 text-white text-sm rounded-full">Admin</span>
-                    )}
+                  <div className="mb-4">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">User Info</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {user.admin === 1 && (
+                            <span className="px-3 py-1 bg-red-600 text-white text-sm rounded-full">Admin</span>
+                          )}
                     {user.is_student === 1 ? (
                       <>
                         <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">Student</span>
@@ -581,44 +617,102 @@ function ProfilePage() {
                     ) : (
                       <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">Non-Student</span>
                     )}
-                    {user.organization && (
-                      <span className={`px-3 py-1 ${user.is_student === 1 ? 'bg-purple-600' : 'bg-indigo-600'} text-white text-sm rounded-full`}>{user.organization}</span>
-                    )}
+                          {user.organization && (
+                            <span className={`px-3 py-1 ${user.is_student === 1 ? 'bg-purple-600' : 'bg-indigo-600'} text-white text-sm rounded-full`}>{user.organization}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Bio */}
                   {user.bio && (
-                    <p className="text-gray-300 leading-relaxed mb-6 whitespace-pre-line">{user.bio}</p>
+                    <div className="mb-6">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Bio</h3>
+                          <p className="text-gray-300 leading-relaxed whitespace-pre-line">{user.bio}</p>
+                        </div>
+                      </div>
+                    </div>
                   )}
 
                   {/* Stats */}
                   {user.is_student === 1 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="mb-4">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Statistics</h3>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="bg-gray-700 rounded-lg p-4">
-                        <p className="text-gray-400 text-sm mb-1">Projects</p>
-                        <p className="text-2xl font-bold text-white">{userProjects.length}</p>
-                      </div>
-                      <div className="bg-gray-700 rounded-lg p-4">
-                        <p className="text-gray-400 text-sm mb-1">Total Ratings</p>
-                        <p className="text-2xl font-bold text-white">{user.total_ratings || 0}</p>
-                      </div>
-                      <div className="bg-gray-700 rounded-lg p-4">
-                        <p className="text-gray-400 text-sm mb-1">Avg. Rating</p>
-                        <p className="text-2xl font-bold text-purple-400">{user.average_rating ? user.average_rating.toFixed(1) : '0.0'}</p>
-                      </div>
-                      <div className="bg-gray-700 rounded-lg p-4">
-                        <p className="text-gray-400 text-sm mb-1">Member Since</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="text-gray-400 text-sm">Member Since</p>
+                        </div>
                         <p className="text-lg font-semibold text-white">
                           {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'N/A'}
                         </p>
                       </div>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                          </svg>
+                          <p className="text-gray-400 text-sm">Projects</p>
+                        </div>
+                        <p className="text-2xl font-bold text-white">{userProjects.length}</p>
+                      </div>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                          <p className="text-gray-400 text-sm">Total Ratings</p>
+                        </div>
+                        <p className="text-2xl font-bold text-white">{user.total_ratings || 0}</p>
+                      </div>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                          <p className="text-gray-400 text-sm">Avg. Rating</p>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-400">{user.average_rating ? user.average_rating.toFixed(1) : '0.0'}</p>
+                      </div>
+                    </div>
+                        </div>
+                      </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-700 rounded-lg p-4 inline-block">
-                      <p className="text-gray-400 text-sm mb-1">Member Since</p>
-                      <p className="text-lg font-semibold text-white">
-                        {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'N/A'}
-                      </p>
+                    <div className="mb-4">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Statistics</h3>
+                          <div className="bg-gray-700 rounded-lg p-4 inline-block">
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <p className="text-gray-400 text-sm">Member Since</p>
+                            </div>
+                            <p className="text-lg font-semibold text-white">
+                              {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -630,9 +724,14 @@ function ProfilePage() {
         {/* Projects Section - Only for Students */}
         {user && user.is_student === 1 && (
           <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              {isOwnProfile ? 'My Projects' : `${user.username}'s Projects`}
-            </h2>
+            <div className="flex items-center gap-3 mb-6">
+              <svg className="w-6 h-6 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <h2 className="text-2xl font-bold text-white">
+                {isOwnProfile ? 'My Projects' : `${user.username}'s Projects`}
+              </h2>
+            </div>
 
             {userProjects.length === 0 ? (
               <div className="text-center py-12">
@@ -665,7 +764,12 @@ function ProfilePage() {
         {/* Pending Projects */}
         {isOwnProfile && pendingProjects && pendingProjects.length > 0 && (
           <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-yellow-600 mt-6">
-            <h2 className="text-2xl font-bold text-yellow-300 mb-4">Pending Projects</h2>
+            <div className="flex items-center gap-3 mb-4">
+              <svg className="w-6 h-6 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h2 className="text-2xl font-bold text-yellow-300">Pending Projects</h2>
+            </div>
             <div className="text-gray-400 mb-4">Projects awaiting admin approval. Only you can view these.</div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pendingProjects.map((project) => (

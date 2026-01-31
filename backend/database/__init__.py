@@ -14,6 +14,7 @@ from .db_users import (
     delete_user,
     get_all_users,
     is_admin,
+    get_admin_user_ids,
     flag_user,
     get_user_flags,
 )
@@ -106,6 +107,7 @@ __all__ = [
     'delete_user',
     'get_all_users',
     'is_admin',
+    'get_admin_user_ids',
     'flag_user',
     'get_user_flags',
     

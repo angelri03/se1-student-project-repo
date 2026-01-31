@@ -164,6 +164,32 @@ def migrate_database():
         else:
             print("Term column already exists.")
         
+        # Add metadata column to notifications table
+        print("\nChecking notifications table...")
+        cursor.execute("PRAGMA table_info(notifications)")
+        notification_columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'metadata' not in notification_columns:
+            print("  Adding metadata column...")
+            cursor.execute('ALTER TABLE notifications ADD COLUMN metadata TEXT')
+            conn.commit()
+            print("Metadata column added successfully!")
+        else:
+            print("Metadata column already exists.")
+        
+        # Add last_edited_by_id column to projects table
+        print("\nChecking projects table...")
+        cursor.execute("PRAGMA table_info(projects)")
+        project_columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'last_edited_by_id' not in project_columns:
+            print("  Adding last_edited_by_id column...")
+            cursor.execute('ALTER TABLE projects ADD COLUMN last_edited_by_id INTEGER')
+            conn.commit()
+            print("Last_edited_by_id column added successfully!")
+        else:
+            print("Last_edited_by_id column already exists.")
+        
         conn.close()
         print("\nMigration completed successfully!")
         

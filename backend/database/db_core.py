@@ -39,7 +39,8 @@ def init_db():
             file_size INTEGER NOT NULL,
             approved INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_edited_by_id INTEGER
         )
     ''')
     

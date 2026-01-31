@@ -55,8 +55,8 @@ function NotificationBell() {
       })
       const data = await response.json()
       if (data.success) {
-        // Get only the 5 most recent unread notifications
-        setNotifications(data.notifications.slice(0, 5))
+        // Get only the 3 most recent unread notifications
+        setNotifications(data.notifications.slice(0, 3))
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
@@ -88,6 +88,24 @@ function NotificationBell() {
     }
   }
 
+  const markAllAsRead = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    try {
+      await fetch('http://localhost:5000/api/notifications/read-all', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      fetchUnreadCount()
+      fetchRecentNotifications()
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error)
+    }
+  }
+
   const handleNotificationClick = (notification: Notification) => {
     if (notification.is_read === 0) {
       markAsRead(notification.id)
@@ -96,6 +114,11 @@ function NotificationBell() {
       navigate(`/project/${notification.project_id}`)
     }
     setShowDropdown(false)
+  }
+
+  const handleMarkAsReadClick = (e: React.MouseEvent, notificationId: number) => {
+    e.stopPropagation()
+    markAsRead(notificationId)
   }
 
   const viewAllNotifications = () => {
@@ -137,8 +160,16 @@ function NotificationBell() {
 
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
-          <div className="p-4 border-b border-gray-700">
+          <div className="p-4 border-b border-gray-700 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-100">Notifications</h3>
+            {notifications.length > 0 && notifications.some(n => n.is_read === 0) && (
+              <button
+                onClick={markAllAsRead}
+                className="text-xs text-purple-400 hover:text-purple-300 font-medium"
+              >
+                Mark all read
+              </button>
+            )}
           </div>
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
@@ -200,9 +231,22 @@ function NotificationBell() {
                         {formatTimeAgo(notification.created_at)}
                       </p>
                     </div>
-                    {notification.is_read === 0 && (
-                      <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0 mt-2"></div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {notification.is_read === 0 && (
+                        <>
+                          <button
+                            onClick={(e) => handleMarkAsReadClick(e, notification.id)}
+                            className="text-purple-400 hover:text-purple-300 transition"
+                            title="Mark as read"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </button>
+                          <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))

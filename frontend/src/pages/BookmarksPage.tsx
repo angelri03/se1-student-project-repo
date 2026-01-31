@@ -26,7 +26,7 @@ interface User {
 function BookmarksPage() {
   const navigate = useNavigate()
   const [projects, setProjects] = useState<Project[]>([])
-  const [user, setUser] = useState<User | null>(null)
+  const [, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

@@ -95,7 +95,8 @@ def upload_project(current_user_id, current_username):
         database.update_project(
             project_id=project_id,
             file_path=file_path,
-            file_size=file_size
+            file_size=file_size,
+            last_edited_by_id=current_user_id
         )
         
         # Add tags if provided
@@ -299,13 +300,19 @@ def update_project(project_id, current_user_id, current_username):
         database.update_project(
             project_id=project_id,
             name=name if name else None,
-            description=description if description is not None else None
+            description=description if description is not None else None,
+            last_edited_by_id=current_user_id
         )
     
     # Update tags if provided
     if tags_str is not None:
         tags = [tag.strip() for tag in tags_str.split(',') if tag.strip()]
         database.set_project_tags(project_id, tags)
+        # Also update last_edited_by_id when tags are changed
+        database.update_project(
+            project_id=project_id,
+            last_edited_by_id=current_user_id
+        )
     
     # Replace file if provided
     if 'file' in request.files:
@@ -331,7 +338,8 @@ def update_project(project_id, current_user_id, current_username):
                 database.update_project(
                     project_id=project_id,
                     file_path=file_path,
-                    file_size=file_size
+                    file_size=file_size,
+                    last_edited_by_id=current_user_id
                 )
                 
                 # Reset approval status when file is replaced
@@ -355,6 +363,17 @@ def update_project(project_id, current_user_id, current_username):
             message=message,
             exclude_user_id=current_user_id
         )
+    # If owner edited project, notify all admins
+    elif is_owner and not is_admin:
+        admin_ids = database.get_admin_user_ids()
+        message = f'Project "{project["name"]}" has been edited by {current_username}.'
+        for admin_id in admin_ids:
+            database.create_notification(
+                user_id=admin_id,
+                project_id=project_id,
+                type='project_edited',
+                message=message
+            )
     
     return jsonify({
         'success': True,

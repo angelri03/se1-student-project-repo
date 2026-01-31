@@ -5,7 +5,7 @@ Handles user CRUD operations and authentication
 
 import sqlite3
 import bcrypt
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from .db_core import DATABASE_NAME, get_connection
 
 def hash_password(password: str) -> str:
@@ -236,6 +236,25 @@ def get_all_users() -> Dict:
 
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
+
+def get_admin_user_ids() -> List[int]:
+    """
+    Get all admin user IDs
+    Returns: List of admin user IDs
+    """
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT id FROM users WHERE admin = 1')
+        rows = cursor.fetchall()
+
+        conn.close()
+
+        return [row[0] for row in rows]
+
+    except Exception:
+        return []
 
 
 def flag_user(user_id: int, flagged_by: int, reason: str = None) -> Dict:

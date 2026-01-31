@@ -21,7 +21,7 @@ function UserMenu({ user, onLogout }: UserMenuProps) {
     <div className="flex gap-3">
       {user ? (
         <>
-          {user.admin !== 1 && <NotificationBell />}
+          {(user.is_student === 1 || user.admin === 1) && <NotificationBell />}
           <button
             onClick={() => navigate(`/profile/${user.username}`)}
             className="p-3 sm:px-6 sm:py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"

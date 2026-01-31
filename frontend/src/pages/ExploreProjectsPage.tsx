@@ -13,8 +13,11 @@ interface Project {
   tags: string[]
   owners: { id: number; username: string; email: string }[]
   created_at: string
+  updated_at?: string
   file_path: string
   approved?: number
+  average_rating?: number
+  total_ratings?: number
 }
 
 interface User {
@@ -36,7 +39,7 @@ function ExploreProjectsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAdminMenu, setShowAdminMenu] = useState(false)
-  const [sortOption, setSortOption] = useState<string>('none')
+  const [sortOption, setSortOption] = useState<string>('newest')
 
   // Close admin menu when clicking outside
   useEffect(() => {
@@ -159,10 +162,16 @@ function ExploreProjectsPage() {
         filtered = filtered.slice().sort((a, b) => b.name.localeCompare(a.name))
         break
       case 'date_new':
-        filtered = filtered.slice().sort((a, b) => (new Date(a.created_at).getTime() || 0) - (new Date(b.created_at).getTime() || 0))
+        filtered = filtered.slice().sort((a, b) => (new Date(b.created_at).getTime() || 0) - (new Date(a.created_at).getTime() || 0))
         break
       case 'date_old':
-        filtered = filtered.slice().sort((a, b) => (new Date(b.created_at).getTime() || 0) - (new Date(a.created_at).getTime() || 0))
+        filtered = filtered.slice().sort((a, b) => (new Date(a.created_at).getTime() || 0) - (new Date(b.created_at).getTime() || 0))
+        break
+      case 'rating_high':
+        filtered = filtered.slice().sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0))
+        break
+      case 'updated_new':
+        filtered = filtered.slice().sort((a, b) => (new Date(b.updated_at || b.created_at).getTime() || 0) - (new Date(a.updated_at || a.created_at).getTime() || 0))
         break
       default:
         break
@@ -335,6 +344,8 @@ function ExploreProjectsPage() {
                 <option value="name_desc">Name (Z → A)</option>
                 <option value="date_new">Date (Newest First)</option>
                 <option value="date_old">Date (Oldest First)</option>
+                <option value="rating_high">Highest Rated</option>
+                {user?.admin === 1 && <option value="updated_new">Last Edited</option>}
               </select>
             </div>
 
