@@ -4,6 +4,7 @@ import axios from 'axios'
 import ProjectCard from '../components/ProjectCard'
 import AdminMenu from '../components/AdminMenu'
 import UserMenu from '../components/UserMenu'
+import ThemeToggle from '../components/ThemeToggle'
 
 interface Project {
   id: number
@@ -255,6 +256,7 @@ function ExploreProjectsPage() {
                 <span className="hidden sm:inline">My Bookmarks</span>
               </button>
             )}
+          <ThemeToggle />
           </div>
           <UserMenu 
             user={user} 

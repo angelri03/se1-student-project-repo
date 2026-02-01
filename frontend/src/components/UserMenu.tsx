@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import NotificationBell from './NotificationBell'
-import ThemeToggle from './ThemeToggle'
 
 interface User {
   id: number
@@ -20,7 +19,6 @@ function UserMenu({ user, onLogout }: UserMenuProps) {
 
   return (
     <div className="flex gap-3">
-      <ThemeToggle />
       {user ? (
         <>
           {(user.is_student === 1 || user.admin === 1) && <NotificationBell />}
