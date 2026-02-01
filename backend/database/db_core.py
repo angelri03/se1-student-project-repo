@@ -25,6 +25,8 @@ def init_db():
             semester INTEGER,
             study_programme TEXT,
             organization TEXT,
+            profile_link TEXT,
+            profile_visibility TEXT DEFAULT 'public',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')

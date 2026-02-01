@@ -50,7 +50,9 @@ def register():
         is_student=is_student,
         semester=semester,
         study_programme=study_programme,
-        organization=organization
+        organization=organization,
+        profile_link=data.get('profile_link'),
+        profile_visibility=data.get('profile_visibility', 'public')
     )
     
     if not result['success']:
@@ -71,7 +73,9 @@ def register():
             'is_student': is_student,
             'semester': semester,
             'study_programme': study_programme,
-            'organization': organization
+            'organization': organization,
+            'profile_link': data.get('profile_link'),
+            'profile_visibility': data.get('profile_visibility', 'public')
         }
     }), 201
 
@@ -113,7 +117,9 @@ def login():
             'is_student': user.get('is_student', 1),
             'semester': user.get('semester'),
             'study_programme': user.get('study_programme'),
-            'organization': user.get('organization')
+            'organization': user.get('organization'),
+            'profile_link': user.get('profile_link'),
+            'profile_visibility': user.get('profile_visibility', 'public')
         }
     }), 200
 
@@ -183,7 +189,9 @@ def get_current_user(current_user_id, current_username):
         'created_at': user.get('created_at'),
         'profile_picture': user.get('profile_picture'),
         'total_ratings': rating_stats.get('total_ratings', 0),
-        'average_rating': rating_stats.get('average_rating', 0)
+        'average_rating': rating_stats.get('average_rating', 0),
+        'profile_link': user.get('profile_link'),
+        'profile_visibility': user.get('profile_visibility', 'public')
     }
     
     return jsonify({
@@ -266,7 +274,9 @@ def admin_update_user(current_user_id, current_username, user_id):
         'semester': data.get('semester'),
         'study_programme': data.get('study_programme'),
         'organization': data.get('organization'),
-        'admin': data.get('admin')
+        'admin': data.get('admin'),
+        'profile_link': data.get('profile_link'),
+        'profile_visibility': data.get('profile_visibility')
     }
 
     # Remove keys with None to allow partial updates handled by database.update_user
@@ -367,7 +377,9 @@ def update_current_user(current_user_id, current_username):
         is_student=is_student,
         semester=semester,
         study_programme=study_programme,
-        organization=organization
+        organization=organization,
+        profile_link=data.get('profile_link') if 'profile_link' in data else user.get('profile_link'),
+        profile_visibility=data.get('profile_visibility') if 'profile_visibility' in data else user.get('profile_visibility', 'public')
     )
     
     if not result['success']:
@@ -521,7 +533,9 @@ def get_user_profile(username):
         'admin': user.get('admin', 0),
         'profile_picture': user.get('profile_picture'),
         'total_ratings': rating_stats.get('total_ratings', 0) if rating_stats else 0,
-        'average_rating': rating_stats.get('average_rating', 0) if rating_stats else 0
+        'average_rating': rating_stats.get('average_rating', 0) if rating_stats else 0,
+        'profile_link': user.get('profile_link'),
+        'profile_visibility': user.get('profile_visibility', 'public')
     }
 
     # Include flags (if any)

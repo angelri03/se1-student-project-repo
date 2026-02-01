@@ -18,6 +18,8 @@ interface User {
   organization?: string
   admin?: number
   profile_picture?: string
+  profile_link?: string
+  profile_visibility?: string
   flags?: Array<{ id: number; reason?: string; flagged_by?: number; flagged_by_username?: string; created_at?: string }>
 }
 
@@ -275,24 +277,32 @@ function ProfilePage() {
         await axios.put('/api/me', {
           username: editedUser.username,
           email: editedUser.email,
-          bio: editedUser.bio,
+          bio: editedUser.bio || '',
           is_student: editedUser.is_student,
-          semester: editedUser.semester,
-          study_programme: editedUser.study_programme,
-          organization: editedUser.organization
+          semester: editedUser.semester || '',
+          study_programme: editedUser.study_programme || '',
+          organization: editedUser.organization || '',
+          profile_link: editedUser.profile_link || '',
+          profile_visibility: editedUser.profile_visibility || 'public'
         }, {
           headers: { Authorization: `Bearer ${token}` }
         })
 
+        // Update user state with all fields including profile_visibility
+        const updatedUser = { ...editedUser }
+        setUser(updatedUser)
+        
+        // Exit edit mode first
+        setIsEditing(false)
+        
         // if username changed, navigate to new profile URL
         if (editedUser.username !== username) {
           navigate(`/profile/${editedUser.username}`, { replace: true })
-        } else {
-          setUser(editedUser)
         }
-        setIsEditing(false)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to update profile:', error)
+        console.error('Error response:', error.response?.data)
+        alert('Failed to update profile: ' + (error.response?.data?.message || 'Unknown error'))
       }
     }
   }
@@ -381,13 +391,14 @@ function ProfilePage() {
         {/* Profile Card */}
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 sm:p-8 border border-gray-700 mb-6">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            {/* Avatar */}
-            <div className="w-full sm:w-auto flex flex-col items-start gap-2 mb-4 sm:mb-0">
-              <div
-                className={`relative w-36 h-36 sm:w-32 sm:h-32 rounded-full overflow-hidden ${isOwnProfile ? 'group cursor-pointer' : ''}`}
-                onMouseEnter={() => isOwnProfile && setHoveredAvatar(true)}
-                onMouseLeave={() => setHoveredAvatar(false)}
-                onClick={() => isOwnProfile && fileInputRef.current?.click()}
+            {/* Avatar - Hidden for private profiles when not owner */}
+            {(!user.profile_visibility || user.profile_visibility !== 'private' || isOwnProfile) && (
+              <div className="w-full sm:w-auto flex flex-col items-start gap-2 mb-4 sm:mb-0">
+                <div
+                  className={`relative w-36 h-36 sm:w-32 sm:h-32 rounded-full overflow-hidden ${isOwnProfile ? 'group cursor-pointer' : ''}`}
+                  onMouseEnter={() => isOwnProfile && setHoveredAvatar(true)}
+                  onMouseLeave={() => setHoveredAvatar(false)}
+                  onClick={() => isOwnProfile && fileInputRef.current?.click()}
               >
                 {user.profile_picture ? (
                   <>
@@ -457,10 +468,38 @@ function ProfilePage() {
                 )}
               </div>
             </div>
+            )}
 
             {/* User Info */}
             <div className="w-full flex-1">
-              {isEditing && isOwnProfile ? (
+              {/* Check visibility restrictions */}
+              {!isOwnProfile && user.profile_visibility === 'private' ? (
+                // Private Profile View - Only username visible
+                <div className="text-center py-12">
+                  <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <h2 className="text-2xl font-bold text-white mb-2">{user.username}</h2>
+                  <p className="text-gray-400 text-lg">This profile is private</p>
+                </div>
+              ) : !isOwnProfile && user.profile_visibility === 'logged_in' && !currentUser ? (
+                // Logged In Only View - Not authenticated
+                <div className="text-center py-12">
+                  <svg className="w-16 h-16 text-purple-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <h2 className="text-2xl font-bold text-white mb-2">{user.username}</h2>
+                  <p className="text-gray-400 text-lg">
+                    <span 
+                      onClick={() => navigate('/login')}
+                      className="text-purple-400 hover:text-purple-300 underline cursor-pointer"
+                    >
+                      Log in
+                    </span>
+                    {' '}to see this profile
+                  </p>
+                </div>
+              ) : isEditing && isOwnProfile ? (
                 // Edit Mode
                 <div>
                   <div className="mb-4">
@@ -525,6 +564,33 @@ function ProfilePage() {
                       placeholder="e.g., University Name"
                     />
                   </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Profile Link</label>
+                    <input
+                      type="url"
+                      value={editedUser?.profile_link || ''}
+                      onChange={(e) => setEditedUser(prev => prev ? {...prev, profile_link: e.target.value} : null)}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Profile Visibility</label>
+                    <select
+                      value={editedUser?.profile_visibility || 'public'}
+                      onChange={(e) => setEditedUser(prev => prev ? {...prev, profile_visibility: e.target.value} : null)}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="public">Public - Everyone can see</option>
+                      <option value="logged_in">Logged In Users Only</option>
+                      <option value="private">Private - Only username visible</option>
+                    </select>
+                    <p className="mt-2 text-sm text-gray-400">
+                      {editedUser?.profile_visibility === 'private' && 'Private profiles only show your username to other users'}
+                      {editedUser?.profile_visibility === 'logged_in' && 'Only logged in users can see your full profile'}
+                      {(!editedUser?.profile_visibility || editedUser?.profile_visibility === 'public') && 'Everyone can see your profile'}
+                    </p>
+                  </div>
                   <button
                     onClick={handleSaveChanges}
                     className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
@@ -536,7 +602,29 @@ function ProfilePage() {
                 // View Mode
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-3xl font-bold text-white">{user.username}</h2>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-3xl font-bold text-white">{user.username}</h2>
+                      {isOwnProfile && (
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                          user.profile_visibility === 'private' 
+                            ? 'bg-gray-700 text-gray-300 border border-gray-600' 
+                            : user.profile_visibility === 'logged_in'
+                            ? 'bg-blue-900/30 text-blue-400 border border-blue-600'
+                            : 'bg-green-900/30 text-green-400 border border-green-600'
+                        }`}>
+                          <svg className="w-3 h-3 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {user.profile_visibility === 'private' ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            ) : user.profile_visibility === 'logged_in' ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            ) : (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            )}
+                          </svg>
+                          {user.profile_visibility === 'private' ? 'Private' : user.profile_visibility === 'logged_in' ? 'Logged In' : 'Public'}
+                        </span>
+                      )}
+                    </div>
                     {!isOwnProfile && currentUser && currentUser.admin !== 1 && (
                       <button
                         onClick={() => setShowReportModal(true)}
@@ -648,6 +736,23 @@ function ProfilePage() {
                     </div>
                   )}
 
+                  {/* Profile Link */}
+                  {user.profile_link && (
+                    <div className="mb-6">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Profile Link</h3>
+                          <a href={user.profile_link} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 underline break-all">
+                            {user.profile_link}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Stats */}
                   {user.is_student === 1 ? (
                     <div className="mb-4">
@@ -744,8 +849,8 @@ function ProfilePage() {
           </div>
         </div>
 
-        {/* Projects Section - Only for Students */}
-        {user && user.is_student === 1 && (
+        {/* Projects Section - Only for Students and accessible profiles */}
+        {user && user.is_student === 1 && (isOwnProfile || (user.profile_visibility !== 'private' && (user.profile_visibility !== 'logged_in' || currentUser))) && (
           <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
             <div className="flex items-center gap-3 mb-6">
               <svg className="w-6 h-6 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

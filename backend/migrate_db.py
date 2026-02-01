@@ -83,6 +83,22 @@ def migrate_database():
         else:
             print("Profile_picture column already exists.")
         
+        if 'profile_link' not in columns:
+            print("  Adding profile_link column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN profile_link TEXT')
+            conn.commit()
+            print("Profile_link column added successfully!")
+        else:
+            print("Profile_link column already exists.")
+        
+        if 'profile_visibility' not in columns:
+            print("  Adding profile_visibility column...")
+            cursor.execute("ALTER TABLE users ADD COLUMN profile_visibility TEXT DEFAULT 'public'")
+            conn.commit()
+            print("Profile_visibility column added successfully!")
+        else:
+            print("Profile_visibility column already exists.")
+        
         # Create project_media table
         print("\nChecking project_media table...")
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='project_media'")

@@ -19,7 +19,8 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def create_user(username: str, password: str, email: str, is_student: int = 1, 
-                semester: str = None, study_programme: str = None, organization: str = None) -> Dict:
+                semester: str = None, study_programme: str = None, organization: str = None,
+                profile_link: str = None, profile_visibility: str = 'public') -> Dict:
     """
     Create a new user with hashed password
     Returns: {'success': bool, 'message': str, 'id': int (if successful)}
@@ -31,9 +32,9 @@ def create_user(username: str, password: str, email: str, is_student: int = 1,
         hashed_password = hash_password(password)
         
         cursor.execute('''
-            INSERT INTO users (username, password, email, is_student, semester, study_programme, organization)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (username, hashed_password, email, is_student, semester, study_programme, organization))
+            INSERT INTO users (username, password, email, is_student, semester, study_programme, organization, profile_link, profile_visibility)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (username, hashed_password, email, is_student, semester, study_programme, organization, profile_link, profile_visibility))
         
         conn.commit()
         user_id = cursor.lastrowid
@@ -95,7 +96,7 @@ _UNSET = object()
 
 def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None,
                 is_student: int = None, semester: str = None, study_programme: str = None, organization: str = None,
-                admin: int = None, profile_picture = _UNSET) -> Dict:
+                admin: int = None, profile_picture = _UNSET, profile_link: str = None, profile_visibility: str = None) -> Dict:
     """
     Update user information
     Only updates fields that are provided (not None)
@@ -145,6 +146,14 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
         if admin is not None:
             update_fields.append('admin = ?')
             values.append(admin)
+        
+        if profile_link is not None:
+            update_fields.append('profile_link = ?')
+            values.append(profile_link)
+        
+        if profile_visibility is not None:
+            update_fields.append('profile_visibility = ?')
+            values.append(profile_visibility)
         
         # Allow explicitly setting profile_picture to None to remove it
         if profile_picture is not _UNSET:
