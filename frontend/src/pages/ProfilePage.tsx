@@ -711,7 +711,7 @@ function ProfilePage() {
                         )}
                       </>
                     ) : (
-                      <span className="px-3 py-1 bg-blue-500 dark:bg-blue-600 text-white text-sm rounded-full">Non-Student</span>
+                      <span className="px-3 py-1 bg-amber-500 dark:bg-blue-600 text-white text-sm rounded-full">Student</span>
                     )}
                           {user.organization && (
                             <span className={`px-3 py-1 ${user.is_student === 1 ? 'bg-amber-500 dark:bg-purple-600' : 'bg-blue-500 dark:bg-indigo-600'} text-white text-sm rounded-full`}>{user.organization}</span>
