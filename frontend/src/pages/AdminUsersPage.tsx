@@ -112,8 +112,8 @@ function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-white text-xl">Loading...</div>
       </div>
     )
   }
@@ -123,12 +123,12 @@ function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8 relative">
           <button
             onClick={() => navigate('/explore')}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -137,7 +137,7 @@ function AdminUsersPage() {
             <span className="hidden sm:inline">Back to Explore</span>
           </button>
 
-          <h1 className="text-xl sm:text-3xl font-bold text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">User Management</h1>
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">User Management</h1>
 
           <div style={{ width: 92 }} />
         </div>
@@ -149,11 +149,11 @@ function AdminUsersPage() {
               placeholder="Search by username"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-600"
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2 text-sm text-gray-300">
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <input type="checkbox" checked={showFlaggedOnly} onChange={(e) => setShowFlaggedOnly(e.target.checked)} className="accent-yellow-400" />
               <span>Show flagged only</span>
             </label>
@@ -166,11 +166,11 @@ function AdminUsersPage() {
           </div>
         )}
 
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-100 dark:bg-gray-700">
               <tr>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     className="flex items-center gap-2"
                     onClick={() => {
@@ -183,15 +183,15 @@ function AdminUsersPage() {
                     title="Sort by username"
                   >
                     <span>Username</span>
-                    <svg className={`w-3 h-3 ml-1 ${sortBy === 'username' ? 'text-white' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <svg className={`w-3 h-3 ml-1 ${sortBy === 'username' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                       <path d="M7 14l5-5 5 5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={sortBy === 'username' && sortAsc ? 'opacity-100' : 'opacity-40'} />
                       <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={sortBy === 'username' && !sortAsc ? 'opacity-100' : 'opacity-40'} />
                     </svg>
                   </button>
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Role</th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Role</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     className="flex items-center gap-2"
                     onClick={() => {
@@ -204,20 +204,20 @@ function AdminUsersPage() {
                     title="Sort by creation date"
                   >
                     <span>Created</span>
-                    <svg className={`w-3 h-3 ml-1 ${sortBy === 'created_at' ? 'text-white' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <svg className={`w-3 h-3 ml-1 ${sortBy === 'created_at' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                       <path d="M7 14l5-5 5 5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={sortBy === 'created_at' && sortAsc ? 'opacity-100' : 'opacity-40'} />
                       <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={sortBy === 'created_at' && !sortAsc ? 'opacity-100' : 'opacity-40'} />
                     </svg>
                   </button>
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Flagged</th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Flagged</th>
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-3 sm:px-6 py-3 text-center text-gray-400">No users found.</td>
+                  <td colSpan={5} className="px-3 sm:px-6 py-3 text-center text-gray-600 dark:text-gray-400">No users found.</td>
                 </tr>
               ) : (
                 users
@@ -239,25 +239,25 @@ function AdminUsersPage() {
                     }
                   })
                   .map((u) => (
-                    <tr key={u.id} className="hover:bg-gray-700">
+                    <tr key={u.id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                           <div className="text-sm font-medium">
-                            <Link to={`/profile/${u.username}`} state={{ fromAdminUsers: true }} className="text-purple-500 hover:underline">
+                            <Link to={`/profile/${u.username}`} state={{ fromAdminUsers: true }} className="text-amber-600 dark:text-purple-500 hover:underline">
                               {u.username}
                             </Link>
                           </div>
                         </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4">
-                        <div className="text-sm text-gray-300">{u.email}</div>
+                        <div className="text-sm text-gray-700 dark:text-gray-300">{u.email}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4">
-                        <div className="text-sm text-gray-300">{u.admin ? 'Admin' : 'User'}</div>
+                        <div className="text-sm text-gray-700 dark:text-gray-300">{u.admin ? 'Admin' : 'User'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-400">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '-'}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '-'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                        <div className={`text-sm ${u.flagged ? 'text-yellow-300 font-semibold' : 'text-gray-400'}`}>{u.flagged ? 'Yes' : 'No'}</div>
+                        <div className={`text-sm ${u.flagged ? 'text-yellow-600 dark:text-yellow-300 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>{u.flagged ? 'Yes' : 'No'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-right">
                         <div className="inline-flex items-center gap-2">

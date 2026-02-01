@@ -235,7 +235,7 @@ function ExploreProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         {/* Top Navigation Bar */}
         <div className="flex justify-between items-center gap-3 mb-8">
@@ -246,7 +246,7 @@ function ExploreProjectsPage() {
             {user && (
               <button
                 onClick={() => navigate('/bookmarks')}
-                className="p-2 sm:px-4 sm:py-2 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 transition duration-200 flex items-center gap-2"
+                className="p-2 sm:px-4 sm:py-2 bg-amber-500 dark:bg-fuchsia-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-fuchsia-700 transition duration-200 flex items-center gap-2"
                 title="View bookmarks"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -268,16 +268,16 @@ function ExploreProjectsPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">Explore Projects</h1>
-          <p className="text-lg text-gray-400">Discover student projects from various courses</p>
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">Explore Projects</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Discover student projects from various courses</p>
         </div>
 
         {/* Filters Section */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-6 mb-8 border border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
           <div className={`grid grid-cols-1 gap-4 ${user?.admin === 1 ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
             {/* Search Bar */}
             <div className="md:col-span-2">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Search Projects
               </label>
               <input
@@ -285,21 +285,21 @@ function ExploreProjectsPage() {
                 id="search"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Search by title, description, or author..."
               />
             </div>
 
             {/* Course Filter */}
             <div>
-              <label htmlFor="course" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="course" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Course
               </label>
               <select
                 id="course"
                 value={selectedCourse}
                 onChange={(e) => handleCourseChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 {courses.map(course => (
                   <option key={course} value={course}>
@@ -311,14 +311,14 @@ function ExploreProjectsPage() {
 
             {/* Topic Filter */}
             <div>
-              <label htmlFor="topic" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="topic" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Topic
               </label>
               <select
                 id="topic"
                 value={selectedTopic}
                 onChange={(e) => handleTopicChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 {topics.map(topic => (
                   <option key={topic} value={topic}>
@@ -330,14 +330,14 @@ function ExploreProjectsPage() {
 
             {/* Sort */}
             <div>
-              <label htmlFor="sort" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="sort" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Sort
               </label>
               <select
                 id="sort"
                 value={sortOption}
                 onChange={(e) => handleSortChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 <option value="none">Default</option>
                 <option value="name_asc">Name (A → Z)</option>
@@ -352,14 +352,14 @@ function ExploreProjectsPage() {
             {/* Approval Status Filter (Admin Only) */}
             {user?.admin === 1 && (
               <div>
-                <label htmlFor="approval" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="approval" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Status
                 </label>
                 <select
                   id="approval"
                   value={selectedApprovalStatus}
                   onChange={(e) => handleApprovalStatusChange(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 >
                   <option value="all">All Projects</option>
                   <option value="approved">Approved</option>
@@ -371,12 +371,12 @@ function ExploreProjectsPage() {
 
           {/* Filter Actions */}
           <div className="mt-4 flex justify-between items-center">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Showing {filteredProjects.length} of {projects.length} projects
             </p>
             <button
               onClick={handleReset}
-              className="px-4 py-2 text-sm border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200"
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
             >
               Reset Filters
             </button>
@@ -386,14 +386,14 @@ function ExploreProjectsPage() {
         {/* Projects Grid */}
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">Loading projects...</p>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Loading projects...</p>
           </div>
         ) : filteredProjects.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No projects found matching your criteria.</p>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">No projects found matching your criteria.</p>
             <button
               onClick={handleReset}
-              className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
+              className="mt-4 px-6 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
             >
               Clear Filters
             </button>

@@ -431,12 +431,12 @@ function UploadProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
           onClick={handleBackNavigation}
-          className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+          className="mb-6 inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -447,15 +447,15 @@ function UploadProjectPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">Upload Your Project</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">Upload Your Project</h1>
         </div>
 
         {/* Form Card */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-200 dark:border-gray-700">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Project Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Project Title <span className="text-fuchsia-500">*</span>
               </label>
               <input
@@ -465,14 +465,14 @@ function UploadProjectPage() {
                 required
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Enter your project title"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Description <span className="text-fuchsia-500">*</span>
               </label>
               <textarea
@@ -482,14 +482,14 @@ function UploadProjectPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="Describe your project..."
               />
             </div>
 
             {/* Course Dropdown */}
             <div>
-              <label htmlFor="course" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="course" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Course <span className="text-fuchsia-500">*</span>
               </label>
               <select
@@ -498,7 +498,7 @@ function UploadProjectPage() {
                 required
                 value={formData.courseId || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, courseId: e.target.value ? parseInt(e.target.value) : null }))}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 <option value="">Select a course...</option>
                 {courses.map(course => (
@@ -512,7 +512,7 @@ function UploadProjectPage() {
 
             {/* Topics Multi-Select */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Topics <span className="text-fuchsia-500">*</span>
               </label>
 
@@ -522,7 +522,7 @@ function UploadProjectPage() {
                   {formData.selectedTopics.map(topic => (
                     <span
                       key={topic}
-                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-fuchsia-900 text-fuchsia-200"
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-amber-100 dark:bg-fuchsia-900 text-amber-700 dark:text-fuchsia-200"
                     >
                       {topic}
                       <button
@@ -544,7 +544,7 @@ function UploadProjectPage() {
                 <button
                   type="button"
                   onClick={() => setIsTopicDropdownOpen(!isTopicDropdownOpen)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 text-left hover:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 text-left hover:border-amber-500 dark:hover:border-purple-500 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
                 >
                   <span>Select topics...</span>
                   <svg className={`w-5 h-5 transition-transform ${isTopicDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -553,9 +553,9 @@ function UploadProjectPage() {
                 </button>
 
                 {isTopicDropdownOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {/* Add new topic input */}
-                    <div className="p-2 border-b border-gray-600">
+                    <div className="p-2 border-b border-gray-300 dark:border-gray-600">
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -568,13 +568,13 @@ function UploadProjectPage() {
                             }
                           }}
                           placeholder="Add new topic..."
-                          className="flex-1 px-3 py-1 bg-gray-600 border border-gray-500 rounded text-white text-sm placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                          className="flex-1 px-3 py-1 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-900 dark:text-white text-sm placeholder-gray-600 dark:placeholder-gray-400 focus:ring-1 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent"
                         />
                         <button
                           type="button"
                           onClick={addNewTopic}
                           disabled={addingTopic || !newTopicName.trim()}
-                          className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-3 py-1 bg-amber-500 dark:bg-purple-600 text-white rounded text-sm hover:bg-amber-600 dark:hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {addingTopic ? '...' : 'Add'}
                         </button>
@@ -588,13 +588,13 @@ function UploadProjectPage() {
                           key={topic.id}
                           type="button"
                           onClick={() => toggleTopic(topic.name)}
-                          className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition"
+                          className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
                         >
                           {topic.name}
                         </button>
                       ))
                     ) : (
-                      <div className="px-4 py-2 text-gray-400 text-sm">
+                      <div className="px-4 py-2 text-gray-600 dark:text-gray-400 text-sm">
                         {topics.length === 0 ? 'No topics available. Add one above.' : 'All topics selected'}
                       </div>
                     )}
@@ -609,7 +609,7 @@ function UploadProjectPage() {
 
             {/* File Upload */}
             <div>
-              <label htmlFor="file" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Project File <span className="text-fuchsia-500">*</span>
               </label>
               {/* Desktop / larger screens: drag-and-drop area */}
@@ -617,8 +617,8 @@ function UploadProjectPage() {
                 <div
                   className={`flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition duration-200 ${
                     isDraggingFile 
-                      ? 'border-purple-500 bg-purple-900/20' 
-                      : 'border-gray-600 hover:border-purple-500'
+                      ? 'border-amber-500 dark:border-purple-500 bg-amber-100/20 dark:bg-purple-900/20' 
+                      : 'border-gray-300 dark:border-gray-600 hover:border-amber-500 dark:hover:border-purple-500'
                   }`}
                   onDragOver={handleFileDragOver}
                   onDragLeave={handleFileDragLeave}
@@ -626,7 +626,7 @@ function UploadProjectPage() {
                 >
                   <div className="space-y-1 text-center">
                     <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
+                      className="mx-auto h-12 w-12 text-gray-600 dark:text-gray-400"
                       stroke="currentColor"
                       fill="none"
                       viewBox="0 0 48 48"
@@ -639,10 +639,10 @@ function UploadProjectPage() {
                         strokeLinejoin="round"
                       />
                     </svg>
-                    <div className="flex text-sm text-gray-400">
+                    <div className="flex text-sm text-gray-600 dark:text-gray-400">
                       <label
                         htmlFor="file-upload"
-                        className="relative cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
+                        className="relative cursor-pointer rounded-md font-medium text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-amber-500 dark:focus-within:ring-purple-500"
                       >
                         <span>Upload a file</span>
                         <input
@@ -658,7 +658,7 @@ function UploadProjectPage() {
                     </div>
                     <p className="text-xs text-gray-500">ZIP, 7z, RAR, TAR or GZ up to 500MB</p>
                     {fileName && (
-                      <p className="text-sm text-purple-400 mt-2">
+                      <p className="text-sm text-amber-500 dark:text-purple-400 mt-2">
                         Selected: {fileName}
                       </p>
                     )}
@@ -668,7 +668,7 @@ function UploadProjectPage() {
 
             {/* Project Link */}
             <div className="mt-6">
-              <label htmlFor="projectLink" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="projectLink" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Project Link <span className="text-gray-500">(optional)</span>
               </label>
               <input
@@ -677,7 +677,7 @@ function UploadProjectPage() {
                 name="projectLink"
                 value={formData.projectLink}
                 onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 placeholder="https://example.com (e.g., hosted project, documentation, repository)"
               />
               <p className="mt-1 text-xs text-gray-500">Add a link to your hosted project, documentation, or repository.</p>
@@ -687,15 +687,15 @@ function UploadProjectPage() {
               <div className="mt-1 block sm:hidden">
                 <div className="flex flex-col gap-3">
                   <label htmlFor="file-upload" className="w-full">
-                    <span className="w-full inline-flex justify-center px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm font-medium text-purple-400 hover:bg-gray-700/80 cursor-pointer">
+                    <span className="w-full inline-flex justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-amber-500 dark:text-purple-400 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 cursor-pointer">
                       Choose Project File
                     </span>
                   </label>
                   <p className="text-xs text-gray-500">ZIP, 7z, RAR, TAR or GZ up to 500MB</p>
                   {fileName ? (
-                    <p className="text-sm text-purple-400">Selected: {fileName}</p>
+                    <p className="text-sm text-amber-500 dark:text-purple-400">Selected: {fileName}</p>
                   ) : (
-                    <p className="text-sm text-gray-400">No file selected</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">No file selected</p>
                   )}
                 </div>
               </div>
@@ -703,7 +703,7 @@ function UploadProjectPage() {
 
             {/* Media Attachments (Optional) */}
             <div>
-              <label htmlFor="media-upload" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="media-upload" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Media Attachments <span className="text-gray-500">(optional)</span>
               </label>
               {/* Desktop / larger screens: drag-and-drop area */}
@@ -711,8 +711,8 @@ function UploadProjectPage() {
                 <div
                   className={`px-6 py-4 border-2 border-dashed rounded-lg transition duration-200 ${
                     isDraggingMedia 
-                      ? 'border-purple-500 bg-purple-900/20' 
-                      : 'border-gray-600 hover:border-purple-500'
+                      ? 'border-amber-500 dark:border-purple-500 bg-amber-100/20 dark:bg-purple-900/20' 
+                      : 'border-gray-300 dark:border-gray-600 hover:border-amber-500 dark:hover:border-purple-500'
                   }`}
                   onDragOver={handleMediaDragOver}
                   onDragLeave={handleMediaDragLeave}
@@ -720,13 +720,13 @@ function UploadProjectPage() {
                 >
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-8 w-8 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <div className="flex-1">
                         <label
                           htmlFor="media-upload"
-                          className="cursor-pointer rounded-md font-medium text-purple-400 hover:text-purple-300"
+                          className="cursor-pointer rounded-md font-medium text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300"
                         >
                           <span>Choose media files</span>
                           <input
@@ -744,11 +744,11 @@ function UploadProjectPage() {
                     <p className="text-xs text-gray-500">Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF</p>
                     {formData.mediaFiles && formData.mediaFiles.length > 0 && (
                       <div className="mt-2 space-y-1">
-                        <p className="text-sm text-purple-400 font-medium">
+                        <p className="text-sm text-amber-500 dark:text-purple-400 font-medium">
                           {formData.mediaFiles.length} file(s) selected:
                         </p>
                         {Array.from(formData.mediaFiles).map((file, index) => (
-                          <p key={index} className="text-xs text-gray-400 truncate">
+                          <p key={index} className="text-xs text-gray-600 dark:text-gray-400 truncate">
                             • {file.name}
                           </p>
                         ))}
@@ -762,20 +762,20 @@ function UploadProjectPage() {
               <div className="mt-1 block sm:hidden">
                 <div className="flex flex-col gap-3">
                   <label htmlFor="media-upload" className="w-full">
-                    <span className="w-full inline-flex justify-center px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm font-medium text-purple-400 hover:bg-gray-700/80 cursor-pointer">
+                    <span className="w-full inline-flex justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-amber-500 dark:text-purple-400 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 cursor-pointer">
                       Choose Media Files
                     </span>
                   </label>
                   <p className="text-xs text-gray-500">Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF</p>
                   {formData.mediaFiles && formData.mediaFiles.length > 0 ? (
                     <div className="space-y-1">
-                      <p className="text-sm text-purple-400 font-medium">{formData.mediaFiles.length} file(s) selected:</p>
+                      <p className="text-sm text-amber-500 dark:text-purple-400 font-medium">{formData.mediaFiles.length} file(s) selected:</p>
                       {Array.from(formData.mediaFiles).map((file, index) => (
-                        <p key={index} className="text-xs text-gray-400 truncate">• {file.name}</p>
+                        <p key={index} className="text-xs text-gray-600 dark:text-gray-400 truncate">• {file.name}</p>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400">No media selected</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">No media selected</p>
                   )}
                 </div>
               </div>
@@ -783,7 +783,7 @@ function UploadProjectPage() {
 
             {/* Authors */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Authors <span className="text-fuchsia-500">*</span>
               </label>
 
@@ -794,19 +794,19 @@ function UploadProjectPage() {
                     key={author.id}
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
                       currentUser && author.id === currentUser.id
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-700 text-gray-200'
+                        ? 'bg-amber-500 dark:bg-purple-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
                     }`}
                   >
                     {author.username}
                     {currentUser && author.id === currentUser.id && (
-                      <span className="text-xs text-purple-200">(you)</span>
+                      <span className="text-xs text-amber-700 dark:text-purple-200">(you)</span>
                     )}
                     {(!currentUser || author.id !== currentUser.id) && (
                       <button
                         type="button"
                         onClick={() => removeAuthor(author.id)}
-                        className="ml-1 text-gray-400 hover:text-white transition"
+                        className="ml-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -822,7 +822,7 @@ function UploadProjectPage() {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 text-left hover:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 text-left hover:border-amber-500 dark:hover:border-purple-500 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
                 >
                   <span>Add co-author...</span>
                   <svg className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -831,13 +831,13 @@ function UploadProjectPage() {
                 </button>
 
                 {isDropdownOpen && availableUsers.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {availableUsers.map(user => (
                       <button
                         key={user.id}
                         type="button"
                         onClick={() => addAuthor(user)}
-                        className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition first:rounded-t-lg last:rounded-b-lg"
+                        className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition first:rounded-t-lg last:rounded-b-lg"
                       >
                         {user.username}
                       </button>
@@ -846,7 +846,7 @@ function UploadProjectPage() {
                 )}
 
                 {isDropdownOpen && availableUsers.length === 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg p-4 text-gray-400 text-sm">
+                  <div className="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4 text-gray-600 dark:text-gray-400 text-sm">
                     No more users available
                   </div>
                 )}
@@ -883,14 +883,14 @@ function UploadProjectPage() {
                   })
                   setFileName('')
                 }}
-                className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200"
+                className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
               >
                 Clear
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 dark:focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Uploading...' : 'Upload Project'}
               </button>
@@ -899,9 +899,9 @@ function UploadProjectPage() {
         </div>
 
         {/* Info Card */}
-        <div className="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-gray-300 mb-2">📋 Before you submit:</h3>
-          <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
+        <div className="mt-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">📋 Before you submit:</h3>
+          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
             <li>Compress your project files into a ZIP archive</li>
             <li>Maximum file size: 500MB</li>
             <li>Accepted media formats: JPG, PNG, GIF, MP4, MOV, AVI, PDF</li>

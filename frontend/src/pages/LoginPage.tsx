@@ -113,11 +113,11 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <button
           onClick={() => navigate('/explore')}
-          className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+          className="mb-6 inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -126,18 +126,18 @@ function LoginPage() {
         </button>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h1>
         </div>
 
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-200 dark:border-gray-700">
           <div className="flex mb-6">
             <button
               type="button"
               onClick={() => switchMode('login')}
               className={`flex-1 py-2 text-center font-medium transition duration-200 ${
                 mode === 'login'
-                  ? 'text-white border-b-2 border-purple-500'
-                  : 'text-gray-400 border-b border-gray-600 hover:text-gray-300'
+                  ? 'text-gray-900 dark:text-white border-b-2 border-amber-500 dark:border-purple-500'
+                  : 'text-gray-500 dark:text-gray-400 border-b border-gray-300 dark:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               Login
@@ -147,8 +147,8 @@ function LoginPage() {
               onClick={() => switchMode('register')}
               className={`flex-1 py-2 text-center font-medium transition duration-200 ${
                 mode === 'register'
-                  ? 'text-white border-b-2 border-purple-500'
-                  : 'text-gray-400 border-b border-gray-600 hover:text-gray-300'
+                  ? 'text-gray-900 dark:text-white border-b-2 border-amber-500 dark:border-purple-500'
+                  : 'text-gray-500 dark:text-gray-400 border-b border-gray-300 dark:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               Register
@@ -158,7 +158,7 @@ function LoginPage() {
           {mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-6">
               <div>
-                <label htmlFor="login-username" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="login-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Username
                 </label>
                 <input
@@ -168,13 +168,13 @@ function LoginPage() {
                   required
                   value={loginData.username}
                   onChange={handleLoginChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your username"
                 />
               </div>
 
               <div>
-                <label htmlFor="login-password" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Password
                 </label>
                 <input
@@ -184,7 +184,7 @@ function LoginPage() {
                   required
                   value={loginData.password}
                   onChange={handleLoginChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your password"
                 />
               </div>
@@ -192,8 +192,8 @@ function LoginPage() {
               {message && (
                 <div className={`p-4 rounded-lg ${
                   message.type === 'success'
-                    ? 'bg-green-900 text-green-200 border border-green-700'
-                    : 'bg-red-900 text-red-200 border border-red-700'
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700'
+                    : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700'
                 }`}>
                   {message.text}
                 </div>
@@ -202,7 +202,7 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 dark:focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
@@ -210,7 +210,7 @@ function LoginPage() {
           ) : (
             <form onSubmit={handleRegisterSubmit} className="space-y-6">
               <div>
-                <label htmlFor="register-username" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="register-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Username
                 </label>
                 <input
@@ -220,13 +220,13 @@ function LoginPage() {
                   required
                   value={registerData.username}
                   onChange={handleRegisterChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Choose a username"
                 />
               </div>
 
               <div>
-                <label htmlFor="register-email" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email
                 </label>
                 <input
@@ -236,13 +236,13 @@ function LoginPage() {
                   required
                   value={registerData.email}
                   onChange={handleRegisterChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your email"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   User Type
                 </label>
                 <div className="flex gap-4">
@@ -252,9 +252,9 @@ function LoginPage() {
                       name="is_student"
                       checked={registerData.is_student === 1}
                       onChange={() => setRegisterData(prev => ({ ...prev, is_student: 1 }))}
-                      className="mr-2"
+                      className="mr-2 accent-amber-500 dark:accent-purple-500"
                     />
-                    <span className="text-gray-300">Student</span>
+                    <span className="text-gray-700 dark:text-gray-300">Student</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -262,9 +262,9 @@ function LoginPage() {
                       name="is_student"
                       checked={registerData.is_student === 0}
                       onChange={() => setRegisterData(prev => ({ ...prev, is_student: 0, semester: '', study_programme: '' }))}
-                      className="mr-2"
+                      className="mr-2 accent-amber-500 dark:accent-purple-500"
                     />
-                    <span className="text-gray-300">Non-Student</span>
+                    <span className="text-gray-700 dark:text-gray-300">Non-Student</span>
                   </label>
                 </div>
               </div>
@@ -272,7 +272,7 @@ function LoginPage() {
               {registerData.is_student === 1 && (
                 <>
                   <div>
-                    <label htmlFor="register-semester" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="register-semester" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Semester (Optional)
                     </label>
                     <input
@@ -281,13 +281,13 @@ function LoginPage() {
                       name="semester"
                       value={registerData.semester}
                       onChange={handleRegisterChange}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                      className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                       placeholder="e.g., Fall 2025"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="register-study-programme" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="register-study-programme" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Study Programme (Optional)
                     </label>
                     <input
@@ -296,7 +296,7 @@ function LoginPage() {
                       name="study_programme"
                       value={registerData.study_programme}
                       onChange={handleRegisterChange}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                      className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                       placeholder="e.g., Computer Science"
                     />
                   </div>
@@ -304,7 +304,7 @@ function LoginPage() {
               )}
 
               <div>
-                <label htmlFor="register-organization" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="register-organization" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Organization (Optional)
                 </label>
                 <input
@@ -313,13 +313,13 @@ function LoginPage() {
                   name="organization"
                   value={registerData.organization}
                   onChange={handleRegisterChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="e.g., University Name"
                 />
               </div>
 
               <div>
-                <label htmlFor="register-password" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Password
                 </label>
                 <input
@@ -329,13 +329,13 @@ function LoginPage() {
                   required
                   value={registerData.password}
                   onChange={handleRegisterChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Create a password (min. 8 characters)"
                 />
               </div>
 
               <div>
-                <label htmlFor="register-confirm-password" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="register-confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Confirm Password
                 </label>
                 <input
@@ -345,7 +345,7 @@ function LoginPage() {
                   required
                   value={registerData.confirmPassword}
                   onChange={handleRegisterChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   placeholder="Confirm your password"
                 />
               </div>
@@ -353,8 +353,8 @@ function LoginPage() {
               {message && (
                 <div className={`p-4 rounded-lg ${
                   message.type === 'success'
-                    ? 'bg-green-900 text-green-200 border border-green-700'
-                    : 'bg-red-900 text-red-200 border border-red-700'
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700'
+                    : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700'
                 }`}>
                   {message.text}
                 </div>
@@ -363,7 +363,7 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 dark:focus:ring-purple-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>

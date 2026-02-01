@@ -142,8 +142,8 @@ function TopicManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-white text-xl">Loading...</div>
       </div>
     )
   }
@@ -153,13 +153,13 @@ function TopicManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
           <div className="flex justify-between items-center mb-8 relative">
           <button
             onClick={() => navigate('/explore')}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -167,10 +167,10 @@ function TopicManagementPage() {
               <span className="inline sm:hidden">Back</span>
               <span className="hidden sm:inline">Back to Explore</span>
           </button>
-            <h1 className="text-xl sm:text-3xl font-bold text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">Topic Management</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">Topic Management</h1>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="p-2 sm:px-6 sm:py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200 inline-flex items-center gap-2"
+            className="p-2 sm:px-6 sm:py-3 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200 inline-flex items-center gap-2"
             title="Create topic"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,42 +188,42 @@ function TopicManagementPage() {
         )}
 
         {/* Topics Table */}
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-100 dark:bg-gray-700">
               <tr>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {topics.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-3 sm:px-6 py-3 text-center text-gray-400">
+                  <td colSpan={4} className="px-3 sm:px-6 py-3 text-center text-gray-600 dark:text-gray-400">
                     No topics found. Create one to get started.
                   </td>
                 </tr>
               ) : (
                 topics.map((topic) => (
-                  <tr key={topic.id} className="hover:bg-gray-700">
+                  <tr key={topic.id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-white">{topic.name}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{topic.name}</div>
                     </td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4">
-                      <div className="text-sm text-gray-300">{topic.description || '-'}</div>
+                      <div className="text-sm text-gray-700 dark:text-gray-300">{topic.description || '-'}</div>
                     </td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-400">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         {topic.created_at ? new Date(topic.created_at).toLocaleDateString() : '-'}
                       </div>
                     </td>
@@ -251,31 +251,31 @@ function TopicManagementPage() {
         {/* Create Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-white mb-4">Create New Topic</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Create New Topic</h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Topic Name *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-600"
                     placeholder="e.g., Machine Learning"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Description
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-600"
                     rows={3}
                     placeholder="Optional description"
                   />
@@ -285,13 +285,13 @@ function TopicManagementPage() {
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={closeModals}
-                  className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreate}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
+                  className="px-4 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
                 >
                   Create Topic
                 </button>
@@ -303,30 +303,30 @@ function TopicManagementPage() {
         {/* Edit Modal */}
         {editingTopic && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-white mb-4">Edit Topic</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Edit Topic</h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Topic Name *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Description
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-600"
                     rows={3}
                   />
                 </div>
@@ -335,13 +335,13 @@ function TopicManagementPage() {
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={closeModals}
-                  className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdate}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
+                  className="px-4 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
                 >
                   Update Topic
                 </button>

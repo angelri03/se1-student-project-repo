@@ -710,9 +710,9 @@ function ViewProjectPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-400 text-lg">Loading project...</p>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading project...</p>
         </div>
       </div>
     )
@@ -720,12 +720,12 @@ function ViewProjectPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Project Not Found</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Project Not Found</h1>
           <button
             onClick={() => navigate('/explore')}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200"
+            className="px-6 py-3 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
           >
             Back to Explore
           </button>
@@ -746,12 +746,12 @@ function ViewProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button
           onClick={handleBackNavigation}
-          className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+          className="mb-6 inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -761,7 +761,7 @@ function ViewProjectPage() {
         </button>
 
         {/* Project Header Card */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-6">
           {/* Pending indicator */}
           {project && project.approved === 0 && (isOwner) && (
             <div className="mb-4 p-3 rounded-md bg-yellow-600 text-yellow-900 border border-yellow-500">
@@ -776,7 +776,7 @@ function ViewProjectPage() {
                   type="text"
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-2xl font-bold focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-2xl font-bold focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent"
                   autoFocus
                 />
                 <button
@@ -796,11 +796,11 @@ function ViewProjectPage() {
             ) : (
               <div className="flex items-center justify-between w-full gap-3">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold text-white">{project.name}</h1>
+                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{project.name}</h1>
                   {isOwner && (
                     <button
                       onClick={startEditingTitle}
-                      className="p-2 text-gray-400 hover:text-purple-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-amber-500 dark:hover:text-purple-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg"
                       title="Edit title"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -815,7 +815,7 @@ function ViewProjectPage() {
                   {/* Download */}
                   <a
                     href={`/api/projects/${project.id}/download`}
-                    className="p-2 text-gray-400 hover:text-purple-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-amber-500 dark:hover:text-purple-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg relative group"
                     title="Download"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -837,7 +837,7 @@ function ViewProjectPage() {
                         console.error('Failed to copy:', err)
                       }
                     }}
-                    className="p-2 text-gray-400 hover:text-blue-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg relative group"
                     title="Share"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -863,8 +863,8 @@ function ViewProjectPage() {
                     <button
                       onClick={handleBookmarkToggle}
                       disabled={isLoadingBookmark}
-                      className={`p-2 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group disabled:opacity-50 ${
-                        isBookmarked ? 'text-fuchsia-400 hover:text-fuchsia-300' : 'text-gray-400 hover:text-fuchsia-400'
+                      className={`p-2 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg relative group disabled:opacity-50 ${
+                        isBookmarked ? 'text-amber-500 dark:text-fuchsia-400 hover:text-amber-600 dark:hover:text-fuchsia-300' : 'text-gray-600 dark:text-gray-400 hover:text-amber-500 dark:hover:text-fuchsia-400'
                       }`}
                       title="Bookmark"
                     >
@@ -887,7 +887,7 @@ function ViewProjectPage() {
                   {isLoggedIn && !isOwner && !isAdmin && (
                     <button
                       onClick={() => setShowReportModal(true)}
-                      className="p-2 text-gray-400 hover:text-red-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg relative group"
                       title="Report"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -904,7 +904,7 @@ function ViewProjectPage() {
                     <button
                       onClick={handleDeleteProject}
                       disabled={deleting}
-                      className="p-2 text-gray-400 hover:text-red-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group disabled:opacity-50"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg relative group disabled:opacity-50"
                       title="Delete"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -922,12 +922,12 @@ function ViewProjectPage() {
 
           {/* Course & Topic Tags */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
             <button
               type="button"
-              className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-purple-900 text-purple-200 hover:bg-purple-800 hover:text-white transition"
+              className="inline-block px-4 py-2 text-sm font-semibold rounded-full bg-amber-100 dark:bg-purple-900 text-amber-700 dark:text-purple-200 hover:bg-amber-200 dark:hover:bg-purple-800 hover:text-amber-800 dark:hover:text-white transition"
               onClick={() => setShowCoursePopup(true)}
               title="View course info"
             >
@@ -935,9 +935,9 @@ function ViewProjectPage() {
             </button>
             
             {!isEditingTags && topics.length > 0 && topics.map((topic, index) => (
-              <span key={index} className="relative inline-block px-4 py-2 text-sm font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200 hover:bg-fuchsia-800 hover:text-white transition group">
+              <span key={index} className="relative inline-block px-4 py-2 text-sm font-semibold rounded-full bg-orange-100 dark:bg-fuchsia-900 text-orange-800 dark:text-fuchsia-200 hover:bg-orange-200 dark:hover:bg-fuchsia-800 hover:text-orange-900 dark:hover:text-white transition group">
                 {topic}
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap max-w-xs">
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-700 dark:bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap max-w-xs">
                   {getTopicDescription(topic)}
                 </span>
               </span>
@@ -946,7 +946,7 @@ function ViewProjectPage() {
             {isOwner && !isEditingTags && (
               <button
                 onClick={startEditingTags}
-                className="inline-flex items-center text-gray-400 hover:text-purple-400 transition"
+                className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-amber-500 dark:hover:text-purple-400 transition"
                 title="Edit tags"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -962,7 +962,7 @@ function ViewProjectPage() {
 
           {/* Topic Editing Mode */}
           {isEditingTags && (
-            <div className="mb-4 p-4 bg-gray-750 rounded-lg border border-gray-700">
+            <div className="mb-4 p-4 bg-gray-100 dark:bg-gray-750 rounded-lg border border-gray-200 dark:border-gray-700">
             {isEditingTags ? (
               <div className="space-y-3">
                 {/* Selected tags */}
@@ -971,13 +971,13 @@ function ViewProjectPage() {
                     {editedTags.map(tag => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-fuchsia-900 text-fuchsia-200"
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-orange-100 dark:bg-fuchsia-900 text-orange-800 dark:text-fuchsia-200"
                       >
                         {tag}
                         <button
                           type="button"
                           onClick={() => removeEditedTopic(tag)}
-                          className="ml-1 text-fuchsia-300 hover:text-white transition"
+                          className="ml-1 text-orange-600 dark:text-fuchsia-300 hover:text-orange-900 dark:hover:text-white transition"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -993,7 +993,7 @@ function ViewProjectPage() {
                   <button
                     type="button"
                     onClick={() => setIsTopicDropdownOpen(!isTopicDropdownOpen)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-400 text-left text-sm hover:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 text-left text-sm hover:border-amber-500 dark:hover:border-purple-500 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200 flex items-center justify-between"
                   >
                     <span>Select topics...</span>
                     <svg className={`w-4 h-4 transition-transform ${isTopicDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1002,9 +1002,9 @@ function ViewProjectPage() {
                   </button>
 
                   {isTopicDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                       {/* Add new topic input */}
-                      <div className="p-2 border-b border-gray-600">
+                      <div className="p-2 border-b border-gray-300 dark:border-gray-600">
                         <div className="flex gap-2">
                           <input
                             type="text"
@@ -1017,13 +1017,13 @@ function ViewProjectPage() {
                               }
                             }}
                             placeholder="Add new topic..."
-                            className="flex-1 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-white text-sm placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                            className="flex-1 px-2 py-1 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded text-gray-900 dark:text-white text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent"
                           />
                           <button
                             type="button"
                             onClick={addNewTopicWhileEditing}
                             disabled={addingTopic || !newTopicName.trim()}
-                            className="px-2 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 py-1 bg-amber-500 dark:bg-purple-600 text-white rounded text-sm hover:bg-amber-600 dark:hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {addingTopic ? '...' : 'Add'}
                           </button>
@@ -1037,13 +1037,13 @@ function ViewProjectPage() {
                             key={topic.id}
                             type="button"
                             onClick={() => toggleEditedTopic(topic.name)}
-                            className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition text-sm"
+                            className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm"
                           >
                             {topic.name}
                           </button>
                         ))
                       ) : (
-                        <div className="px-4 py-2 text-gray-400 text-sm">
+                        <div className="px-4 py-2 text-gray-600 dark:text-gray-400 text-sm">
                           {allTopics.length === 0 ? 'No topics available. Add one above.' : 'All topics selected'}
                         </div>
                       )}
@@ -1078,38 +1078,38 @@ function ViewProjectPage() {
           {/* Authors/Collaborators */}
           <div className="mb-4">
             <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               <div className="flex-1 min-w-0">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Authors & Collaborators</h3>
+                <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Authors & Collaborators</h3>
             <div className="flex flex-wrap gap-2">
               {project.owners.map((owner) => (
-                <div key={owner.id} className="inline-flex items-center gap-2 px-3 py-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg text-white border border-gray-600 transition-colors">
-                  <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div key={owner.id} className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 transition-colors">
+                  <svg className="w-4 h-4 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   <button
                     onClick={() => navigate(`/profile/${owner.username}`, {
                       state: { fromProject: true, projectId: project.id }
                     })}
-                    className="font-medium hover:text-purple-400 transition-colors"
+                    className="font-medium hover:text-amber-500 dark:hover:text-purple-400 transition-colors"
                     title="View profile"
                   >
                     {owner.username}
                   </button>
                   {owner.id === currentUserId && (
-                    <span className="text-xs text-purple-400">(you)</span>
+                    <span className="text-xs text-amber-500 dark:text-purple-400">(you)</span>
                   )}
                   {owner.id === creatorId && owner.id !== currentUserId && (
-                    <span className="text-xs text-gray-400">(creator)</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">(creator)</span>
                   )}
                   {isOwner && project.owners.length > 1 && owner.id !== currentUserId && (
                     // Hide the remove button for the creator unless current user is an admin
                     (isAdmin || owner.id !== creatorId) && (
                       <button
                         onClick={() => removeCollaborator(owner.id)}
-                        className="ml-1 text-gray-400 hover:text-red-400 transition"
+                        className="ml-1 text-gray-600 dark:text-gray-400 hover:text-red-400 transition"
                         title="Remove collaborator"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1126,7 +1126,7 @@ function ViewProjectPage() {
                 <div className="relative">
                   <button
                     onClick={() => setIsCollaboratorDropdownOpen(!isCollaboratorDropdownOpen)}
-                    className="inline-flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors font-medium"
+                    className="inline-flex items-center gap-1 px-3 py-2 bg-amber-500 dark:bg-purple-600 hover:bg-amber-600 dark:hover:bg-purple-700 rounded-lg text-white text-sm transition-colors font-medium"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -1135,19 +1135,19 @@ function ViewProjectPage() {
                   </button>
 
                   {isCollaboratorDropdownOpen && (
-                    <div className="absolute z-10 mt-1 w-48 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 mt-1 w-48 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                       {availableCollaborators.length > 0 ? (
                         availableCollaborators.map(user => (
                           <button
                             key={user.id}
                             onClick={() => addCollaborator(user)}
-                            className="w-full px-4 py-2 text-left text-gray-200 hover:bg-gray-600 transition first:rounded-t-lg last:rounded-b-lg"
+                            className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition first:rounded-t-lg last:rounded-b-lg"
                           >
                             {user.username}
                           </button>
                         ))
                       ) : (
-                        <div className="px-4 py-2 text-gray-400 text-sm">
+                        <div className="px-4 py-2 text-gray-600 dark:text-gray-400 text-sm">
                           No users available
                         </div>
                       )}
@@ -1166,12 +1166,12 @@ function ViewProjectPage() {
             <div className={`grid gap-3 ${isAdmin && project.updated_at && project.updated_at !== project.created_at ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
               {/* Upload Date */}
               <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Upload Date</h3>
-                  <p className="text-white font-semibold text-sm">
+                  <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">Upload Date</h3>
+                  <p className="text-gray-900 dark:text-white font-semibold text-sm">
                     {new Date(project.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
@@ -1184,19 +1184,19 @@ function ViewProjectPage() {
               {/* Last Edited (Admin Only) */}
               {isAdmin && project.updated_at && project.updated_at !== project.created_at && (
                 <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Last Edited</h3>
-                    <p className="text-white font-semibold text-sm">
+                    <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">Last Edited</h3>
+                    <p className="text-gray-900 dark:text-white font-semibold text-sm">
                       {new Date(project.updated_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'
                       })}
                       {project.last_edited_by && (
-                        <span className="text-gray-400 font-normal"> by {project.last_edited_by}</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-normal"> by {project.last_edited_by}</span>
                       )}
                     </p>
                   </div>
@@ -1206,23 +1206,23 @@ function ViewProjectPage() {
 
             {/* File Information */}
             <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <div className="flex-1 min-w-0">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project File</h3>
-                <p className="text-white font-semibold text-sm font-mono break-all">{project.file_path.split('/').pop()}</p>
+                <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">Project File</h3>
+                <p className="text-gray-900 dark:text-white font-semibold text-sm font-mono break-all">{project.file_path.split('/').pop()}</p>
               </div>
             </div>
 
             {/* Project Link */}
             {(project.project_link || isOwner) && (
               <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project Link</h3>
+                  <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">Project Link</h3>
                   {isEditingProjectLink ? (
                     <div className="flex items-center gap-2">
                       <input
@@ -1230,7 +1230,7 @@ function ViewProjectPage() {
                         value={editedProjectLink}
                         onChange={(e) => setEditedProjectLink(e.target.value)}
                         placeholder="https://example.com"
-                        className="flex-1 px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent"
                         autoFocus
                       />
                       <button
@@ -1262,12 +1262,12 @@ function ViewProjectPage() {
                           </svg>
                         </a>
                       ) : (
-                        <span className="text-gray-400 text-sm italic">No link provided</span>
+                        <span className="text-gray-600 dark:text-gray-400 text-sm italic">No link provided</span>
                       )}
                       {isOwner && (
                         <button
                           onClick={startEditingProjectLink}
-                          className="p-1 text-gray-400 hover:text-blue-400 transition flex-shrink-0"
+                          className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-400 transition flex-shrink-0"
                           title="Edit project link"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1284,18 +1284,18 @@ function ViewProjectPage() {
         </div>
 
         {/* Description Card */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-6">
           <div className="flex items-start gap-3 mb-4">
-            <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
             </svg>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</h3>
+                <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Description</h3>
                 {isOwner && !isEditingDescription && (
                   <button
                     onClick={startEditingDescription}
-                    className="p-1 text-gray-400 hover:text-blue-400 transition"
+                    className="p-1 text-gray-600 dark:text-gray-400 hover:text-blue-400 transition"
                     title="Edit description"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1310,7 +1310,7 @@ function ViewProjectPage() {
                 value={editedDescription}
                 onChange={(e) => setEditedDescription(e.target.value)}
                 rows={6}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent"
                 autoFocus
               />
               <div className="flex gap-2">
@@ -1330,7 +1330,7 @@ function ViewProjectPage() {
               </div>
             </div>
           ) : (
-            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
               {project.description || 'No description provided.'}
             </p>
           )}
@@ -1340,19 +1340,19 @@ function ViewProjectPage() {
 
         {/* Media Attachments - Hide if empty and user is not owner */}
         {(media.length > 0 || isOwner) && (
-        <div className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
           <div className="flex items-start gap-3 mb-4">
-            <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Media Attachments</h3>
+                <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Media Attachments</h3>
                 {isOwner && !showUpload && (
                   <button
                     onClick={() => setShowUpload(true)}
                     title="Add media"
-                    className="p-1 text-gray-400 hover:text-pink-400 transition"
+                    className="p-1 text-gray-600 dark:text-gray-400 hover:text-pink-400 transition"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1363,25 +1363,25 @@ function ViewProjectPage() {
 
           {/* Upload Section (only for owners) - expanded when toggled */}
           {isOwner && showUpload && (
-            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="text-lg font-semibold text-white">Upload Media</h3>
-                <button onClick={() => setShowUpload(false)} className="text-gray-300 hover:text-white">✕</button>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload Media</h3>
+                <button onClick={() => setShowUpload(false)} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">✕</button>
               </div>
                   <input
                     type="file"
                     multiple
                     accept="image/*,video/*,.pdf"
                     onChange={(e) => setSelectedFiles(e.target.files)}
-                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 mb-3"
+                    className="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-500 dark:file:bg-purple-600 file:text-white hover:file:bg-amber-600 dark:hover:file:bg-purple-700 mb-3"
                   />
-                  <p className="text-xs text-gray-400 mb-3">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
                     Accepts: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), PDF
                   </p>
                   <button
                     onClick={handleMediaUpload}
                     disabled={uploadingMedia || !selectedFiles}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                    className="px-4 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
                   >
                     {uploadingMedia ? 'Uploading...' : 'Upload Media'}
                   </button>
@@ -1390,11 +1390,11 @@ function ViewProjectPage() {
 
           {/* Media Grid */}
           {media.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">No media attachments yet</p>
+            <p className="text-gray-600 dark:text-gray-400 text-center py-8">No media attachments yet</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {media.map((item, idx) => (
-                <div key={item.id} className="bg-gray-700 rounded-lg overflow-hidden border border-gray-600 hover:border-purple-500 transition duration-200">
+                <div key={item.id} className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 hover:border-amber-500 dark:hover:border-purple-500 transition duration-200">
                   {/* Media Preview */}
                   {item.file_type.match(/jpg|jpeg|png|gif/) ? (
                     <img
@@ -1424,8 +1424,8 @@ function ViewProjectPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="w-full h-48 bg-gray-600 flex items-center justify-center">
-                      <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-full h-48 bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                      <svg className="w-16 h-16 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
                     </div>
@@ -1447,7 +1447,7 @@ function ViewProjectPage() {
                           href={`/api/media/${item.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition duration-200 text-center"
+                          className="flex-1 px-3 py-1 text-xs bg-amber-500 dark:bg-purple-600 text-white rounded hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200 text-center"
                         >
                           View
                         </a>
@@ -1464,19 +1464,19 @@ function ViewProjectPage() {
         )}
 
         {/* Rating Section */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-6">
           <div className="flex items-start gap-3 mb-6">
-            <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
             </svg>
             <div className="flex-1 min-w-0">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Rating</h3>
+              <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Rating</h3>
 
           {/* Current Rating Display and User Rating Input side by side */}
           <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center">
             {/* Left: Current Rating Display */}
             <div className="flex items-center gap-4">
-              <div className="text-5xl font-bold text-white">
+              <div className="text-5xl font-bold text-gray-900 dark:text-white">
                 {ratingData.count > 0 ? ratingData.average.toFixed(1) : '-'}
               </div>
               <div>
@@ -1486,8 +1486,8 @@ function ViewProjectPage() {
                       key={star}
                       className={`w-10 h-10 ${
                         star <= Math.round(ratingData.average)
-                          ? 'text-fuchsia-400 fill-fuchsia-400'
-                          : 'text-gray-600'
+                          ? 'text-amber-400 dark:text-fuchsia-400 fill-amber-400 dark:fill-fuchsia-400'
+                          : 'text-gray-400 dark:text-gray-600'
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -1502,17 +1502,17 @@ function ViewProjectPage() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-base text-gray-400">
+                <p className="text-base text-gray-600 dark:text-gray-400">
                   {ratingData.count} {ratingData.count === 1 ? 'rating' : 'ratings'}
                 </p>
               </div>
             </div>
 
             {/* Right: User Rating Input */}
-            <div className="flex-1 lg:border-l lg:border-gray-700 lg:pl-8">
-              <h4 className="text-sm font-semibold text-gray-300 mb-3">Rate this project</h4>
+            <div className="flex-1 lg:border-l lg:border-gray-200 dark:lg:border-gray-700 lg:pl-8">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Rate this project</h4>
               {isOwner ? (
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   {isAdmin ? "Admins cannot rate projects." : "You cannot rate your own project."}
                 </p>
               ) : isLoggedIn ? (
@@ -1529,8 +1529,8 @@ function ViewProjectPage() {
                         <svg
                           className={`w-10 h-10 ${
                             star <= (hoveredStar || userRating)
-                              ? 'text-fuchsia-400 fill-fuchsia-400'
-                              : 'text-gray-600'
+                              ? 'text-amber-400 dark:text-fuchsia-400 fill-amber-400 dark:fill-fuchsia-400'
+                              : 'text-gray-400 dark:text-gray-600'
                           } transition-colors`}
                           fill="none"
                           stroke="currentColor"
@@ -1553,10 +1553,10 @@ function ViewProjectPage() {
                   )}
                 </>
               ) : (
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-purple-400 hover:text-purple-300 underline"
+                    className="text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300 underline"
                   >
                     Log in
                   </button>
@@ -1595,12 +1595,12 @@ function ViewProjectPage() {
         )}
 
         {/* Action Buttons */}
-        <div className="bg-gray-800 rounded-lg shadow-xl mt-6 p-6 border border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl mt-6 p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-4">
-            <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</h2>
+            <h2 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actions</h2>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
@@ -1613,7 +1613,7 @@ function ViewProjectPage() {
                   console.error('Failed to copy:', err)
                 }
               }}
-              className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2 relative"
+              className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2 relative"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -1635,8 +1635,8 @@ function ViewProjectPage() {
                 disabled={isLoadingBookmark}
                 className={`px-6 py-3 border rounded-lg font-medium transition duration-200 inline-flex items-center gap-2 disabled:opacity-50 ${
                   isBookmarked 
-                    ? 'bg-fuchsia-700 text-white border-fuchsia-700 hover:bg-fuchsia-800' 
-                    : 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                    ? 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600 dark:bg-fuchsia-700 dark:text-white dark:border-fuchsia-700 dark:hover:bg-fuchsia-800' 
+                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 {isBookmarked ? (

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from './context/ThemeContext'
 import UploadProjectPage from './pages/UploadProjectPage'
 import ExploreProjectsPage from './pages/ExploreProjectsPage'
 import ViewProjectPage from './pages/ViewProjectPage'
@@ -14,25 +15,27 @@ import NotificationsPage from './pages/NotificationsPage'
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-900">
-        <Routes>
-          <Route path="/" element={<ExploreProjectsPage />} />
-          <Route path="/explore" element={<ExploreProjectsPage />} />
-          <Route path="/upload" element={<UploadProjectPage />} />
-          <Route path="/project/:id" element={<ViewProjectPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/profile/:username" element={<ProfilePage />} />
-          <Route path="/bookmarks" element={<BookmarksPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/admin/courses" element={<CourseManagementPage />} />
-          <Route path="/admin/topics" element={<TopicManagementPage />} />
-          <Route path="/admin/users" element={<AdminUsersPage />} />
-          <Route path="/admin/logs" element={<AdminLogsPage />} />
-          <Route path="/admin/reports" element={<AdminReportsPage />} />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+          <Routes>
+            <Route path="/" element={<ExploreProjectsPage />} />
+            <Route path="/explore" element={<ExploreProjectsPage />} />
+            <Route path="/upload" element={<UploadProjectPage />} />
+            <Route path="/project/:id" element={<ViewProjectPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/profile/:username" element={<ProfilePage />} />
+            <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/admin/courses" element={<CourseManagementPage />} />
+            <Route path="/admin/topics" element={<TopicManagementPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/logs" element={<AdminLogsPage />} />
+            <Route path="/admin/reports" element={<AdminReportsPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   )
 }
 

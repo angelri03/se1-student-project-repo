@@ -226,19 +226,19 @@ function NotificationsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-gray-900 dark:text-white text-xl">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 relative">
           <button
             onClick={() => navigate('/explore')}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -246,7 +246,7 @@ function NotificationsPage() {
             <span className="inline sm:hidden">Back</span>
             <span className="hidden sm:inline">Back to Explore</span>
           </button>
-          <h1 className="text-xl sm:text-3xl font-bold text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">
             Notifications
           </h1>
         </div>
@@ -258,8 +258,8 @@ function NotificationsPage() {
               onClick={() => setFilter('unread')}
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 filter === 'unread'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  ? 'bg-amber-500 dark:bg-purple-600 text-gray-900 dark:text-white'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               Unread
@@ -268,8 +268,8 @@ function NotificationsPage() {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 filter === 'all'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  ? 'bg-amber-500 dark:bg-purple-600 text-gray-900 dark:text-white'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               All
@@ -279,7 +279,7 @@ function NotificationsPage() {
             {notifications.some(n => n.is_read === 0) && (
               <button
                 onClick={markAllAsRead}
-                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition"
+                className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
               >
                 Mark All as Read
               </button>
@@ -298,15 +298,15 @@ function NotificationsPage() {
         {/* Notifications List */}
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-gray-400">Loading notifications...</p>
+            <p className="text-gray-600 dark:text-gray-400">Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="text-center py-12 bg-gray-800 rounded-lg">
-            <svg className="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+            <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <p className="text-gray-400 text-lg">No notifications</p>
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-gray-600 dark:text-gray-400 text-lg">No notifications</p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
               {filter === 'unread' 
                 ? "You're all caught up!"
                 : "You'll be notified about project activities here"}
@@ -317,10 +317,10 @@ function NotificationsPage() {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-gray-800 rounded-lg p-5 border transition ${
+                className={`bg-white dark:bg-gray-800 rounded-lg p-5 border transition ${
                   notification.is_read === 0
-                    ? 'border-purple-500 bg-gray-750'
-                    : 'border-gray-700 hover:border-gray-600'
+                    ? 'border-amber-500 dark:border-purple-500 bg-amber-50 dark:bg-gray-750'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -333,7 +333,7 @@ function NotificationsPage() {
                         onClick={() => handleNotificationClick(notification)}
                       >
                         <p className={`text-sm md:text-base ${
-                          notification.is_read === 0 ? 'text-gray-100 font-medium' : 'text-gray-300'
+                          notification.is_read === 0 ? 'text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-700 dark:text-gray-300'
                         }`}>
                           {notification.message}
                         </p>
@@ -343,7 +343,7 @@ function NotificationsPage() {
                       </div>
                       
                       {notification.is_read === 0 && (
-                        <div className="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0 mt-1"></div>
+                        <div className="w-3 h-3 bg-amber-500 dark:bg-purple-500 rounded-full flex-shrink-0 mt-1"></div>
                       )}
                     </div>
                     
@@ -351,7 +351,7 @@ function NotificationsPage() {
                       {notification.is_read === 0 && (
                         <button
                           onClick={() => markAsRead(notification.id)}
-                          className="text-sm text-purple-400 hover:text-purple-300 transition"
+                          className="text-sm text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300 transition"
                         >
                           Mark as Read
                         </button>

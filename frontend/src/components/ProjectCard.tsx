@@ -41,8 +41,12 @@ function ProjectCard({
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoadingBookmark, setIsLoadingBookmark] = useState(false)
 
-  const bgColor = variant === 'profile' ? 'bg-gray-700' : 'bg-gray-800'
-  const borderColor = variant === 'profile' ? 'border-gray-600' : 'border-gray-700'
+  const bgColor = variant === 'profile' 
+    ? 'bg-gray-100 dark:bg-gray-700' 
+    : 'bg-white dark:bg-gray-800'
+  const borderColor = variant === 'profile' 
+    ? 'border-gray-300 dark:border-gray-600' 
+    : 'border-gray-200 dark:border-gray-700'
 
   // Check if project is bookmarked on mount
   useEffect(() => {
@@ -139,15 +143,15 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
 
   return (
     <div
-      className={`${bgColor} rounded-lg shadow-lg border ${borderColor} hover:border-purple-500 transition duration-200 overflow-hidden flex flex-col`}
+      className={`${bgColor} rounded-lg shadow-lg border ${borderColor} hover:border-amber-500 dark:hover:border-purple-500 transition duration-200 overflow-hidden flex flex-col`}
     >
       <div className="p-6 flex flex-col flex-grow">
         {/* Project Title with Bookmark Button */}
         <div className="flex items-start justify-between mb-3 gap-2">
-          <h3 className="text-xl font-bold text-white line-clamp-2 flex items-center gap-2 flex-1">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2 flex items-center gap-2 flex-1">
             <span className="line-clamp-2">{project.name}</span>
             {project.approved === 0 && variant === 'default' && (
-              <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <title>Pending approval</title>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -157,15 +161,15 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
             <button
               onClick={handleBookmarkToggle}
               disabled={isLoadingBookmark}
-              className="flex-shrink-0 p-2 hover:bg-gray-700 rounded-lg transition duration-200 disabled:opacity-50"
+              className="flex-shrink-0 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition duration-200 disabled:opacity-50"
               title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
             >
               {isBookmarked ? (
-                <svg className="w-6 h-6 text-fuchsia-400 fill-current" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-amber-500 dark:text-fuchsia-400 fill-current" viewBox="0 0 24 24">
                   <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 text-gray-400 hover:text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-gray-400 hover:text-amber-500 dark:hover:text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
               )}
@@ -175,11 +179,11 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
 
         {/* Course and Topic Tags */}
         <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-900 text-purple-200">
+          <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 dark:bg-purple-900 text-amber-800 dark:text-purple-200">
             {project.course}
           </span>
           {(project.tags || []).map((tag, index) => (
-            <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-900 text-fuchsia-200">
+            <span key={index} className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 dark:bg-fuchsia-900 text-orange-800 dark:text-fuchsia-200">
               {tag}
             </span>
           ))}
@@ -188,10 +192,10 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
         {/* Description */}
         <div className="mb-4">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-amber-500 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
-            <p className="text-gray-300 text-sm line-clamp-3 flex-1">
+            <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-1">
               {project.description || 'No description provided'}
             </p>
           </div>
@@ -203,22 +207,22 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
         {/* Authors */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Authors:</p>
+            <p className="text-xs text-gray-700 dark:text-gray-400 font-semibold uppercase tracking-wider">Authors:</p>
           </div>
           <div className="flex flex-wrap gap-1">
             {project.owners.map((owner, index) => (
               <span key={owner.id}>
                 <button
                   onClick={(e) => handleAuthorClick(e, owner.username)}
-                  className="text-sm text-purple-400 hover:text-purple-300 hover:underline transition"
+                  className="text-sm text-amber-600 dark:text-purple-400 hover:text-amber-700 dark:hover:text-purple-300 hover:underline transition"
                 >
                   {owner.username}
                 </button>
                 {index < project.owners.length - 1 && (
-                  <span className="text-gray-500">, </span>
+                  <span className="text-gray-400 dark:text-gray-500">, </span>
                 )}
               </span>
             ))}
@@ -227,10 +231,10 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
 
         {/* Upload Date */}
         <div className="flex items-center gap-2 mb-4">
-          <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-700 dark:text-gray-400">
             {new Date(project.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -243,7 +247,7 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
         <div className="flex flex-col gap-2">
           <button
             onClick={handleViewDetails}
-            className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:to-fuchsia-700 transition duration-200 flex items-center justify-center gap-2"
+            className="w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 dark:from-purple-600 dark:to-fuchsia-600 text-white rounded-lg text-sm font-medium hover:from-amber-600 hover:to-orange-600 dark:hover:from-purple-700 dark:hover:to-fuchsia-700 transition duration-200 flex items-center justify-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

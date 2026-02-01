@@ -156,9 +156,9 @@ function CourseManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-gray-400 text-lg">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading...</p>
         </div>
       </div>
     )
@@ -169,13 +169,13 @@ function CourseManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 relative">
           <button
             onClick={() => navigate('/explore')}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition duration-200"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -183,10 +183,10 @@ function CourseManagementPage() {
             <span className="inline sm:hidden">Back</span>
             <span className="hidden sm:inline">Back to Explore</span>
           </button>
-          <h1 className="text-xl sm:text-3xl font-bold text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">Course Management</h1>
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mx-auto absolute left-1/2 sm:static transform -translate-x-1/2 sm:transform-none scale-105 sm:scale-100">Course Management</h1>
           <button
             onClick={openCreateModal}
-            className="p-2 sm:px-6 sm:py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-200 inline-flex items-center gap-2"
+            className="p-2 sm:px-6 sm:py-3 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200 inline-flex items-center gap-2"
             title="Create course"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,58 +208,58 @@ function CourseManagementPage() {
         )}
 
         {/* Courses Table */}
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-750">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-x-auto border border-gray-200 dark:border-gray-700">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-100 dark:bg-gray-750">
               <tr>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Code
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Course Name
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Semester
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Term
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {courses.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-3 sm:px-6 py-6 sm:py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-3 sm:px-6 py-6 sm:py-8 text-center text-gray-600 dark:text-gray-400">
                     No courses found. Create your first course to get started.
                   </td>
                 </tr>
               ) : (
                 courses.map((course) => (
-                  <tr key={course.id} className="hover:bg-gray-750 transition duration-150">
+                  <tr key={course.id} className="hover:bg-gray-100 dark:hover:bg-gray-750 transition duration-150">
                     <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-purple-400">{course.code}</div>
+                      <div className="text-sm font-medium text-amber-500 dark:text-purple-400">{course.code}</div>
                     </td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-white">{course.name}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{course.name}</div>
                     </td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-300">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         {course.semester || <span className="text-gray-500 italic">N/A</span>}
                       </div>
                     </td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-300">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         {course.term || <span className="text-gray-500 italic">N/A</span>}
                       </div>
                     </td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4">
-                      <div className="text-sm text-gray-300">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         {course.description || <span className="text-gray-500 italic">No description</span>}
                       </div>
                     </td>
@@ -287,59 +287,59 @@ function CourseManagementPage() {
         {/* Create/Edit Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-              <h2 className="text-2xl font-bold text-white mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 {editingCourse ? 'Edit Course' : 'Create New Course'}
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Course Code *
                   </label>
                   <input
                     type="text"
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
                     placeholder="e.g., SE1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Course Name *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
                     placeholder="e.g., Software Engineering"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Semester
                   </label>
                   <input
                     type="text"
                     value={formData.semester}
                     onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
                     placeholder="e.g., 1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Term (Summer/Winter)
                   </label>
                   <select
                     value={formData.term}
                     onChange={(e) => setFormData({ ...formData, term: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
                   >
                     <option value="">Select term</option>
                     <option value="All Year">All Year</option>
@@ -349,14 +349,14 @@ function CourseManagementPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Description
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
                     placeholder="Brief description of the course"
                   />
                 </div>
@@ -365,13 +365,13 @@ function CourseManagementPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={editingCourse ? handleUpdate : handleCreate}
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200"
+                  className="flex-1 px-4 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
                 >
                   {editingCourse ? 'Update' : 'Create'}
                 </button>

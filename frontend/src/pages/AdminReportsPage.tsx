@@ -189,20 +189,20 @@ function AdminReportsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-400 text-lg">Loading reports...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-400 text-lg">Loading reports...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Top Navigation Bar */}
         <div className="flex items-center gap-3 mb-8">
           <button
             onClick={() => navigate('/')}
-            className="text-gray-400 hover:text-gray-300 transition duration-200 flex items-center gap-2"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition duration-200 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -213,21 +213,21 @@ function AdminReportsPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">Reports Management</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">Reports Management</h1>
         </div>
 
         {/* Filters */}
-        <div className="bg-gray-800 rounded-lg shadow-xl p-6 mb-8 border border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8 border border-gray-200 dark:border-gray-700">
           <div className="flex flex-wrap gap-4 items-end">
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Filter by Status
               </label>
               <select
                 id="status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 <option value="all">All Reports</option>
                 <option value="pending">Pending</option>
@@ -236,14 +236,14 @@ function AdminReportsPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="reportType" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="reportType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Report Type
               </label>
               <select
                 id="reportType"
                 value={reportTypeFilter}
                 onChange={(e) => setReportTypeFilter(e.target.value)}
-                className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 <option value="all">All Types</option>
                 <option value="users">Users</option>
@@ -252,14 +252,14 @@ function AdminReportsPage() {
             </div>
             {(reportTypeFilter === 'all' || reportTypeFilter === 'users') && (
               <div>
-                <label htmlFor="reportedUser" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="reportedUser" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Filter by User
                 </label>
                 <select
                   id="reportedUser"
                   value={reportedUserFilter}
                   onChange={(e) => setReportedUserFilter(e.target.value)}
-                  className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 >
                   <option value="all">All Users</option>
                   {Array.from(new Set(reports.filter(r => r.reported_user_id).map(r => r.reported_username))).sort().map(username => (
@@ -270,14 +270,14 @@ function AdminReportsPage() {
             )}
             {(reportTypeFilter === 'all' || reportTypeFilter === 'projects') && (
               <div>
-                <label htmlFor="reportedProject" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="reportedProject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Filter by Project
                 </label>
                 <select
                   id="reportedProject"
                   value={reportedProjectFilter}
                   onChange={(e) => setReportedProjectFilter(e.target.value)}
-                  className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                 >
                   <option value="all">All Projects</option>
                   {Array.from(new Set(reports.filter(r => r.reported_project_id).map(r => r.reported_project_name))).sort().map(projectName => (
@@ -287,21 +287,21 @@ function AdminReportsPage() {
               </div>
             )}
             <div>
-              <label htmlFor="dateSort" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="dateSort" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Sort by Date
               </label>
               <select
                 id="dateSort"
                 value={dateSortOrder}
                 onChange={(e) => setDateSortOrder(e.target.value as 'desc' | 'asc')}
-                className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
               >
                 <option value="desc">Newest First</option>
                 <option value="asc">Oldest First</option>
               </select>
             </div>
             <div className="ml-auto">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Showing {filteredReports.length} of {reports.length} reports
               </p>
             </div>
@@ -310,24 +310,24 @@ function AdminReportsPage() {
 
         {/* Reports List */}
         {filteredReports.length === 0 ? (
-          <div className="bg-gray-800 rounded-lg shadow-xl p-8 text-center border border-gray-700">
-            <p className="text-gray-400 text-lg">No reports found</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 text-center border border-gray-200 dark:border-gray-700">
+            <p className="text-gray-600 dark:text-gray-400 text-lg">No reports found</p>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredReports.map((report) => (
-              <div key={report.id} className="bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-700">
+              <div key={report.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        report.status === 'pending' ? 'bg-yellow-900 text-yellow-200' :
-                        report.status === 'resolved' ? 'bg-green-900 text-green-200' :
-                        'bg-gray-700 text-gray-300'
+                        report.status === 'pending' ? 'bg-amber-100 dark:bg-yellow-900 text-amber-700 dark:text-yellow-200' :
+                        report.status === 'resolved' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200' :
+                        'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}>
                         {report.status.toUpperCase()}
                       </span>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-600 dark:text-gray-400 text-sm">
                         {new Date(report.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'short',
@@ -339,23 +339,23 @@ function AdminReportsPage() {
                     </div>
 
                     <div className="mb-3">
-                      <p className="text-gray-400 text-sm mb-1">
-                        <span className="text-white font-semibold">{report.reporter_username}</span> reported{' '}
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">
+                        <span className="text-gray-900 dark:text-white font-semibold">{report.reporter_username}</span> reported{' '}
                         {report.reported_user_id ? (
-                          <>user <button onClick={() => navigateToReported(report)} className="text-purple-400 hover:text-purple-300 font-semibold">{report.reported_username}</button></>
+                          <>user <button onClick={() => navigateToReported(report)} className="text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300 font-semibold">{report.reported_username}</button></>
                         ) : (
-                          <>project <button onClick={() => navigateToReported(report)} className="text-purple-400 hover:text-purple-300 font-semibold">{report.reported_project_name}</button></>
+                          <>project <button onClick={() => navigateToReported(report)} className="text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300 font-semibold">{report.reported_project_name}</button></>
                         )}
                       </p>
-                      <div className="bg-gray-700 rounded-lg p-3 mt-2">
-                        <p className="text-white">{report.reason}</p>
+                      <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mt-2">
+                        <p className="text-gray-900 dark:text-white">{report.reason}</p>
                       </div>
                     </div>
 
                     {report.admin_notes && (
-                      <div className="bg-gray-700 rounded-lg p-3 mb-3 border-l-4 border-blue-500">
-                        <p className="text-xs text-gray-400 mb-1">Admin Notes:</p>
-                        <p className="text-white text-sm">{report.admin_notes}</p>
+                      <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-3 border-l-4 border-blue-500">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Admin Notes:</p>
+                        <p className="text-gray-900 dark:text-white text-sm">{report.admin_notes}</p>
                         {report.resolved_by_username && (
                           <p className="text-xs text-gray-500 mt-2">
                             By {report.resolved_by_username} on {new Date(report.resolved_at!).toLocaleDateString()}
@@ -375,7 +375,7 @@ function AdminReportsPage() {
                       </button>
                       <button
                         onClick={() => handleResolveClick(report, 'dismissed')}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200 text-sm font-medium"
+                        className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 transition duration-200 text-sm font-medium"
                       >
                         Dismiss
                       </button>
@@ -397,21 +397,21 @@ function AdminReportsPage() {
       {/* Resolve/Dismiss Modal */}
       {showResolveModal && selectedReport && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full border border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full border border-gray-200 dark:border-gray-700">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                 {resolveAction === 'resolved' ? 'Resolve' : 'Dismiss'} Report
               </h2>
               
               <div className="mb-4">
-                <label htmlFor="adminNotes" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="adminNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Admin Notes (optional)
                 </label>
                 <textarea
                   id="adminNotes"
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
                   rows={4}
                   placeholder="Add any notes about this report resolution..."
                 />
@@ -420,7 +420,7 @@ function AdminReportsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowResolveModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition duration-200"
+                  className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition duration-200"
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -430,7 +430,7 @@ function AdminReportsPage() {
                   className={`flex-1 px-4 py-2 rounded-lg text-white font-medium transition duration-200 ${
                     resolveAction === 'resolved' 
                       ? 'bg-green-600 hover:bg-green-700' 
-                      : 'bg-gray-600 hover:bg-gray-700'
+                      : 'bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                   disabled={isSubmitting}
                 >

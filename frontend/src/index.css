@@ -2,9 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Light mode colors */
+    --bg-primary: 255 255 255; /* white */
+    --bg-secondary: 249 250 251; /* gray-50 */
+    --bg-tertiary: 243 244 246; /* gray-100 */
+    --text-primary: 17 24 39; /* gray-900 */
+    --text-secondary: 55 65 81; /* gray-700 */
+    --text-tertiary: 107 114 128; /* gray-500 */
+    --border-color: 229 231 235; /* gray-200 */
+    --primary: 245 158 11; /* amber-500 */
+    --primary-hover: 217 119 6; /* amber-600 */
+    --primary-light: 254 243 199; /* amber-100 */
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --bg-primary: 17 24 39; /* gray-900 */
+    --bg-secondary: 31 41 55; /* gray-800 */
+    --bg-tertiary: 55 65 81; /* gray-700 */
+    --text-primary: 243 244 246; /* gray-100 */
+    --text-secondary: 229 231 235; /* gray-200 */
+    --text-tertiary: 156 163 175; /* gray-400 */
+    --border-color: 75 85 99; /* gray-600 */
+    --primary: 168 85 247; /* purple-500 */
+    --primary-hover: 147 51 234; /* purple-600 */
+    --primary-light: 233 213 255; /* purple-200 */
+  }
+}
+
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .bg-primary {
+    background-color: rgb(var(--bg-primary));
+  }
+  
+  .bg-secondary {
+    background-color: rgb(var(--bg-secondary));
+  }
+  
+  .bg-tertiary {
+    background-color: rgb(var(--bg-tertiary));
+  }
+  
+  .text-primary {
+    color: rgb(var(--text-primary));
+  }
+  
+  .text-secondary {
+    color: rgb(var(--text-secondary));
+  }
+  
+  .text-tertiary {
+    color: rgb(var(--text-tertiary));
+  }
+  
+  .border-custom {
+    border-color: rgb(var(--border-color));
+  }
+  
+  .btn-primary {
+    background-color: rgb(var(--primary));
+  }
+  
+  .btn-primary:hover {
+    background-color: rgb(var(--primary-hover));
   }
 }
 
@@ -24,14 +90,19 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #111827;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force color-scheme based on class, not browser preference */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
@@ -40,7 +111,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #111827;
 }
 
 #root {
