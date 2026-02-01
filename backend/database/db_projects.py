@@ -8,7 +8,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from .db_core import DATABASE_NAME
 
-def create_project(name: str, description: str, file_path: str, file_size: int, creator_user_id: int) -> Dict:
+def create_project(name: str, description: str, file_path: str, file_size: int, creator_user_id: int, project_link: str = None) -> Dict:
     """
     Create a new project entry and add the creator as the first owner
     Returns: {'success': bool, 'message': str, 'id': int (if successful)}
@@ -18,9 +18,9 @@ def create_project(name: str, description: str, file_path: str, file_size: int, 
         cursor = conn.cursor()
         
         cursor.execute('''
-            INSERT INTO projects (name, description, file_path, file_size, approved)
-            VALUES (?, ?, ?, ?, 0)
-        ''', (name, description, file_path, file_size))
+            INSERT INTO projects (name, description, file_path, file_size, project_link, approved)
+            VALUES (?, ?, ?, ?, ?, 0)
+        ''', (name, description, file_path, file_size, project_link))
         
         project_id = cursor.lastrowid
         
@@ -262,7 +262,7 @@ def search_projects_by_tag(tag: str) -> Dict:
         return {'success': False, 'message': f'Error: {str(e)}'}
 
 def update_project(project_id: int, name: str = None, description: str = None, 
-                   file_path: str = None, file_size: int = None, last_edited_by_id: int = None) -> Dict:
+                   file_path: str = None, file_size: int = None, project_link: str = None, last_edited_by_id: int = None) -> Dict:
     """
     Update project information
     Only updates fields that are provided (not None)
@@ -291,6 +291,10 @@ def update_project(project_id: int, name: str = None, description: str = None,
         if file_size is not None:
             update_fields.append('file_size = ?')
             values.append(file_size)
+        
+        if project_link is not None:
+            update_fields.append('project_link = ?')
+            values.append(project_link)
         
         if last_edited_by_id is not None:
             update_fields.append('last_edited_by_id = ?')

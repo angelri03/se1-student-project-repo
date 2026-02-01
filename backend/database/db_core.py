@@ -37,6 +37,7 @@ def init_db():
             description TEXT,
             file_path TEXT NOT NULL,
             file_size INTEGER NOT NULL,
+            project_link TEXT,
             approved INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -28,6 +28,7 @@ interface ProjectFormData {
   authors: User[]
   file: File | null
   mediaFiles: FileList | null
+  projectLink: string
 }
 
 function UploadProjectPage() {
@@ -42,7 +43,8 @@ function UploadProjectPage() {
     selectedTopics: [],
     authors: [],
     file: null,
-    mediaFiles: null
+    mediaFiles: null,
+    projectLink: ''
   })
 
   const [loading, setLoading] = useState(false)
@@ -321,6 +323,9 @@ function UploadProjectPage() {
       formDataToSend.append('name', formData.title)  // Backend expects 'name'
       formDataToSend.append('description', formData.description)
       formDataToSend.append('tags', formData.selectedTopics.join(', '))  // Send topics as comma-separated tags
+      if (formData.projectLink) {
+        formDataToSend.append('project_link', formData.projectLink)
+      }
       if (formData.file) {
         formDataToSend.append('file', formData.file)
       }
@@ -411,7 +416,8 @@ function UploadProjectPage() {
         selectedTopics: [],
         authors: currentUser ? [currentUser] : [],
         file: null,
-        mediaFiles: null
+        mediaFiles: null,
+        projectLink: ''
       })
       setFileName('')
     } catch (error: any) {
@@ -660,6 +666,23 @@ function UploadProjectPage() {
                 </div>
               </div>
 
+            {/* Project Link */}
+            <div className="mt-6">
+              <label htmlFor="projectLink" className="block text-sm font-medium text-gray-300 mb-2">
+                Project Link <span className="text-gray-500">(optional)</span>
+              </label>
+              <input
+                type="url"
+                id="projectLink"
+                name="projectLink"
+                value={formData.projectLink}
+                onChange={handleChange}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                placeholder="https://example.com (e.g., hosted project, documentation, repository)"
+              />
+              <p className="mt-1 text-xs text-gray-500">Add a link to your hosted project, documentation, or repository.</p>
+            </div>
+
               {/* Mobile: simple upload button (no drag-and-drop) */}
               <div className="mt-1 block sm:hidden">
                 <div className="flex flex-col gap-3">
@@ -855,7 +878,8 @@ function UploadProjectPage() {
                     selectedTopics: [],
                     authors: currentUser ? [currentUser] : [],
                     file: null,
-                    mediaFiles: null
+                    mediaFiles: null,
+                    projectLink: ''
                   })
                   setFileName('')
                 }}

@@ -29,6 +29,7 @@ interface Project {
   last_edited_by?: string
   file_path: string
   approved?: number
+  project_link?: string
 }
 
 interface RatingData {
@@ -70,6 +71,7 @@ function ViewProjectPage() {
   const [modalItem, setModalItem] = useState<any | null>(null)
   const [modalIndex, setModalIndex] = useState<number | null>(null)
   const [showUpload, setShowUpload] = useState(false)
+  const [showCopyNotification, setShowCopyNotification] = useState<'icon' | 'button' | null>(null)
   const modalVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const openModalAt = (index: number) => {
@@ -127,9 +129,11 @@ function ViewProjectPage() {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [isEditingTags, setIsEditingTags] = useState(false)
+  const [isEditingProjectLink, setIsEditingProjectLink] = useState(false)
   const [editedTitle, setEditedTitle] = useState('')
   const [editedDescription, setEditedDescription] = useState('')
   const [editedTags, setEditedTags] = useState<string[]>([])
+  const [editedProjectLink, setEditedProjectLink] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -532,6 +536,37 @@ function ViewProjectPage() {
     }
   }
 
+  const startEditingProjectLink = () => {
+    if (project) {
+      setEditedProjectLink(project.project_link || '')
+      setIsEditingProjectLink(true)
+    }
+  }
+
+  const saveProjectLink = async () => {
+    if (!project) return
+    setSaving(true)
+    const token = localStorage.getItem('token')
+
+    try {
+      const formData = new FormData()
+      formData.append('project_link', editedProjectLink)
+
+      const response = await axios.put(`/api/projects/${project.id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setProject({ ...project, project_link: editedProjectLink })
+        setIsEditingProjectLink(false)
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to update project link')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   // Topic editing functions
   const toggleEditedTopic = (topicName: string) => {
     setEditedTags(prev =>
@@ -793,9 +828,14 @@ function ViewProjectPage() {
                   
                   {/* Share */}
                   <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href)
-                      alert('Link copied to clipboard!')
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(window.location.href)
+                        setShowCopyNotification('icon')
+                        setTimeout(() => setShowCopyNotification(null), 3000)
+                      } catch (err) {
+                        console.error('Failed to copy:', err)
+                      }
                     }}
                     className="p-2 text-gray-400 hover:text-blue-400 transition-colors duration-200 hover:bg-gray-700/50 rounded-lg relative group"
                     title="Share"
@@ -803,9 +843,19 @@ function ViewProjectPage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
+                    {/* Tooltip on hover */}
                     <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                       Share Link
                     </span>
+                    {/* Copy notification popup */}
+                    {showCopyNotification === 'icon' && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg shadow-lg flex items-center gap-2 animate-fade-in z-50">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Link copied!
+                      </div>
+                    )}
                   </button>
                   
                   {/* Bookmark (only for logged in users) */}
@@ -1164,6 +1214,72 @@ function ViewProjectPage() {
                 <p className="text-white font-semibold text-sm font-mono break-all">{project.file_path.split('/').pop()}</p>
               </div>
             </div>
+
+            {/* Project Link */}
+            {(project.project_link || isOwner) && (
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project Link</h3>
+                  {isEditingProjectLink ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        value={editedProjectLink}
+                        onChange={(e) => setEditedProjectLink(e.target.value)}
+                        placeholder="https://example.com"
+                        className="flex-1 px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        autoFocus
+                      />
+                      <button
+                        onClick={saveProjectLink}
+                        disabled={saving}
+                        className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {saving ? '...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={() => setIsEditingProjectLink(false)}
+                        className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-500"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {project.project_link ? (
+                        <a
+                          href={project.project_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 text-sm inline-flex items-center gap-1.5 break-all"
+                        >
+                          {project.project_link}
+                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 text-sm italic">No link provided</span>
+                      )}
+                      {isOwner && (
+                        <button
+                          onClick={startEditingProjectLink}
+                          className="p-1 text-gray-400 hover:text-blue-400 transition flex-shrink-0"
+                          title="Edit project link"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1487,11 +1603,31 @@ function ViewProjectPage() {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2">
+            <button
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(window.location.href)
+                  setShowCopyNotification('button')
+                  setTimeout(() => setShowCopyNotification(null), 3000)
+                } catch (err) {
+                  console.error('Failed to copy:', err)
+                }
+              }}
+              className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 font-medium hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2 relative"
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
               Share
+              {/* Copy notification popup */}
+              {showCopyNotification === 'button' && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg shadow-lg flex items-center gap-2 animate-fade-in z-50 whitespace-nowrap">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Link copied!
+                </div>
+              )}
             </button>
             {isLoggedIn && (
               <button

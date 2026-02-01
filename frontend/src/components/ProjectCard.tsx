@@ -11,6 +11,7 @@ interface Project {
   owners: { id: number; username: string; email: string }[]
   created_at: string
   approved?: number
+  project_link?: string
 }
 
 interface ProjectCardProps {

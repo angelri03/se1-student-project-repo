@@ -60,6 +60,7 @@ def upload_project(current_user_id, current_username):
     name = request.form.get('name')
     description = request.form.get('description', '')
     tags_str = request.form.get('tags', '')
+    project_link = request.form.get('project_link', '')
     
     if not name:
         return jsonify({'success': False, 'message': 'Project name is required'}), 400
@@ -74,7 +75,8 @@ def upload_project(current_user_id, current_username):
         description=description,
         file_path='',  # Will update after saving file
         file_size=0,   # Will update after saving file
-        creator_user_id=current_user_id
+        creator_user_id=current_user_id,
+        project_link=project_link if project_link else None
     )
     
     if not result['success']:
@@ -294,13 +296,15 @@ def update_project(project_id, current_user_id, current_username):
     name = request.form.get('name')
     description = request.form.get('description')
     tags_str = request.form.get('tags')
+    project_link = request.form.get('project_link')
     
     # Update basic info if provided
-    if name or description:
+    if name or description or project_link is not None:
         database.update_project(
             project_id=project_id,
             name=name if name else None,
             description=description if description is not None else None,
+            project_link=project_link if project_link is not None else None,
             last_edited_by_id=current_user_id
         )
     

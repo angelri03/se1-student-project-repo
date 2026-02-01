@@ -190,6 +190,14 @@ def migrate_database():
         else:
             print("Last_edited_by_id column already exists.")
         
+        if 'project_link' not in project_columns:
+            print("  Adding project_link column...")
+            cursor.execute('ALTER TABLE projects ADD COLUMN project_link TEXT')
+            conn.commit()
+            print("Project_link column added successfully!")
+        else:
+            print("Project_link column already exists.")
+        
         # Create reports table
         print("\nChecking reports table...")
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='reports'")
