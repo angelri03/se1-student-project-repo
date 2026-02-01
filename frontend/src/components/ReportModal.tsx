@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
+import Toast from './Toast'
 
 interface ReportModalProps {
   isOpen: boolean
@@ -13,6 +14,7 @@ function ReportModal({ isOpen, onClose, reportType, reportedId, reportedName }: 
   const [reason, setReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null)
 
   if (!isOpen) return null
 
@@ -41,9 +43,11 @@ function ReportModal({ isOpen, onClose, reportType, reportedId, reportedName }: 
       })
 
       if (response.data.success) {
-        alert('Report submitted successfully. Our team will review it.')
+        setToast({ message: 'Report submitted successfully. Our team will review it.', type: 'success' })
         setReason('')
-        onClose()
+        setTimeout(() => {
+          onClose()
+        }, 2000)
       } else {
         setError(response.data.message || 'Failed to submit report')
       }
@@ -124,6 +128,15 @@ function ReportModal({ isOpen, onClose, reportType, reportedId, reportedName }: 
           </form>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   )
 }

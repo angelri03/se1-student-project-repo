@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import CoursePopup from '../components/CoursePopup'
 import ReportModal from '../components/ReportModal'
+import Toast from '../components/Toast'
+import ConfirmDialog from '../components/ConfirmDialog'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
@@ -72,6 +74,8 @@ function ViewProjectPage() {
   const [modalIndex, setModalIndex] = useState<number | null>(null)
   const [showUpload, setShowUpload] = useState(false)
   const [showCopyNotification, setShowCopyNotification] = useState<'icon' | 'button' | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
   const modalVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const openModalAt = (index: number) => {
@@ -313,13 +317,13 @@ function ViewProjectPage() {
 
   const handleMediaUpload = async () => {
     if (!selectedFiles || selectedFiles.length === 0) {
-      alert('Please select files to upload')
+      setToast({ message: 'Please select files to upload', type: 'warning' })
       return
     }
 
     const token = localStorage.getItem('token')
     if (!token) {
-      alert('Please log in to upload media')
+      setToast({ message: 'Please log in to upload media', type: 'warning' })
       return
     }
 
@@ -339,7 +343,7 @@ function ViewProjectPage() {
       })
 
       if (response.data.success) {
-        alert(`Successfully uploaded ${response.data.media.length} file(s)`)
+        setToast({ message: `Successfully uploaded ${response.data.media.length} file(s)`, type: 'success' })
         setSelectedFiles(null)
         // Refresh media list
         const mediaResponse = await axios.get(`/api/projects/${id}/media`)
@@ -348,20 +352,27 @@ function ViewProjectPage() {
         }
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to upload media')
+      setToast({ message: error.response?.data?.message || 'Failed to upload media', type: 'error' })
     } finally {
       setUploadingMedia(false)
     }
   }
 
   const handleDeleteMedia = async (mediaId: number) => {
-    if (!confirm('Are you sure you want to delete this media?')) {
-      return
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Media',
+      message: 'Are you sure you want to delete this media? This action cannot be undone.',
+      onConfirm: () => confirmDeleteMedia(mediaId)
+    })
+  }
 
+  const confirmDeleteMedia = async (mediaId: number) => {
+    setConfirmDialog(null)
+    
     const token = localStorage.getItem('token')
     if (!token) {
-      alert('Please log in')
+      setToast({ message: 'Please log in', type: 'warning' })
       return
     }
 
@@ -372,10 +383,10 @@ function ViewProjectPage() {
 
       if (response.data.success) {
         setMedia(media.filter(m => m.id !== mediaId))
-        alert('Media deleted successfully')
+        setToast({ message: 'Media deleted successfully', type: 'success' })
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to delete media')
+      setToast({ message: error.response?.data?.message || 'Failed to delete media', type: 'error' })
     }
   }
 
@@ -481,7 +492,7 @@ function ViewProjectPage() {
         setIsEditingTitle(false)
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update title')
+      setToast({ message: error.response?.data?.message || 'Failed to update title', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -505,7 +516,7 @@ function ViewProjectPage() {
         setIsEditingDescription(false)
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update description')
+      setToast({ message: error.response?.data?.message || 'Failed to update description', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -530,7 +541,7 @@ function ViewProjectPage() {
         setIsTopicDropdownOpen(false)
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update tags')
+      setToast({ message: error.response?.data?.message || 'Failed to update tags', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -561,7 +572,7 @@ function ViewProjectPage() {
         setIsEditingProjectLink(false)
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update project link')
+      setToast({ message: error.response?.data?.message || 'Failed to update project link', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -641,7 +652,7 @@ function ViewProjectPage() {
         })
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to add collaborator')
+      setToast({ message: error.response?.data?.message || 'Failed to add collaborator', type: 'error' })
     }
     setIsCollaboratorDropdownOpen(false)
   }
@@ -649,7 +660,7 @@ function ViewProjectPage() {
   const removeCollaborator = async (userId: number) => {
     if (!project) return
     if (project.owners.length <= 1) {
-      alert('Cannot remove the last owner')
+      setToast({ message: 'Cannot remove the last owner', type: 'warning' })
       return
     }
 
@@ -671,7 +682,7 @@ function ViewProjectPage() {
         }
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to remove collaborator')
+      setToast({ message: error.response?.data?.message || 'Failed to remove collaborator', type: 'error' })
     }
   }
 
@@ -681,13 +692,22 @@ function ViewProjectPage() {
 
   const handleDeleteProject = async () => {
     if (!project) return
-    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      return
-    }
+    
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Project',
+      message: 'Are you sure you want to delete this project? This action cannot be undone.',
+      onConfirm: confirmDeleteProject
+    })
+  }
+
+  const confirmDeleteProject = async () => {
+    if (!project) return
+    setConfirmDialog(null)
 
     const token = localStorage.getItem('token')
     if (!token) {
-      alert('Please log in')
+      setToast({ message: 'Please log in', type: 'warning' })
       return
     }
 
@@ -698,11 +718,11 @@ function ViewProjectPage() {
       })
 
       if (response.data.success) {
-        alert('Project deleted successfully')
+        setToast({ message: 'Project deleted successfully', type: 'success' })
         handleBackNavigation()
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to delete project')
+      setToast({ message: error.response?.data?.message || 'Failed to delete project', type: 'error' })
     } finally {
       setDeleting(false)
     }
@@ -1702,6 +1722,29 @@ function ViewProjectPage() {
           reportType="project"
           reportedId={project.id}
           reportedName={project.name}
+        />
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Confirm Dialog */}
+      {confirmDialog && (
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+          type="danger"
         />
       )}
     </div>

@@ -18,7 +18,7 @@ function AdminLogsPage() {
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [logs, setLogs] = useState<LogItem[]>([])
-  const [lines, setLines] = useState(200)
+  const [lines] = useState(200)
   const [message, setMessage] = useState<string | null>(null)
   const [isFetching, setIsFetching] = useState(false)
   const fetchAbort = useRef<AbortController | null>(null)

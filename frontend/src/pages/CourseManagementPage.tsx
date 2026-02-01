@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface Course {
   id: number
@@ -27,6 +28,7 @@ function CourseManagementPage() {
     description: ''
   })
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
 
   useEffect(() => {
     checkAdminAndFetchCourses()
@@ -114,10 +116,17 @@ function CourseManagementPage() {
   }
 
   const handleDelete = async (courseId: number, courseName: string) => {
-    if (!confirm(`Are you sure you want to delete "${courseName}"? This action cannot be undone.`)) {
-      return
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Course',
+      message: `Are you sure you want to delete "${courseName}"? This action cannot be undone.`,
+      onConfirm: () => confirmDelete(courseId)
+    })
+  }
 
+  const confirmDelete = async (courseId: number) => {
+    setConfirmDialog(null)
+    
     try {
       const token = localStorage.getItem('token')
       const response = await axios.delete(`/api/courses/${courseId}`, {
@@ -378,6 +387,20 @@ function CourseManagementPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Confirm Dialog */}
+        {confirmDialog && (
+          <ConfirmDialog
+            isOpen={confirmDialog.isOpen}
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+            type="danger"
+          />
         )}
       </div>
     </div>

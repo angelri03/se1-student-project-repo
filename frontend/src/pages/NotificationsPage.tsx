@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface Notification {
   id: number
@@ -26,6 +27,7 @@ function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'unread'>('unread')
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
 
   useEffect(() => {
     const checkAuthAndFetchNotifications = async () => {
@@ -120,12 +122,18 @@ function NotificationsPage() {
   }
 
   const clearAllNotifications = async () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete All Notifications',
+      message: 'Are you sure you want to delete all notifications? This action cannot be undone.',
+      onConfirm: confirmClearAllNotifications
+    })
+  }
+
+  const confirmClearAllNotifications = async () => {
+    setConfirmDialog(null)
     const token = localStorage.getItem('token')
     if (!token) return
-
-    if (!confirm('Are you sure you want to delete all notifications? This action cannot be undone.')) {
-      return
-    }
 
     try {
       // Delete all notifications one by one
@@ -317,10 +325,10 @@ function NotificationsPage() {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-white dark:bg-gray-800 rounded-lg p-5 border transition ${
+                className={`rounded-lg p-5 border transition ${
                   notification.is_read === 0
-                    ? 'border-amber-500 dark:border-purple-500 bg-amber-50 dark:bg-gray-750'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    ? 'bg-amber-50 dark:bg-purple-950 border-amber-500 dark:border-purple-500'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -368,6 +376,20 @@ function NotificationsPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Confirm Dialog */}
+        {confirmDialog && (
+          <ConfirmDialog
+            isOpen={confirmDialog.isOpen}
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+            type="danger"
+          />
         )}
       </div>
     </div>

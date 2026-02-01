@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import Toast from '../components/Toast'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface Report {
   id: number
@@ -19,14 +21,6 @@ interface Report {
   resolved_at: string | null
 }
 
-interface User {
-  id: number
-  username: string
-  email: string
-  admin?: number
-  is_student?: number
-}
-
 function AdminReportsPage() {
   const navigate = useNavigate()
   const [reports, setReports] = useState<Report[]>([])
@@ -36,13 +30,14 @@ function AdminReportsPage() {
   const [reportedUserFilter, setReportedUserFilter] = useState<string>('all')
   const [reportedProjectFilter, setReportedProjectFilter] = useState<string>('all')
   const [dateSortOrder, setDateSortOrder] = useState<'desc' | 'asc'>('desc')
-  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showResolveModal, setShowResolveModal] = useState(false)
   const [adminNotes, setAdminNotes] = useState('')
   const [resolveAction, setResolveAction] = useState<'resolved' | 'dismissed'>('resolved')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
 
   useEffect(() => {
     checkAuthAndFetchReports()
@@ -70,8 +65,6 @@ function AdminReportsPage() {
         navigate('/')
         return
       }
-
-      setUser(authResponse.data.user)
 
       // Fetch all reports
       const reportsResponse = await axios.get('http://localhost:5000/api/reports', {
@@ -155,14 +148,23 @@ function AdminReportsPage() {
       }
     } catch (error) {
       console.error('Failed to update report:', error)
-      alert('Failed to update report')
+      setToast({ message: 'Failed to update report', type: 'error' })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleDeleteReport = async (reportId: number) => {
-    if (!confirm('Are you sure you want to delete this report?')) return
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Report',
+      message: 'Are you sure you want to delete this report?',
+      onConfirm: () => confirmDeleteReport(reportId)
+    })
+  }
+
+  const confirmDeleteReport = async (reportId: number) => {
+    setConfirmDialog(null)
 
     try {
       const token = localStorage.getItem('token')
@@ -175,7 +177,7 @@ function AdminReportsPage() {
       }
     } catch (error) {
       console.error('Failed to delete report:', error)
-      alert('Failed to delete report')
+      setToast({ message: 'Failed to delete report', type: 'error' })
     }
   }
 
@@ -340,7 +342,7 @@ function AdminReportsPage() {
 
                     <div className="mb-3">
                       <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">
-                        <span className="text-gray-900 dark:text-white font-semibold">{report.reporter_username}</span> reported{' '}
+                        <button onClick={() => navigate(`/profile/${report.reporter_username}`)} className="text-gray-900 dark:text-white font-semibold hover:text-amber-500 dark:hover:text-purple-400 transition">{report.reporter_username}</button> reported{' '}
                         {report.reported_user_id ? (
                           <>user <button onClick={() => navigateToReported(report)} className="text-amber-500 dark:text-purple-400 hover:text-amber-600 dark:hover:text-purple-300 font-semibold">{report.reported_username}</button></>
                         ) : (
@@ -440,6 +442,29 @@ function AdminReportsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Confirm Dialog */}
+      {confirmDialog && (
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+          type="danger"
+        />
       )}
     </div>
   )

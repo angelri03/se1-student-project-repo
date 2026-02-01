@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface Topic {
   id: number
@@ -21,6 +22,7 @@ function TopicManagementPage() {
     description: ''
   })
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
 
   useEffect(() => {
     checkAdminAndFetchTopics()
@@ -106,14 +108,21 @@ function TopicManagementPage() {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this topic? This action cannot be undone.')) {
-      return
-    }
+  const handleDelete = async (topicId: number) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Topic',
+      message: 'Are you sure you want to delete this topic? This action cannot be undone.',
+      onConfirm: () => confirmDelete(topicId)
+    })
+  }
 
+  const confirmDelete = async (topicId: number) => {
+    setConfirmDialog(null)
+    
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.delete(`/api/topics/${id}`, {
+      const response = await axios.delete(`/api/topics/${topicId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -348,6 +357,20 @@ function TopicManagementPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Confirm Dialog */}
+        {confirmDialog && (
+          <ConfirmDialog
+            isOpen={confirmDialog.isOpen}
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+            type="danger"
+          />
         )}
       </div>
     </div>

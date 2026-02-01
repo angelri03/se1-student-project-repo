@@ -182,7 +182,7 @@ function NotificationBell() {
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
                   className={`p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition ${
-                    notification.is_read === 0 ? 'bg-amber-50 dark:bg-gray-750' : ''
+                    notification.is_read === 0 ? 'bg-amber-50 dark:bg-gray-800' : ''
                   }`}
                 >
                   <div className="flex items-start gap-3">

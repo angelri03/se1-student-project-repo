@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-
+import ConfirmDialog from '../components/ConfirmDialog'
 interface User {
   id: number
   username: string
@@ -22,6 +22,7 @@ function AdminUsersPage() {
   const [sortAsc, setSortAsc] = useState(true)
   const [sortBy, setSortBy] = useState<'username' | 'created_at'>('username')
   const [showFlaggedOnly, setShowFlaggedOnly] = useState(false)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
 
   useEffect(() => {
     checkAdminAndFetchUsers()
@@ -79,7 +80,16 @@ function AdminUsersPage() {
   }
 
   const handleDeleteUser = async (u: any) => {
-    if (!confirm(`Delete user ${u.username}? This cannot be undone.`)) return
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete User',
+      message: `Delete user ${u.username}? This cannot be undone.`,
+      onConfirm: () => confirmDeleteUser(u)
+    })
+  }
+
+  const confirmDeleteUser = async (u: any) => {
+    setConfirmDialog(null)
     const token = localStorage.getItem('token')
     try {
       const response = await axios.delete(`/api/users/${u.id}`, { headers: { Authorization: `Bearer ${token}` } })
@@ -289,6 +299,20 @@ function AdminUsersPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Confirm Dialog */}
+        {confirmDialog && (
+          <ConfirmDialog
+            isOpen={confirmDialog.isOpen}
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+            type="danger"
+          />
+        )}
       </div>
     </div>
   )

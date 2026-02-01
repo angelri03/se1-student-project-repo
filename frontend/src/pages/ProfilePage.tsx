@@ -3,6 +3,8 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import ProjectCard from '../components/ProjectCard'
 import ReportModal from '../components/ReportModal'
+import Toast from '../components/Toast'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface User {
   id: number
@@ -57,6 +59,8 @@ function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isOwnProfile = currentUser && user && currentUser.id === user.id
@@ -201,13 +205,13 @@ function ProfilePage() {
     // Validate file type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
-      alert('Please select a valid image file (PNG, JPG, JPEG, GIF, or WebP)')
+      setToast({ message: 'Please select a valid image file (PNG, JPG, JPEG, GIF, or WebP)', type: 'warning' })
       return
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
+      setToast({ message: 'File size must be less than 5MB', type: 'warning' })
       return
     }
 
@@ -236,15 +240,23 @@ function ProfilePage() {
       }
     } catch (error: any) {
       console.error('Failed to upload profile picture:', error)
-      alert(error.response?.data?.message || 'Failed to upload profile picture')
+      setToast({ message: error.response?.data?.message || 'Failed to upload profile picture', type: 'error' })
     } finally {
       setUploadingPicture(false)
     }
   }
 
   const handleProfilePictureDelete = async () => {
-    if (!confirm('Are you sure you want to remove your profile picture?')) return
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Remove Profile Picture',
+      message: 'Are you sure you want to remove your profile picture?',
+      onConfirm: confirmDeleteProfilePicture
+    })
+  }
 
+  const confirmDeleteProfilePicture = async () => {
+    setConfirmDialog(null)
     setUploadingPicture(true)
 
     try {
@@ -264,7 +276,7 @@ function ProfilePage() {
       }
     } catch (error: any) {
       console.error('Failed to delete profile picture:', error)
-      alert(error.response?.data?.message || 'Failed to delete profile picture')
+      setToast({ message: error.response?.data?.message || 'Failed to delete profile picture', type: 'error' })
     } finally {
       setUploadingPicture(false)
     }
@@ -302,7 +314,7 @@ function ProfilePage() {
       } catch (error: any) {
         console.error('Failed to update profile:', error)
         console.error('Error response:', error.response?.data)
-        alert('Failed to update profile: ' + (error.response?.data?.message || 'Unknown error'))
+        setToast({ message: 'Failed to update profile: ' + (error.response?.data?.message || 'Unknown error'), type: 'error' })
       }
     }
   }
@@ -711,7 +723,7 @@ function ProfilePage() {
                         )}
                       </>
                     ) : (
-                      <span className="px-3 py-1 bg-amber-500 dark:bg-blue-600 text-white text-sm rounded-full">Student</span>
+                      <span className="px-3 py-1 bg-amber-500 dark:bg-blue-600 text-white text-sm rounded-full">Non-Student</span>
                     )}
                           {user.organization && (
                             <span className={`px-3 py-1 ${user.is_student === 1 ? 'bg-amber-500 dark:bg-purple-600' : 'bg-blue-500 dark:bg-indigo-600'} text-white text-sm rounded-full`}>{user.organization}</span>
@@ -943,7 +955,7 @@ function ProfilePage() {
                 <button
                   onClick={async () => {
                     if (!deletePassword) {
-                      alert('Please enter your password')
+                      setToast({ message: 'Please enter your password', type: 'warning' })
                       return
                     }
                     setDeleting(true)
@@ -954,10 +966,10 @@ function ProfilePage() {
                         localStorage.removeItem('token')
                         navigate('/login')
                       } else {
-                        alert(response.data.message || 'Failed to delete account')
+                        setToast({ message: response.data.message || 'Failed to delete account', type: 'error' })
                       }
                     } catch (err: any) {
-                      alert(err.response?.data?.message || 'Failed to delete account')
+                      setToast({ message: err.response?.data?.message || 'Failed to delete account', type: 'error' })
                     } finally {
                       setDeleting(false)
                       setShowDeleteModal(false)
@@ -977,21 +989,28 @@ function ProfilePage() {
         {currentUser?.admin === 1 && user && !isOwnProfile && user.admin !== 1 && (
           <div className="mt-4">
             <button
-              onClick={async () => {
-                if (!confirm(`Delete user ${user.username}? This cannot be undone.`)) return
-                try {
-                  const token = localStorage.getItem('token')
-                  const response = await axios.delete(`/api/users/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
-                  if (response.data.success) {
-                    alert('User deleted')
-                    if (fromAdminUsers) navigate('/admin/users')
-                    else navigate('/explore')
-                  } else {
-                    alert(response.data.message || 'Failed to delete user')
+              onClick={() => {
+                setConfirmDialog({
+                  isOpen: true,
+                  title: 'Delete User',
+                  message: `Delete user ${user.username}? This cannot be undone.`,
+                  onConfirm: async () => {
+                    setConfirmDialog(null)
+                    try {
+                      const token = localStorage.getItem('token')
+                      const response = await axios.delete(`/api/users/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
+                      if (response.data.success) {
+                        setToast({ message: 'User deleted', type: 'success' })
+                        if (fromAdminUsers) navigate('/admin/users')
+                        else navigate('/explore')
+                      } else {
+                        setToast({ message: response.data.message || 'Failed to delete user', type: 'error' })
+                      }
+                    } catch (err: any) {
+                      setToast({ message: err.response?.data?.message || 'Failed to delete user', type: 'error' })
+                    }
                   }
-                } catch (err: any) {
-                  alert(err.response?.data?.message || 'Failed to delete user')
-                }
+                })
               }}
               className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200"
             >
@@ -1009,6 +1028,29 @@ function ProfilePage() {
         reportedId={user.id}
         reportedName={user.username}
       />
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Confirm Dialog */}
+      {confirmDialog && (
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+          type="danger"
+        />
+      )}
     </div>
   )
 }

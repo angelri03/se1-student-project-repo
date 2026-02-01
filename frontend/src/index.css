@@ -37,6 +37,10 @@
     animation: fadeIn 0.3s ease-in-out;
   }
   
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+  
   .bg-primary {
     background-color: rgb(var(--bg-primary));
   }
@@ -82,6 +86,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
