@@ -9,6 +9,7 @@ from .db_users import (
     verify_password,
     create_user,
     get_user_by_username,
+    get_user_by_email,
     get_user_by_id,
     update_user,
     delete_user,
@@ -17,6 +18,8 @@ from .db_users import (
     get_admin_user_ids,
     flag_user,
     get_user_flags,
+    change_password,
+    change_email,
 )
 from .db_projects import (
     create_project,

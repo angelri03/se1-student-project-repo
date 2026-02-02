@@ -99,6 +99,14 @@ def migrate_database():
         else:
             print("Profile_visibility column already exists.")
         
+        if 'full_name' not in columns:
+            print("  Adding full_name column...")
+            cursor.execute('ALTER TABLE users ADD COLUMN full_name TEXT')
+            conn.commit()
+            print("Full_name column added successfully!")
+        else:
+            print("Full_name column already exists.")
+        
         # Create project_media table
         print("\nChecking project_media table...")
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='project_media'")

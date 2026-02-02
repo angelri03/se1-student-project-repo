@@ -20,11 +20,12 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 def create_user(username: str, password: str, email: str, is_student: int = 1, 
                 semester: str = None, study_programme: str = None, organization: str = None,
-                profile_link: str = None, profile_visibility: str = 'public') -> Dict:
+                profile_link: str = None, profile_visibility: str = 'public', full_name: str = None) -> Dict:
     """
     Create a new user with hashed password
     Returns: {'success': bool, 'message': str, 'id': int (if successful)}
     """
+    conn = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -32,20 +33,26 @@ def create_user(username: str, password: str, email: str, is_student: int = 1,
         hashed_password = hash_password(password)
         
         cursor.execute('''
-            INSERT INTO users (username, password, email, is_student, semester, study_programme, organization, profile_link, profile_visibility)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (username, hashed_password, email, is_student, semester, study_programme, organization, profile_link, profile_visibility))
+            INSERT INTO users (username, password, email, full_name, is_student, semester, study_programme, organization, profile_link, profile_visibility)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (username, hashed_password, email, full_name, is_student, semester, study_programme, organization, profile_link, profile_visibility))
         
         conn.commit()
         user_id = cursor.lastrowid
-        conn.close()
         
         return {'success': True, 'message': 'User created successfully', 'id': user_id}
     
     except sqlite3.IntegrityError:
+        if conn:
+            conn.rollback()
         return {'success': False, 'message': 'Username or email already exists'}
     except Exception as e:
+        if conn:
+            conn.rollback()
         return {'success': False, 'message': f'Error: {str(e)}'}
+    finally:
+        if conn:
+            conn.close()
 
 def get_user_by_username(username: str) -> Optional[Dict]:
     """
@@ -58,6 +65,28 @@ def get_user_by_username(username: str) -> Optional[Dict]:
         cursor = conn.cursor()
         
         cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        row = cursor.fetchone()
+        
+        conn.close()
+        
+        if row:
+            return dict(row)
+        return None
+    
+    except Exception:
+        return None
+
+def get_user_by_email(email: str) -> Optional[Dict]:
+    """
+    Get a user by email (case-insensitive)
+    Returns: Dict with user data or None if not found
+    """
+    try:
+        conn = get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', (email,))
         row = cursor.fetchone()
         
         conn.close()
@@ -96,7 +125,8 @@ _UNSET = object()
 
 def update_user(user_id: int, username: str = None, password: str = None, email: str = None, bio: str = None,
                 is_student: int = None, semester: str = None, study_programme: str = None, organization: str = None,
-                admin: int = None, profile_picture = _UNSET, profile_link: str = None, profile_visibility: str = None) -> Dict:
+                admin: int = None, profile_picture = _UNSET, profile_link: str = None, profile_visibility: str = None,
+                full_name: str = None) -> Dict:
     """
     Update user information
     Only updates fields that are provided (not None)
@@ -122,6 +152,10 @@ def update_user(user_id: int, username: str = None, password: str = None, email:
         if email is not None:
             update_fields.append('email = ?')
             values.append(email)
+        
+        if full_name is not None:
+            update_fields.append('full_name = ?')
+            values.append(full_name)
         
         if bio is not None:
             update_fields.append('bio = ?')
@@ -307,3 +341,82 @@ def get_user_flags(user_id: int) -> Dict:
         return {'success': True, 'data': flags}
     except Exception as e:
         return {'success': False, 'message': f'Error: {str(e)}'}
+
+
+def change_password(user_id: int, current_password: str, new_password: str) -> Dict:
+    """
+    Change user's password after verifying current password
+    Returns: {'success': bool, 'message': str}
+    """
+    conn = None
+    try:
+        # Get current user
+        user = get_user_by_id(user_id)
+        if not user:
+            return {'success': False, 'message': 'User not found'}
+        
+        # Verify current password
+        if not verify_password(current_password, user['password']):
+            return {'success': False, 'message': 'Current password is incorrect'}
+        
+        # Hash new password
+        new_hashed = hash_password(new_password)
+        
+        # Update password
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET password = ? WHERE id = ?', (new_hashed, user_id))
+        conn.commit()
+        
+        return {'success': True, 'message': 'Password changed successfully'}
+    
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return {'success': False, 'message': f'Error: {str(e)}'}
+    finally:
+        if conn:
+            conn.close()
+
+
+def change_email(user_id: int, password: str, new_email: str) -> Dict:
+    """
+    Change user's email after verifying password
+    Returns: {'success': bool, 'message': str}
+    """
+    conn = None
+    try:
+        # Get current user
+        user = get_user_by_id(user_id)
+        if not user:
+            return {'success': False, 'message': 'User not found'}
+        
+        # Verify password
+        if not verify_password(password, user['password']):
+            return {'success': False, 'message': 'Password is incorrect'}
+        
+        # Check if email is already taken
+        new_email = new_email.lower().strip()
+        existing = get_user_by_email(new_email)
+        if existing and existing['id'] != user_id:
+            return {'success': False, 'message': 'Email already in use'}
+        
+        # Update email
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET email = ? WHERE id = ?', (new_email, user_id))
+        conn.commit()
+        
+        return {'success': True, 'message': 'Email changed successfully'}
+    
+    except sqlite3.IntegrityError:
+        if conn:
+            conn.rollback()
+        return {'success': False, 'message': 'Email already in use'}
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return {'success': False, 'message': f'Error: {str(e)}'}
+    finally:
+        if conn:
+            conn.close()

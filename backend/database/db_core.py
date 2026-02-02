@@ -19,6 +19,7 @@ def init_db():
             username TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
+            full_name TEXT,
             bio TEXT,
             admin INTEGER DEFAULT 0,
             is_student INTEGER DEFAULT 1,
@@ -266,9 +267,12 @@ def init_db():
     conn.close()
 
 
-def get_connection(timeout: int = 30):
+def get_connection(timeout: int = 60):
     """
-    Return a new sqlite3 connection.
-    Uses longer timeout.
+    Return a new sqlite3 connection with optimized settings to reduce locking.
+    Uses longer timeout and enables WAL mode for better concurrency.
     """
-    return sqlite3.connect(DATABASE_NAME, timeout=timeout, check_same_thread=False)
+    conn = sqlite3.connect(DATABASE_NAME, timeout=timeout, check_same_thread=False)
+    conn.execute('PRAGMA journal_mode=WAL') 
+    conn.execute('PRAGMA busy_timeout=60000') 
+    return conn

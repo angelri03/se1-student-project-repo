@@ -6,6 +6,7 @@ Handles registration, login, and account management
 from flask import Blueprint, request, jsonify
 import database
 from .auth import create_token, token_required
+import re
 
 users_bp = Blueprint('users', __name__)
 
@@ -13,8 +14,8 @@ users_bp = Blueprint('users', __name__)
 def register():
     """
     Register a new user
-    Expected JSON: {"username": "...", "password": "...", "email": "...", "is_student": 1/0, 
-                    "semester": "...", "study_programme": "...", "organization": "..."}
+    Expected JSON: {"username": "...", "password": "...", "email": "...", "full_name": "..." (optional), "is_student": 1/0 (optional for non-whitelisted domains)}
+    User type is automatically determined based on email domain for whitelisted domains
     Returns: {"success": bool, "message": str, "token": str (if successful)}
     """
     data = request.get_json()
@@ -28,25 +29,52 @@ def register():
     if len(data['password']) < 8:
         return jsonify({'success': False, 'message': 'Password must be at least 8 characters'}), 400
     
-    if '@' not in data['email']:
-        return jsonify({'success': False, 'message': 'Invalid email address'}), 400
+    email = data['email'].lower().strip()
     
-    # Get user type and related fields
-    is_student = data.get('is_student', 1)  # Default to student
-    semester = data.get('semester')
-    study_programme = data.get('study_programme')
+    # Validate email format
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, email):
+        return jsonify({'success': False, 'message': 'Invalid email format'}), 400
+    
+    # Define student domains
+    student_patterns = [
+        r'@student\.uni\.lu$',
+        r'@student\.[a-zA-Z0-9.-]+$',
+        r'@student-[a-zA-Z0-9.-]+$'
+    ]
+    
+    non_student_domains = [
+        '@uni.lu'
+    ]
+    
+    is_student = None
+    
+    for pattern in student_patterns:
+        if re.search(pattern, email):
+            is_student = 1
+            break
+    
+    if is_student is None:
+        for domain in non_student_domains:
+            if email.endswith(domain):
+                is_student = 0
+                break
+    
+    if is_student is None:
+        is_student = data.get('is_student', 1)  # Default to student if not specified
+    
+    # Get optional fields based on user type
+    full_name = data.get('full_name')
+    semester = data.get('semester') if is_student else None
+    study_programme = data.get('study_programme') if is_student else None
     organization = data.get('organization')
-    
-    # Validate: if not a student, semester and study_programme should not be set
-    if not is_student:
-        semester = None
-        study_programme = None
     
     # Create the user (password will be hashed automatically)
     result = database.create_user(
         username=data['username'],
         password=data['password'],
         email=data['email'],
+        full_name=full_name,
         is_student=is_student,
         semester=semester,
         study_programme=study_programme,
@@ -69,6 +97,7 @@ def register():
             'id': result['id'],
             'username': data['username'],
             'email': data['email'],
+            'full_name': full_name,
             'admin': 0,
             'is_student': is_student,
             'semester': semester,
@@ -82,25 +111,32 @@ def register():
 @users_bp.route('/api/login', methods=['POST'])
 def login():
     """
-    Login with username and password
-    Expected JSON: {"username": "...", "password": "..."}
+    Login with email and password
+    Expected JSON: {"email": "...", "password": "..."}
     Returns: {"success": bool, "token": str (if successful)}
     """
     data = request.get_json()
     
     # Validate required fields
-    if not data or 'username' not in data or 'password' not in data:
-        return jsonify({'success': False, 'message': 'Username and password required'}), 400
+    if not data or 'email' not in data or 'password' not in data:
+        return jsonify({'success': False, 'message': 'Email and password required'}), 400
+    
+    email = data['email'].lower().strip()
+    
+    # Validate email format
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, email):
+        return jsonify({'success': False, 'message': 'Invalid email format'}), 400
     
     # Get user from database
-    user = database.get_user_by_username(data['username'])
+    user = database.get_user_by_email(email)
     
     if not user:
-        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+        return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
     
     # Verify password
     if not database.verify_password(data['password'], user['password']):
-        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+        return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
     
     # Generate JWT token
     token = create_token(user['id'], user['username'])
@@ -180,6 +216,7 @@ def get_current_user(current_user_id, current_username):
         'id': user['id'],
         'username': user['username'],
         'email': user['email'],
+        'full_name': user.get('full_name'),
         'bio': user.get('bio'),
         'admin': user.get('admin', 0),
         'is_student': user.get('is_student', 1),
@@ -362,6 +399,7 @@ def update_current_user(current_user_id, current_username):
     semester = data.get('semester', user.get('semester'))
     study_programme = data.get('study_programme', user.get('study_programme'))
     organization = data.get('organization', user.get('organization'))
+    full_name = data.get('full_name') if 'full_name' in data else user.get('full_name')
     
     # Validate: if not a student, semester and study_programme should not be set
     if not is_student:
@@ -373,6 +411,7 @@ def update_current_user(current_user_id, current_username):
         user_id=current_user_id,
         username=data.get('username', current_username),
         email=data.get('email', user['email']),
+        full_name=full_name,
         bio=data.get('bio', user.get('bio')),
         is_student=is_student,
         semester=semester,
@@ -524,6 +563,7 @@ def get_user_profile(username):
     public_user = {
         'id': user['id'],
         'username': user['username'],
+        'full_name': user.get('full_name'),
         'bio': user.get('bio'),
         'created_at': user.get('created_at'),
         'is_student': user.get('is_student', 1),
@@ -546,3 +586,64 @@ def get_user_profile(username):
         public_user['flags'] = []
 
     return jsonify({'success': True, 'user': public_user}), 200
+
+
+@users_bp.route('/api/me/change-password', methods=['POST'])
+@token_required
+def change_password_endpoint(current_user_id, current_username):
+    """
+    Change the current user's password
+    Requires valid JWT token in Authorization header
+    Expected JSON: {"current_password": "...", "new_password": "..."}
+    """
+    data = request.get_json()
+    
+    if not data or 'current_password' not in data or 'new_password' not in data:
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    
+    current_password = data['current_password']
+    new_password = data['new_password']
+    
+    # Validate new password
+    if len(new_password) < 8:
+        return jsonify({'success': False, 'message': 'New password must be at least 8 characters'}), 400
+    
+    # Change password
+    result = database.change_password(current_user_id, current_password, new_password)
+    
+    if not result['success']:
+        return jsonify(result), 400
+    
+    return jsonify(result), 200
+
+
+@users_bp.route('/api/me/change-email', methods=['POST'])
+@token_required
+def change_email_endpoint(current_user_id, current_username):
+    """
+    Change the current user's email
+    Requires valid JWT token in Authorization header
+    Expected JSON: {"password": "...", "new_email": "..."}
+    """
+    import re
+    
+    data = request.get_json()
+    
+    if not data or 'password' not in data or 'new_email' not in data:
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    
+    password = data['password']
+    new_email = data['new_email'].lower().strip()
+    
+    # Validate email format
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, new_email):
+        return jsonify({'success': False, 'message': 'Invalid email format'}), 400
+    
+    # Change email
+    result = database.change_email(current_user_id, password, new_email)
+    
+    if not result['success']:
+        return jsonify(result), 400
+    
+    return jsonify(result), 200

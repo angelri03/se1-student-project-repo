@@ -10,6 +10,7 @@ interface User {
   id: number
   username: string
   email: string
+  full_name?: string
   bio?: string
   created_at?: string
   total_ratings?: number
@@ -57,8 +58,20 @@ function ProfilePage() {
   const [profilePicVersion, setProfilePicVersion] = useState(Date.now())
   const [showReportModal, setShowReportModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showAccountInfoModal, setShowAccountInfoModal] = useState(false)
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
+  const [showChangeEmailModal, setShowChangeEmailModal] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [changePasswordData, setChangePasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [changeEmailData, setChangeEmailData] = useState({
+    password: '',
+    newEmail: ''
+  })
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null)
   const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -118,6 +131,13 @@ function ProfilePage() {
 
         if (userResponse.data.success) {
           const userData = userResponse.data.user
+          
+          // If viewing own profile, merge with meUser data to get email and full_name
+          if (meUser && meUser.id === userData.id) {
+            userData.email = meUser.email
+            userData.full_name = meUser.full_name
+          }
+          
           setUser(userData)
           setEditedUser(userData)
 
@@ -288,7 +308,7 @@ function ProfilePage() {
         const token = localStorage.getItem('token')
         await axios.put('/api/me', {
           username: editedUser.username,
-          email: editedUser.email,
+          full_name: editedUser.full_name || '',
           bio: editedUser.bio || '',
           is_student: editedUser.is_student,
           semester: editedUser.semester || '',
@@ -316,6 +336,86 @@ function ProfilePage() {
         console.error('Error response:', error.response?.data)
         setToast({ message: 'Failed to update profile: ' + (error.response?.data?.message || 'Unknown error'), type: 'error' })
       }
+    }
+  }
+
+  const handleChangePassword = async () => {
+    // Validate inputs
+    if (!changePasswordData.currentPassword || !changePasswordData.newPassword || !changePasswordData.confirmPassword) {
+      setToast({ message: 'Please fill in all fields', type: 'warning' })
+      return
+    }
+
+    if (changePasswordData.newPassword !== changePasswordData.confirmPassword) {
+      setToast({ message: 'New passwords do not match', type: 'warning' })
+      return
+    }
+
+    if (changePasswordData.newPassword.length < 8) {
+      setToast({ message: 'Password must be at least 8 characters', type: 'warning' })
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await axios.post('/api/me/change-password', {
+        current_password: changePasswordData.currentPassword,
+        new_password: changePasswordData.newPassword
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setToast({ message: 'Password changed successfully', type: 'success' })
+        setShowChangePasswordModal(false)
+        setChangePasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      }
+    } catch (error: any) {
+      console.error('Failed to change password:', error)
+      setToast({ message: error.response?.data?.message || 'Failed to change password', type: 'error' })
+    }
+  }
+
+  const handleChangeEmail = async () => {
+    // Validate inputs
+    if (!changeEmailData.password || !changeEmailData.newEmail) {
+      setToast({ message: 'Please fill in all fields', type: 'warning' })
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(changeEmailData.newEmail)) {
+      setToast({ message: 'Please enter a valid email address', type: 'warning' })
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await axios.post('/api/me/change-email', {
+        password: changeEmailData.password,
+        new_email: changeEmailData.newEmail
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        setToast({ message: 'Email changed successfully', type: 'success' })
+        setShowChangeEmailModal(false)
+        setChangeEmailData({ password: '', newEmail: '' })
+        
+        // Refresh user data to show new email
+        const meResponse = await axios.get('/api/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (meResponse.data.success && user) {
+          const updatedUser = { ...user, email: meResponse.data.user.email }
+          setUser(updatedUser)
+        }
+      }
+    } catch (error: any) {
+      console.error('Failed to change email:', error)
+      setToast({ message: error.response?.data?.message || 'Failed to change email', type: 'error' })
     }
   }
 
@@ -368,6 +468,16 @@ function ProfilePage() {
             {isOwnProfile && (
               <>
                 <button
+                  onClick={() => setShowAccountInfoModal(true)}
+                  className="p-2 sm:px-6 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200 inline-flex items-center gap-2"
+                  title="View account info"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                  </svg>
+                  <span className="hidden lg:inline">Account Info</span>
+                </button>
+                <button
                   onClick={() => {
                     if (isEditing) {
                       // Cancel editing - restore original user data
@@ -381,7 +491,7 @@ function ProfilePage() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  <span className="hidden sm:inline">{isEditing ? 'Cancel' : 'Edit Profile'}</span>
+                  <span className="hidden lg:inline">{isEditing ? 'Cancel' : 'Edit Profile'}</span>
                 </button>
                 {user.is_student === 1 && (
                   <button
@@ -392,7 +502,7 @@ function ProfilePage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    <span className="hidden sm:inline">Upload Project</span>
+                    <span className="hidden lg:inline">Upload Project</span>
                   </button>
                 )}
               </>
@@ -524,12 +634,13 @@ function ProfilePage() {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Email</label>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Full Name (optional)</label>
                     <input
-                      type="email"
-                      value={editedUser?.email || ''}
-                      onChange={(e) => setEditedUser(prev => prev ? {...prev, email: e.target.value} : null)}
+                      type="text"
+                      value={editedUser?.full_name || ''}
+                      onChange={(e) => setEditedUser(prev => prev ? {...prev, full_name: e.target.value} : null)}
                       className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
+                      placeholder="Your full name"
                     />
                   </div>
                   <div className="mb-4">
@@ -650,7 +761,11 @@ function ProfilePage() {
                       </button>
                     )}
                   </div>
-                  {isOwnProfile && <p className="text-gray-600 dark:text-gray-400 mb-4">{user.email}</p>}
+
+                  {/* Full Name */}
+                  {user.full_name && (
+                    <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">{user.full_name}</p>
+                  )}
 
                   {/* Flag banner */}
                   {user.flags && user.flags.length > 0 && (
@@ -1050,6 +1165,288 @@ function ProfilePage() {
           onCancel={() => setConfirmDialog(null)}
           type="danger"
         />
+      )}
+
+      {/* Account Information Modal */}
+      {showAccountInfoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <svg className="w-6 h-6 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                  </svg>
+                  Account Information
+                </h2>
+                <button
+                  onClick={() => setShowAccountInfoModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Email</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowAccountInfoModal(false)
+                        setShowChangeEmailModal(true)
+                      }}
+                      className="px-3 py-1 text-xs bg-amber-500 dark:bg-purple-600 text-white rounded hover:bg-amber-600 dark:hover:bg-purple-700 transition"
+                    >
+                      Change
+                    </button>
+                  </div>
+                  <p className="text-gray-900 dark:text-white font-medium ml-8">{user.email}</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Password</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowAccountInfoModal(false)
+                        setShowChangePasswordModal(true)
+                      }}
+                      className="px-3 py-1 text-xs bg-amber-500 dark:bg-purple-600 text-white rounded hover:bg-amber-600 dark:hover:bg-purple-700 transition"
+                    >
+                      Change
+                    </button>
+                  </div>
+                  <p className="text-gray-900 dark:text-white font-medium ml-8">••••••••••••</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center gap-3 mb-2">
+                    <svg className="w-5 h-5 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Username</span>
+                  </div>
+                  <p className="text-gray-900 dark:text-white font-medium ml-8">{user.username}</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center gap-3 mb-2">
+                    <svg className="w-5 h-5 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Member Since</span>
+                  </div>
+                  <p className="text-gray-900 dark:text-white font-medium ml-8">
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <p className="text-sm text-amber-800 dark:text-amber-300">
+                    This information is private and only visible to you.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setShowAccountInfoModal(false)}
+                  className="px-6 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showChangePasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <svg className="w-6 h-6 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Change Password
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowChangePasswordModal(false)
+                    setChangePasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    value={changePasswordData.currentPassword}
+                    onChange={(e) => setChangePasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={changePasswordData.newPassword}
+                    onChange={(e) => setChangePasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
+                    placeholder="Enter new password (min 8 characters)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={changePasswordData.confirmPassword}
+                    onChange={(e) => setChangePasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowChangePasswordModal(false)
+                    setChangePasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+                  }}
+                  className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  className="px-6 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
+                >
+                  Change Password
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Email Modal */}
+      {showChangeEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <svg className="w-6 h-6 text-amber-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Change Email
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowChangeEmailModal(false)
+                    setChangeEmailData({ password: '', newEmail: '' })
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                      Current email: <strong>{user.email}</strong>
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    New Email
+                  </label>
+                  <input
+                    type="email"
+                    value={changeEmailData.newEmail}
+                    onChange={(e) => setChangeEmailData(prev => ({ ...prev, newEmail: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
+                    placeholder="Enter new email address"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    value={changeEmailData.password}
+                    onChange={(e) => setChangeEmailData(prev => ({ ...prev, password: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500"
+                    placeholder="Enter your password to confirm"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowChangeEmailModal(false)
+                    setChangeEmailData({ password: '', newEmail: '' })
+                  }}
+                  className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangeEmail}
+                  className="px-6 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
+                >
+                  Change Email
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -11,13 +11,14 @@ function LoginPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   const [loginData, setLoginData] = useState({
-    username: '',
+    email: '',
     password: ''
   })
 
   const [registerData, setRegisterData] = useState({
     username: '',
     email: '',
+    full_name: '',
     password: '',
     confirmPassword: '',
     is_student: 1,
@@ -43,7 +44,7 @@ function LoginPage() {
 
     try {
       const response = await axios.post('/api/login', {
-        username: loginData.username,
+        email: loginData.email,
         password: loginData.password
       })
 
@@ -80,15 +81,36 @@ function LoginPage() {
       return
     }
 
+    // Validate email format
+    const email = registerData.email.toLowerCase().trim()
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(email)) {
+      setMessage({ type: 'error', text: 'Invalid email format' })
+      setLoading(false)
+      return
+    }
+
+    // Determine if we need to send is_student (for non-whitelisted domains)
+    const studentPatterns = [
+      /@student\.uni\.lu$/,
+      /@student\.[a-zA-Z0-9.-]+$/,
+      /@student-[a-zA-Z0-9.-]+$/
+    ]
+    const nonStudentDomains = ['@uni.lu', '@staff.uni.lu', '@faculty.uni.lu']
+    const isStudentEmail = studentPatterns.some(pattern => pattern.test(email))
+    const isNonStudentEmail = nonStudentDomains.some(domain => email.endsWith(domain))
+    const isWhitelisted = isStudentEmail || isNonStudentEmail
+
     try {
       const response = await axios.post('/api/register', {
         username: registerData.username,
-        email: registerData.email,
+        email: email,
+        full_name: registerData.full_name || undefined,
         password: registerData.password,
-        is_student: registerData.is_student,
-        semester: registerData.is_student === 1 ? registerData.semester : undefined,
-        study_programme: registerData.is_student === 1 ? registerData.study_programme : undefined,
-        organization: registerData.organization
+        is_student: isWhitelisted ? undefined : registerData.is_student,
+        semester: registerData.semester || undefined,
+        study_programme: registerData.study_programme || undefined,
+        organization: registerData.organization || undefined
       })
 
       if (response.data.success) {
@@ -158,18 +180,18 @@ function LoginPage() {
           {mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-6">
               <div>
-                <label htmlFor="login-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Username
+                <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email
                 </label>
                 <input
-                  type="text"
-                  id="login-username"
-                  name="username"
+                  type="email"
+                  id="login-email"
+                  name="email"
                   required
-                  value={loginData.username}
+                  value={loginData.email}
                   onChange={handleLoginChange}
                   className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
-                  placeholder="Enter your username"
+                  placeholder="e.g., name@student.uni.lu"
                 />
               </div>
 
@@ -237,39 +259,91 @@ function LoginPage() {
                   value={registerData.email}
                   onChange={handleRegisterChange}
                   className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
-                  placeholder="Enter your email"
+                  placeholder="e.g., name@student.uni.lu"
                 />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  User Type
+                <label htmlFor="register-full-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Full Name (Optional)
                 </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="is_student"
-                      checked={registerData.is_student === 1}
-                      onChange={() => setRegisterData(prev => ({ ...prev, is_student: 1 }))}
-                      className="mr-2 accent-amber-500 dark:accent-purple-500"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300">Student</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="is_student"
-                      checked={registerData.is_student === 0}
-                      onChange={() => setRegisterData(prev => ({ ...prev, is_student: 0, semester: '', study_programme: '' }))}
-                      className="mr-2 accent-amber-500 dark:accent-purple-500"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300">Non-Student</span>
-                  </label>
-                </div>
+                <input
+                  type="text"
+                  id="register-full-name"
+                  name="full_name"
+                  value={registerData.full_name}
+                  onChange={handleRegisterChange}
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
+                  placeholder="e.g., John Doe"
+                />
               </div>
 
-              {registerData.is_student === 1 && (
+              {(() => {
+                const email = registerData.email.toLowerCase().trim()
+                const studentPatterns = [
+                  /@student\.uni\.lu$/,
+                  /@student\.[a-zA-Z0-9.-]+$/,
+                  /@student-[a-zA-Z0-9.-]+$/
+                ]
+                const nonStudentDomains = ['@uni.lu', '@staff.uni.lu', '@faculty.uni.lu']
+                const isStudentEmail = studentPatterns.some(pattern => pattern.test(email))
+                const isNonStudentEmail = nonStudentDomains.some(domain => email.endsWith(domain))
+                const isWhitelisted = isStudentEmail || isNonStudentEmail
+                
+                // Show user type selector for non-whitelisted domains
+                if (email && !isWhitelisted) {
+                  return (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        User Type
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="is_student"
+                            checked={registerData.is_student === 1}
+                            onChange={() => setRegisterData(prev => ({ ...prev, is_student: 1 }))}
+                            className="mr-2 accent-amber-500 dark:accent-purple-500"
+                          />
+                          <span className="text-gray-700 dark:text-gray-300">Student</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="is_student"
+                            checked={registerData.is_student === 0}
+                            onChange={() => setRegisterData(prev => ({ ...prev, is_student: 0, semester: '', study_programme: '' }))}
+                            className="mr-2 accent-amber-500 dark:accent-purple-500"
+                          />
+                          <span className="text-gray-700 dark:text-gray-300">Non-Student</span>
+                        </label>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })()}
+
+              {(() => {
+                const email = registerData.email.toLowerCase().trim()
+                const studentPatterns = [
+                  /@student\.uni\.lu$/,
+                  /@student\.[a-zA-Z0-9.-]+$/,
+                  /@student-[a-zA-Z0-9.-]+$/
+                ]
+                const nonStudentDomains = ['@uni.lu', '@staff.uni.lu', '@faculty.uni.lu']
+                const isStudentEmail = studentPatterns.some(pattern => pattern.test(email))
+                const isNonStudentEmail = nonStudentDomains.some(domain => email.endsWith(domain))
+                const isWhitelisted = isStudentEmail || isNonStudentEmail
+                
+                // For whitelisted domains, use auto-detection
+                const shouldShowStudentFields = isWhitelisted ? isStudentEmail : registerData.is_student === 1
+                
+                return shouldShowStudentFields
+              })() && (
                 <>
                   <div>
                     <label htmlFor="register-semester" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
