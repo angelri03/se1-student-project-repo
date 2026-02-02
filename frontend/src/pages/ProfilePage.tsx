@@ -502,7 +502,7 @@ function ProfilePage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    <span className="hidden lg:inline">Upload Project</span>
+                    <span className="hidden xl:inline">Upload Project</span>
                   </button>
                 )}
               </>
@@ -553,7 +553,7 @@ function ProfilePage() {
                   </>
                 ) : (
                   <>
-                    <div className="w-full h-full bg-indigo-600 flex items-center justify-center">
+                    <div className="w-full h-full bg-amber-500 dark:bg-indigo-600 flex items-center justify-center">
                       <span className="text-5xl font-bold text-white">
                         {user.username.charAt(0).toUpperCase()}
                       </span>
@@ -634,7 +634,7 @@ function ProfilePage() {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Full Name (optional)</label>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Full Name</label>
                     <input
                       type="text"
                       value={editedUser?.full_name || ''}
@@ -725,8 +725,8 @@ function ProfilePage() {
                 // View Mode
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{user.username}</h2>
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white break-all">{user.username}</h2>
                       {isOwnProfile && (
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                           user.profile_visibility === 'private' 
@@ -764,7 +764,7 @@ function ProfilePage() {
 
                   {/* Full Name */}
                   {user.full_name && (
-                    <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">{user.full_name}</p>
+                    <p className="text-lg text-gray-600 dark:text-gray-400 mb-4 break-all">{user.full_name}</p>
                   )}
 
                   {/* Flag banner */}
@@ -994,7 +994,7 @@ function ProfilePage() {
                 {isOwnProfile && (
                   <button
                     onClick={() => navigate('/upload', { state: { fromProfile: true, profileUsername: user?.username } })}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
+                    className="px-6 py-3 bg-amber-500 dark:bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
                   >
                     Upload Your First Project
                   </button>
@@ -1041,17 +1041,7 @@ function ProfilePage() {
           </div>
         )}
 
-        {/* Delete account (self) */}
-        {isOwnProfile && user && user.admin !== 1 && (
-          <div className="mt-6">
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200"
-            >
-              Delete Account
-            </button>
-          </div>
-        )}
+        {/* Delete account moved to Account Info modal for users */}
 
         {showDeleteModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -1266,10 +1256,21 @@ function ProfilePage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-between items-center gap-3">
+                {user.admin !== 1 && (
+                  <button
+                    onClick={() => {
+                      setShowAccountInfoModal(false)
+                      setShowDeleteModal(true)
+                    }}
+                    className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200"
+                  >
+                    Delete Account
+                  </button>
+                )}
                 <button
                   onClick={() => setShowAccountInfoModal(false)}
-                  className="px-6 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200"
+                  className="px-6 py-2 bg-amber-500 dark:bg-purple-600 text-white rounded-lg font-medium hover:bg-amber-600 dark:hover:bg-purple-700 transition duration-200 ml-auto"
                 >
                   Close
                 </button>

@@ -148,8 +148,8 @@ const handleAuthorClick = (e: React.MouseEvent, username: string) => {
       <div className="p-6 flex flex-col flex-grow">
         {/* Project Title with Bookmark Button */}
         <div className="flex items-start justify-between mb-3 gap-2">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2 flex items-center gap-2 flex-1">
-            <span className="line-clamp-2">{project.name}</span>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2 flex items-center gap-2 flex-1 overflow-hidden">
+            <span className="line-clamp-2 break-all overflow-hidden">{project.name}</span>
             {project.approved === 0 && variant === 'default' && (
               <svg className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <title>Pending approval</title>

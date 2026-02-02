@@ -814,24 +814,26 @@ function ViewProjectPage() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-between w-full gap-3">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{project.name}</h1>
-                  {isOwner && (
-                    <button
-                      onClick={startEditingTitle}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-amber-500 dark:hover:text-purple-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg"
-                      title="Edit title"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                
-                {/* Action Icons */}
-                <div className="flex items-center gap-2">
+              <div className="w-full">
+                {/* Title and Edit Button */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-3 mb-3 sm:mb-0">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white break-all">{project.name}</h1>
+                    {isOwner && (
+                      <button
+                        onClick={startEditingTitle}
+                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-amber-500 dark:hover:text-purple-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg flex-shrink-0"
+                        title="Edit title"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Action Icons*/}
+                  <div className="flex items-center gap-2 sm:flex-shrink-0">
                   {/* Download */}
                   <a
                     href={`/api/projects/${project.id}/download`}
@@ -936,6 +938,7 @@ function ViewProjectPage() {
                     </button>
                   )}
                 </div>
+              </div>
               </div>
             )}
           </div>

@@ -111,32 +111,36 @@ def register():
 @users_bp.route('/api/login', methods=['POST'])
 def login():
     """
-    Login with email and password
-    Expected JSON: {"email": "...", "password": "..."}
+    Login with username or email and password
+    Expected JSON: {"email": "..." (can be username or email), "password": "..."}
     Returns: {"success": bool, "token": str (if successful)}
     """
+    import re
+    
     data = request.get_json()
     
     # Validate required fields
     if not data or 'email' not in data or 'password' not in data:
-        return jsonify({'success': False, 'message': 'Email and password required'}), 400
+        return jsonify({'success': False, 'message': 'Username/email and password required'}), 400
     
-    email = data['email'].lower().strip()
+    identifier = data['email'].strip()  # Can be username or email
     
-    # Validate email format
+    # Try to determine if it's an email or username
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if not re.match(email_regex, email):
-        return jsonify({'success': False, 'message': 'Invalid email format'}), 400
+    is_email = re.match(email_regex, identifier)
     
     # Get user from database
-    user = database.get_user_by_email(email)
+    if is_email:
+        user = database.get_user_by_email(identifier.lower())
+    else:
+        user = database.get_user_by_username(identifier)
     
     if not user:
-        return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
+        return jsonify({'success': False, 'message': 'Invalid username/email or password'}), 401
     
     # Verify password
     if not database.verify_password(data['password'], user['password']):
-        return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
+        return jsonify({'success': False, 'message': 'Invalid username/email or password'}), 401
     
     # Generate JWT token
     token = create_token(user['id'], user['username'])

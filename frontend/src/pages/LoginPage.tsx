@@ -11,7 +11,7 @@ function LoginPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   const [loginData, setLoginData] = useState({
-    email: '',
+    identifier: '',
     password: ''
   })
 
@@ -44,7 +44,7 @@ function LoginPage() {
 
     try {
       const response = await axios.post('/api/login', {
-        email: loginData.email,
+        email: loginData.identifier,
         password: loginData.password
       })
 
@@ -180,18 +180,18 @@ function LoginPage() {
           {mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-6">
               <div>
-                <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email
+                <label htmlFor="login-identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Username or Email
                 </label>
                 <input
-                  type="email"
-                  id="login-email"
-                  name="email"
+                  type="text"
+                  id="login-identifier"
+                  name="identifier"
                   required
-                  value={loginData.email}
+                  value={loginData.identifier}
                   onChange={handleLoginChange}
                   className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent transition duration-200"
-                  placeholder="e.g., name@student.uni.lu"
+                  placeholder="Username or email"
                 />
               </div>
 
