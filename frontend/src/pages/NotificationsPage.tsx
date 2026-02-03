@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 interface Notification {
@@ -39,10 +40,10 @@ function NotificationsPage() {
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/me', {
+        const response = await axios.get('/api/me', {
           headers: { Authorization: `Bearer ${token}` }
         })
-        const data = await response.json()
+        const data = await response.data
         if (data.success) {
           setUser(data.user)
         } else {
@@ -71,10 +72,10 @@ function NotificationsPage() {
     setLoading(true)
     try {
       const unreadParam = filter === 'unread' ? '?unread_only=true' : ''
-      const response = await fetch(`http://localhost:5000/api/notifications${unreadParam}`, {
+      const response = await axios.get(`/api/notifications${unreadParam}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      const data = await response.json()
+      const data = await response.data
       if (data.success) {
         setNotifications(data.notifications)
       }
@@ -96,8 +97,7 @@ function NotificationsPage() {
     if (!token) return
 
     try {
-      await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
-        method: 'PUT',
+      await axios.put(`/api/notifications/${notificationId}/read`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       fetchNotifications()
@@ -111,8 +111,7 @@ function NotificationsPage() {
     if (!token) return
 
     try {
-      await fetch('http://localhost:5000/api/notifications/read-all', {
-        method: 'PUT',
+      await axios.put('/api/notifications/read-all', {
         headers: { Authorization: `Bearer ${token}` }
       })
       fetchNotifications()
@@ -138,8 +137,7 @@ function NotificationsPage() {
     try {
       // Delete all notifications one by one
       const deletePromises = notifications.map(notification =>
-        fetch(`http://localhost:5000/api/notifications/${notification.id}`, {
-          method: 'DELETE',
+        axios.delete(`/api/notifications/${notification.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       )
@@ -155,8 +153,7 @@ function NotificationsPage() {
     if (!token) return
 
     try {
-      await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
-        method: 'DELETE',
+      await axios.delete(`/api/notifications/${notificationId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       fetchNotifications()

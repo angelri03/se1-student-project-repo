@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 interface Notification {
   id: number
@@ -29,12 +30,12 @@ function NotificationBell() {
     if (!token) return
 
     try {
-      const response = await fetch('http://localhost:5000/api/notifications/unread-count', {
+      const response = await axios.get('/api/notifications/unread-count', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
-      const data = await response.json()
+      const data = await response.data
       if (data.success) {
         setUnreadCount(data.count)
       }
@@ -48,12 +49,12 @@ function NotificationBell() {
     if (!token) return
 
     try {
-      const response = await fetch('http://localhost:5000/api/notifications?unread_only=true', {
+      const response = await axios.get('/api/notifications?unread_only=true', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
-      const data = await response.json()
+      const data = await response.data
       if (data.success) {
         // Get only the 3 most recent unread notifications
         setNotifications(data.notifications.slice(0, 3))
@@ -75,8 +76,7 @@ function NotificationBell() {
     if (!token) return
 
     try {
-      await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
-        method: 'PUT',
+      await axios.put(`/api/notifications/${notificationId}/read`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -93,8 +93,7 @@ function NotificationBell() {
     if (!token) return
 
     try {
-      await fetch('http://localhost:5000/api/notifications/read-all', {
-        method: 'PUT',
+      await axios.put('/api/notifications/read-all', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

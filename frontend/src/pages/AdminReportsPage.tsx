@@ -57,7 +57,7 @@ function AdminReportsPage() {
 
     try {
       // Check if user is admin
-      const authResponse = await axios.get('http://localhost:5000/api/me', {
+      const authResponse = await axios.get('/api/me', {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -67,7 +67,7 @@ function AdminReportsPage() {
       }
 
       // Fetch all reports
-      const reportsResponse = await axios.get('http://localhost:5000/api/reports', {
+      const reportsResponse = await axios.get('/api/reports', {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -132,7 +132,7 @@ function AdminReportsPage() {
     try {
       const token = localStorage.getItem('token')
       const response = await axios.put(
-        `http://localhost:5000/api/reports/${selectedReport.id}`,
+        `/api/reports/${selectedReport.id}`,
         {
           status: resolveAction,
           admin_notes: adminNotes.trim() || null
@@ -168,7 +168,7 @@ function AdminReportsPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.delete(`http://localhost:5000/api/reports/${reportId}`, {
+      const response = await axios.delete(`/api/reports/${reportId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
 

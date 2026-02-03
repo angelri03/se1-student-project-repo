@@ -38,7 +38,7 @@ function ReportModal({ isOpen, onClose, reportType, reportedId, reportedName }: 
           : { reported_project_id: reportedId })
       }
 
-      const response = await axios.post('http://localhost:5000/api/reports', payload, {
+      const response = await axios.post('/api/reports', payload, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
