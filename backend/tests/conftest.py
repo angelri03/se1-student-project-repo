@@ -7,6 +7,8 @@ import sys
 import os
 import sqlite3
 from pathlib import Path
+import sqlite3
+import gc
 
 # Add backend directory to path
 backend_dir = Path(__file__).parent.parent
@@ -21,7 +23,7 @@ TEST_DB = 'test_se1.db'
 @pytest.fixture(scope='function')
 def test_db():
     """Create a fresh test database for each test"""
-    # Set test database
+    # Set test database for all modules
     database.db_core.DATABASE_NAME = TEST_DB
     database.db_users.DATABASE_NAME = TEST_DB
     database.db_projects.DATABASE_NAME = TEST_DB
@@ -30,6 +32,9 @@ def test_db():
     database.db_ratings.DATABASE_NAME = TEST_DB
     database.db_media.DATABASE_NAME = TEST_DB
     database.db_project_owners.DATABASE_NAME = TEST_DB
+    database.db_bookmarks.DATABASE_NAME = TEST_DB
+    database.db_notifications.DATABASE_NAME = TEST_DB
+    database.db_reports.DATABASE_NAME = TEST_DB
     
     # Remove existing test database
     if os.path.exists(TEST_DB):
@@ -40,9 +45,25 @@ def test_db():
     
     yield TEST_DB
     
-    # Cleanup
+    # Cleanup - close all database connections first
+    gc.collect()
+
+    try:
+        conn = sqlite3.connect(TEST_DB)
+        conn.close()
+    except:
+        pass
+    
     if os.path.exists(TEST_DB):
-        os.remove(TEST_DB)
+        try:
+            os.remove(TEST_DB)
+        except PermissionError:
+            import time
+            time.sleep(0.1)
+            try:
+                os.remove(TEST_DB)
+            except:
+                pass
 
 @pytest.fixture(scope='function')
 def client(test_db):
@@ -71,10 +92,12 @@ def sample_user(test_db):
 def auth_token(client, sample_user):
     """Get an authentication token for a sample user"""
     response = client.post('/api/login', json={
-        'username': sample_user['username'],
+        'email': sample_user['username'], 
         'password': sample_user['password']
     })
     data = response.get_json()
+    if not data.get('success'):
+        raise Exception(f"Login failed: {data.get('message')}")
     return data['token']
 
 @pytest.fixture(scope='function')
@@ -118,9 +141,12 @@ def admin_headers(client, test_db):
     
     # Login as admin
     response = client.post('/api/login', json={
-        'username': admin_data['username'],
+        'email': admin_data['username'],
         'password': admin_data['password']
     })
-    token = response.get_json()['token']
+    data = response.get_json()
+    if not data.get('success'):
+        raise Exception(f"Admin login failed: {data.get('message')}")
+    token = data['token']
     
     return {'Authorization': f'Bearer {token}'}

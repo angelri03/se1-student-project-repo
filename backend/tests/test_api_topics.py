@@ -124,13 +124,13 @@ def test_update_topic_no_auth(client, test_db):
     assert response.status_code == 401
 
 
-def test_delete_topic(client, test_db, auth_headers):
+def test_delete_topic(client, test_db, admin_headers):
     """Test deleting a topic"""
     # First create a topic
     create_response = client.post(
         '/api/topics',
         json={'name': 'Test Topic'},
-        headers=auth_headers
+        headers=admin_headers
     )
     
     topic_id = create_response.get_json()['id']
@@ -138,7 +138,7 @@ def test_delete_topic(client, test_db, auth_headers):
     # Delete the topic
     response = client.delete(
         f'/api/topics/{topic_id}',
-        headers=auth_headers
+        headers=admin_headers
     )
     
     assert response.status_code == 200

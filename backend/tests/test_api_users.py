@@ -90,7 +90,7 @@ def test_register_duplicate_email(client, test_db, sample_user):
 def test_login_success(client, test_db, sample_user):
     """Test successful login"""
     response = client.post('/api/login', json={
-        'username': sample_user['username'],
+        'email': sample_user['username'],
         'password': sample_user['password']
     })
     
@@ -104,7 +104,7 @@ def test_login_success(client, test_db, sample_user):
 def test_login_missing_credentials(client, test_db):
     """Test login with missing credentials"""
     response = client.post('/api/login', json={
-        'username': 'testuser'
+        'email': 'testuser'
         # Missing password
     })
     
@@ -115,7 +115,7 @@ def test_login_missing_credentials(client, test_db):
 def test_login_invalid_username(client, test_db):
     """Test login with non-existent username"""
     response = client.post('/api/login', json={
-        'username': 'nonexistent',
+        'email': 'nonexistent',
         'password': 'password123'
     })
     
@@ -127,7 +127,7 @@ def test_login_invalid_username(client, test_db):
 def test_login_wrong_password(client, test_db, sample_user):
     """Test login with incorrect password"""
     response = client.post('/api/login', json={
-        'username': sample_user['username'],
+        'email': sample_user['username'],
         'password': 'wrongpassword'
     })
     
@@ -138,9 +138,14 @@ def test_login_wrong_password(client, test_db, sample_user):
 
 def test_delete_account_success(client, test_db, sample_user, auth_token):
     """Test successful account deletion"""
-    response = client.delete('/api/account', headers={
-        'Authorization': f'Bearer {auth_token}'
-    })
+    response = client.delete('/api/account', 
+        headers={
+            'Authorization': f'Bearer {auth_token}'
+        },
+        json={
+            'password': sample_user['password']
+        }
+    )
     
     assert response.status_code == 200
     data = response.get_json()
@@ -148,7 +153,7 @@ def test_delete_account_success(client, test_db, sample_user, auth_token):
     
     # Verify account is deleted (login should fail)
     login_response = client.post('/api/login', json={
-        'username': sample_user['username'],
+        'email': sample_user['username'],
         'password': sample_user['password']
     })
     assert login_response.status_code == 401

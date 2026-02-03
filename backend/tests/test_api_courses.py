@@ -7,15 +7,16 @@ import pytest
 import json
 
 
-def test_create_course_success(client, test_db, auth_headers):
+def test_create_course_success(client, test_db, admin_headers):
     """Test successful course creation"""
     response = client.post(
         '/api/courses',
         json={
+            'code': 'SE1',
             'name': 'Software Engineering 1',
             'description': 'Introduction to software engineering'
         },
-        headers=auth_headers
+        headers=admin_headers
     )
     
     assert response.status_code == 201
@@ -24,12 +25,12 @@ def test_create_course_success(client, test_db, auth_headers):
     assert 'id' in data
 
 
-def test_create_course_no_name(client, test_db, auth_headers):
+def test_create_course_no_name(client, test_db, admin_headers):
     """Test course creation without name"""
     response = client.post(
         '/api/courses',
         json={'description': 'Test description'},
-        headers=auth_headers
+        headers=admin_headers
     )
     
     assert response.status_code == 400
@@ -59,13 +60,13 @@ def test_get_all_courses(client, test_db):
     assert isinstance(data['data'], list)
 
 
-def test_get_course_by_id(client, test_db, auth_headers):
+def test_get_course_by_id(client, test_db, admin_headers):
     """Test getting a specific course by ID"""
     # First create a course
     create_response = client.post(
         '/api/courses',
-        json={'name': 'Test Course', 'description': 'Test'},
-        headers=auth_headers
+        json={'code': 'TEST', 'name': 'Test Course', 'description': 'Test'},
+        headers=admin_headers
     )
     
     course_id = create_response.get_json()['id']
@@ -88,13 +89,13 @@ def test_get_course_not_found(client, test_db):
     assert data['success'] is False
 
 
-def test_update_course(client, test_db, auth_headers):
+def test_update_course(client, test_db, admin_headers):
     """Test updating a course"""
     # First create a course
     create_response = client.post(
         '/api/courses',
-        json={'name': 'Test Course'},
-        headers=auth_headers
+        json={'code': 'TEST', 'name': 'Test Course'},
+        headers=admin_headers
     )
     
     course_id = create_response.get_json()['id']
@@ -106,7 +107,7 @@ def test_update_course(client, test_db, auth_headers):
             'name': 'Updated Course',
             'description': 'Updated description'
         },
-        headers=auth_headers
+        headers=admin_headers
     )
     
     assert response.status_code == 200
@@ -124,13 +125,13 @@ def test_update_course_no_auth(client, test_db):
     assert response.status_code == 401
 
 
-def test_delete_course(client, test_db, auth_headers):
+def test_delete_course(client, test_db, admin_headers):
     """Test deleting a course"""
     # First create a course
     create_response = client.post(
         '/api/courses',
-        json={'name': 'Test Course'},
-        headers=auth_headers
+        json={'code': 'TEST', 'name': 'Test Course'},
+        headers=admin_headers
     )
     
     course_id = create_response.get_json()['id']
@@ -138,7 +139,7 @@ def test_delete_course(client, test_db, auth_headers):
     # Delete the course
     response = client.delete(
         f'/api/courses/{course_id}',
-        headers=auth_headers
+        headers=admin_headers
     )
     
     assert response.status_code == 200
@@ -153,13 +154,13 @@ def test_delete_course_no_auth(client, test_db):
     assert response.status_code == 401
 
 
-def test_get_course_topics(client, test_db, auth_headers):
+def test_get_course_topics(client, test_db, admin_headers):
     """Test getting all topics for a course"""
     # Create a course
     course_response = client.post(
         '/api/courses',
-        json={'name': 'Test Course'},
-        headers=auth_headers
+        json={'code': 'TEST', 'name': 'Test Course'},
+        headers=admin_headers
     )
     course_id = course_response.get_json()['id']
     
