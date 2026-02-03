@@ -76,7 +76,7 @@ function NotificationBell() {
     if (!token) return
 
     try {
-      await axios.put(`/api/notifications/${notificationId}/read`, {
+      await axios.put(`/api/notifications/${notificationId}/read`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -93,7 +93,7 @@ function NotificationBell() {
     if (!token) return
 
     try {
-      await axios.put('/api/notifications/read-all', {
+      await axios.put('/api/notifications/read-all', {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
