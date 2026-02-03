@@ -1025,7 +1025,7 @@ function ProfilePage() {
               </svg>
               <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">Pending Projects</h2>
             </div>
-            <div className="text-gray-600 dark:text-gray-400 mb-4">Projects awaiting admin approval. Only you can view these.</div>
+            <div className="text-gray-600 dark:text-gray-400 mb-4">Projects awaiting administrator approval. Only you can view these.</div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pendingProjects.map((project) => (
                 <ProjectCard
