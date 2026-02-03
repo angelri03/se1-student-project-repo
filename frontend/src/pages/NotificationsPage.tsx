@@ -97,7 +97,7 @@ function NotificationsPage() {
     if (!token) return
 
     try {
-      await axios.put(`/api/notifications/${notificationId}/read`, {
+      await axios.put(`/api/notifications/${notificationId}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       })
       fetchNotifications()
