@@ -517,6 +517,9 @@ def add_project_owner(project_id, current_user_id, current_username):
     if not new_owner:
         return jsonify({'success': False, 'message': 'User not found'}), 404
     
+    if database.is_admin(new_owner['id']):
+        return jsonify({'success': False, 'message': 'Administrators cannot be added as collaborators'}), 400
+    
     # Add the owner
     result = database.add_owner_to_project(project_id, new_owner['id'])
     
@@ -528,15 +531,20 @@ def remove_project_owner(project_id, user_id, current_user_id, current_username)
     """
     Remove an owner from a project
     Any owner can remove other owners (or themselves)
+    Non-owner collaborators can remove themselves
     Cannot remove the last owner
     """
-    # Check if current user is an owner or admin
-    if not database.is_project_owner(project_id, current_user_id) and not database.is_admin(current_user_id):
+    # Allow if current user is an owner, admin, or is removing themselves
+    is_owner = database.is_project_owner(project_id, current_user_id)
+    is_user_admin = database.is_admin(current_user_id)
+    is_removing_self = (current_user_id == user_id)
+    
+    if not is_owner and not is_user_admin and not is_removing_self:
         return jsonify({'success': False, 'message': 'You do not have permission to remove owners'}), 403
 
     # Prevent non-admin owners from removing the project creator
     creator_id = database.get_project_creator(project_id)
-    if creator_id is not None and creator_id == user_id and current_user_id != user_id and not database.is_admin(current_user_id):
+    if creator_id is not None and creator_id == user_id and current_user_id != user_id and not is_user_admin:
         return jsonify({'success': False, 'message': 'Cannot remove the project creator'}), 403
 
     # Remove the owner

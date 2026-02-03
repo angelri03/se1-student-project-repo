@@ -10,6 +10,7 @@ interface User {
   id: number
   username: string
   email: string
+  admin?: number
 }
 
 interface Project {
@@ -687,7 +688,7 @@ function ViewProjectPage() {
   }
 
   const availableCollaborators = allUsers.filter(
-    user => !project?.owners.find(o => o.id === user.id)
+    user => !project?.owners.find(o => o.id === user.id) && user.admin !== 1
   )
 
   const handleDeleteProject = async () => {
@@ -1127,19 +1128,20 @@ function ViewProjectPage() {
                   {owner.id === creatorId && owner.id !== currentUserId && (
                     <span className="text-xs text-gray-600 dark:text-gray-400">(creator)</span>
                   )}
-                  {isOwner && project.owners.length > 1 && owner.id !== currentUserId && (
-                    // Hide the remove button for the creator unless current user is an admin
-                    (isAdmin || owner.id !== creatorId) && (
-                      <button
-                        onClick={() => removeCollaborator(owner.id)}
-                        className="ml-1 text-gray-600 dark:text-gray-400 hover:text-red-400 transition"
-                        title="Remove collaborator"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )
+                  {/* Remove button for creator, removing yourself as collaborator and admin */}
+                  {project.owners.length > 1 && (
+                    (isOwner && owner.id !== currentUserId && (isAdmin || owner.id !== creatorId)) || 
+                    (owner.id === currentUserId && owner.id !== creatorId)
+                  ) && (
+                    <button
+                      onClick={() => removeCollaborator(owner.id)}
+                      className="ml-1 text-gray-600 dark:text-gray-400 hover:text-red-400 transition"
+                      title={owner.id === currentUserId ? "Remove yourself" : "Remove collaborator"}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   )}
                 </div>
               ))}
