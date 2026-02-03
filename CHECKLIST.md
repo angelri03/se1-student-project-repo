@@ -56,10 +56,10 @@
 	- [x] Bookmark Project Function
 	- [x] Add to Database
 - [ ] Project Details
-	- [ ] Share Function
+	- [x] Share Function
 		- [ ] Project Link
-	- [ ] Add Link to Project (for example if you are hosting it) -- OPTIONAL NOT REQUIRED
-	- [ ] View Project Files
+	- [x] Add Link to Project (for example if you are hosting it) -- OPTIONAL NOT REQUIRED
+	- [] View Project Files
 	- [ ] Add Personal Project Tags (should make a distinction)
 - [x] Fix Rating on Project
 - [x] Download button
@@ -67,13 +67,13 @@
 - [ ] Visual Changes
 	- [ ] Redo the Design of the Profile and Project View
 	- [ ] Custom Color Schemes (green)
-	- [ ] Add Light Mode
+	- [x] Add Light Mode
 	- [ ] Add Logo
 	- [ ] Add Header? (maybe)
 	- [ ] Add Footer
 - [ ] Profile Details
-	- [ ] Add Github Link for Profle
-	- [ ] Add Profile Picture
+	- [x] Add Github Link for Profle
+	- [x] Add Profile Picture
 - [ ] Little About section on the website?
-- [ ] Potentially hosting the website
+- [x] Potentially hosting the website
 - [ ] Clean up code and reformat it
