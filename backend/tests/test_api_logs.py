@@ -104,7 +104,7 @@ def test_get_logs_filter_by_method(client, test_db, admin_headers):
 def test_get_logs_filter_by_path(client, test_db, admin_headers):
     """Test filtering logs by request path"""
     response = client.get(
-        '/api/logs?path=/api/login',
+        '/api/logs?path=/api/projects',
         headers=admin_headers
     )
     
@@ -130,7 +130,7 @@ def test_get_logs_filter_by_status(client, test_db, admin_headers):
 def test_get_logs_search_in_message(client, test_db, admin_headers):
     """Test searching in log messages"""
     response = client.get(
-        '/api/logs?search=login',
+        '/api/logs?search=project',
         headers=admin_headers
     )
     

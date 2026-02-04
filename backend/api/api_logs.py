@@ -92,9 +92,17 @@ def get_logs(current_user_id=None, current_username=None):
 
     raw_lines = tail_lines(path, lines)
     parsed = []
+    
+    # exclude from logs
+    excluded_paths = ['/api/login', '/api/register', '/api/change-password']
+    
     for l in raw_lines:
         p = _parse_log_line(l)
         if not p:
+            continue
+        
+        log_path = p.get('path', '')
+        if any(excluded in log_path for excluded in excluded_paths):
             continue
 
         # apply filters

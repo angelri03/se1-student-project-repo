@@ -50,6 +50,10 @@ def _log_before_request():
 @app.after_request
 def _log_after_request(response):
     try:
+        # exclude login and authentication
+        if request.path in ['/api/login', '/api/register', '/api/change-password']:
+            return response
+            
         remote_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
         username = getattr(g, 'username', None) or 'anonymous'
         status = getattr(response, 'status_code', '')
@@ -64,6 +68,13 @@ def _log_after_request(response):
 
         if not payload:
             payload = request.values.to_dict()
+
+        if isinstance(payload, dict):
+            payload = payload.copy()
+            sensitive_fields = ['password', 'old_password', 'new_password', 'token', 'access_token', 'refresh_token']
+            for field in sensitive_fields:
+                if field in payload:
+                    payload[field] = '********'
 
         payload_str = str(payload)
         if len(payload_str) > 2000:
