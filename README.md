@@ -4,6 +4,9 @@ A platform for students to showcase and explore academic projects.
 
 > See [frontend](frontend) and [backend](backend) READMEs for detailed setup instructions.
 
+## Live Demo
+Access to the hosted application: <http://se1.insects.ltd:3000/>
+
 ## Structure
 
 | Codebase             |       Description       |
