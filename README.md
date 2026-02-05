@@ -9,11 +9,11 @@ Access to the hosted application: <http://se1.insects.ltd:3000/>
 
 ## Structure
 
-| Codebase             |       Description       |
-| :------------------- | :---------------------: |
-| [frontend](frontend) | Front End App \| Vite   |
-| [backend](backend)   | Back End App \| Python  |
-| [report](report)     | Documentation           |
+| Codebase                     | Description                   |
+| :--------------------------- | :---------------------------: |
+| [frontend](frontend)         | Front End App \| Vite         |
+| [backend](backend)           | Back End App \| Python        |
+| [deliverables](deliverables) | Documentation \| Presentation |
 
 ## Technologies
 
